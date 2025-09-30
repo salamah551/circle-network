@@ -2,10 +2,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Use service role client for admin operations
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request) {
   try {
@@ -47,7 +48,7 @@ export async function POST(request) {
     }
 
     // Verify invite code is still valid
-    const { data: invite, error: inviteError } = await supabase
+    const { data: invite, error: inviteError } = await supabaseAdmin
       .from('invites')
       .select('*')
       .eq('code', inviteCode.toUpperCase())
@@ -63,20 +64,43 @@ export async function POST(request) {
       );
     }
 
-    // Get the current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
+    // Get the authorization header to verify user
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
       return NextResponse.json(
         { error: 'Not authenticated. Please use the magic link from your email.' },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    // Create client with user's token
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(
+      supabaseUrl,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      }
+    );
+
+    // Verify the token and get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Not authenticated. Please use the magic link from your email.' },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
 
     // Check if application already exists
-    const { data: existingApp } = await supabase
+    const { data: existingApp } = await supabaseAdmin
       .from('applications')
       .select('id')
       .eq('user_id', userId)
@@ -90,7 +114,7 @@ export async function POST(request) {
     }
 
     // Create application
-    const { data: application, error: appError } = await supabase
+    const { data: application, error: appError } = await supabaseAdmin
       .from('applications')
       .insert({
         user_id: userId,
@@ -118,7 +142,7 @@ export async function POST(request) {
     }
 
     // Create profile from application
-    const { error: profileError } = await supabase
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
         id: userId,
