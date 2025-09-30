@@ -2,6 +2,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 function ApplicationForm() {
   const router = useRouter();
@@ -24,6 +30,7 @@ function ApplicationForm() {
   const [error, setError] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [email, setEmail] = useState('');
+  const [session, setSession] = useState(null);
 
   const expertiseTags = [
     'Fundraising', 'Sales', 'Marketing', 'Product', 'Engineering',
@@ -48,7 +55,25 @@ function ApplicationForm() {
 
     setInviteCode(code);
     setEmail(emailParam);
-    setIsLoading(false);
+
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Session error:', error);
+        setError('Authentication failed. Please try clicking the magic link again.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!session) {
+        setError('Not authenticated. Please check your email and click the magic link.');
+        setIsLoading(false);
+        return;
+      }
+
+      setSession(session);
+      setIsLoading(false);
+    });
   }, [searchParams, router]);
 
   const toggleTag = (field, tag) => {
@@ -63,6 +88,11 @@ function ApplicationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!session) {
+      setError('Not authenticated. Please use the magic link from your email.');
+      return;
+    }
+
     if (!formData.fullName || !formData.title || !formData.company || !formData.bio) {
       setError('Please fill in all required fields');
       return;
@@ -84,7 +114,10 @@ function ApplicationForm() {
     try {
       const response = await fetch('/api/applications/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({
           ...formData,
           email,
@@ -110,6 +143,23 @@ function ApplicationForm() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error && !session) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-red-500 rounded-2xl p-8 text-center">
+          <div className="text-red-400 text-lg font-bold mb-4">Authentication Required</div>
+          <p className="text-zinc-400 mb-6">{error}</p>
+          <button 
+            onClick={() => router.push('/')}
+            className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition-colors"
+          >
+            Back to Home
+          </button>
+        </div>
       </div>
     );
   }
