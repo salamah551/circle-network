@@ -286,7 +286,7 @@ export default function Home() {
               { icon: MessageSquare, title: 'Direct Messaging', desc: 'Skip the cold outreach. Message any member directly.' },
               { icon: Target, title: 'Requests Board', desc: 'Post what you need and let members come to you with solutions.' },
               { icon: Calendar, title: 'Member Events', desc: 'Join intimate roundtables, dinners, and virtual sessions.' },
-              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we'll make warm introductions.' },
+              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we will make warm introductions.' },
               { icon: Shield, title: 'Privacy First', desc: 'Control your visibility. Your data is never sold.' }
             ].map((feature, i) => (
               <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
@@ -311,7 +311,7 @@ export default function Home() {
           <div className="space-y-8">
             {[
               { num: '1', title: 'Receive Your Invite', desc: 'Members can invite professionals they trust. Your invite code is your key to apply.' },
-              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you're looking for.' },
+              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you are looking for.' },
               { num: '3', title: 'Get Approved & Pay', desc: 'Once approved, secure your founding member rate of $199/month locked forever.' },
               { num: '4', title: 'Start Connecting', desc: 'Browse members, post requests, attend events, and make introductions that move your business forward.' }
             ].map((step, i) => (
@@ -454,3 +454,4 @@ export default function Home() {
     </div>
   );
 }
+
