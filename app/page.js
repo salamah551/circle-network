@@ -298,6 +298,8 @@ export default function Home() {
               </div>
             ))}
           </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -454,4 +456,5 @@ export default function Home() {
     </div>
   );
 }
+
 
