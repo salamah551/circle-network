@@ -78,7 +78,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
       <header className="bg-black/95 backdrop-blur-sm border-b border-zinc-800 py-4 px-4 md:px-6 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -133,7 +132,6 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero Section */}
       <section className="bg-black py-12 md:py-20 px-4 md:px-6 border-b border-zinc-800">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-block bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
@@ -200,14 +198,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="bg-zinc-950 py-12 px-4 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {[
             { number: '100+', label: 'Members', icon: Users },
             { number: '$2.3M+', label: 'Deals Closed', icon: TrendingUp },
-            { number: '<12hr', label: 'Avg Response Time', icon: Clock },
-            { number: '94%', label: 'Member Satisfaction', icon: Star }
+            { number: '<12hr', label: 'Avg Response', icon: Clock },
+            { number: '94%', label: 'Satisfaction', icon: Star }
           ].map((stat, i) => (
             <div key={i} className="text-center">
               <div className="flex justify-center mb-3">
@@ -220,7 +217,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Problem/Solution Section */}
       <section className="py-16 md:py-24 px-4 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 mb-16">
@@ -240,7 +236,7 @@ export default function Home() {
                 </li>
                 <li className="flex gap-3">
                   <span className="text-red-400 mt-1">•</span>
-                  <span>Most "exclusive" networks aren't actually exclusive</span>
+                  <span>Most exclusive networks aren't actually exclusive</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-red-400 mt-1">•</span>
@@ -277,7 +273,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
@@ -287,12 +282,12 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: Users, title: 'Member Directory', desc: 'Browse vetted professionals by industry, expertise, and location. See who can help before you reach out.' },
-              { icon: MessageSquare, title: 'Direct Messaging', desc: 'Skip the cold outreach. Message any member directly and get responses from people who want to help.' },
-              { icon: Target, title: 'Requests Board', desc: 'Post what you need—investors, talent, advisors—and let members come to you with solutions.' },
-              { icon: Calendar, title: 'Member Events', desc: 'Join intimate roundtables, dinners, and virtual sessions hosted by fellow members.' },
-              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we'll make warm introductions to the right people.' },
-              { icon: Shield, title: 'Privacy First', desc: 'Control your visibility. Share what you want, when you want. Your data is never sold.' }
+              { icon: Users, title: 'Member Directory', desc: 'Browse vetted professionals by industry, expertise, and location.' },
+              { icon: MessageSquare, title: 'Direct Messaging', desc: 'Skip the cold outreach. Message any member directly.' },
+              { icon: Target, title: 'Requests Board', desc: 'Post what you need and let members come to you with solutions.' },
+              { icon: Calendar, title: 'Member Events', desc: 'Join intimate roundtables, dinners, and virtual sessions.' },
+              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we'll make warm introductions.' },
+              { icon: Shield, title: 'Privacy First', desc: 'Control your visibility. Your data is never sold.' }
             ].map((feature, i) => (
               <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
                 <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center mb-4">
@@ -306,7 +301,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section id="how-it-works" className="py-16 md:py-24 px-4 border-b border-zinc-800">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -317,8 +311,8 @@ export default function Home() {
           <div className="space-y-8">
             {[
               { num: '1', title: 'Receive Your Invite', desc: 'Members can invite professionals they trust. Your invite code is your key to apply.' },
-              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you're looking for. Quality profiles get approved faster.' },
-              { num: '3', title: 'Get Approved & Pay', desc: 'Once approved, secure your founding member rate of $199/month (locked forever).' },
+              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you're looking for.' },
+              { num: '3', title: 'Get Approved & Pay', desc: 'Once approved, secure your founding member rate of $199/month locked forever.' },
               { num: '4', title: 'Start Connecting', desc: 'Browse members, post requests, attend events, and make introductions that move your business forward.' }
             ].map((step, i) => (
               <div key={i} className="flex gap-6 items-start">
@@ -335,7 +329,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Section */}
       <section id="pricing" className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -414,7 +407,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Social Proof */}
       <section className="py-16 px-4 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Who's Already Inside</h2>
@@ -437,12 +429,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
       <section className="py-20 px-4 bg-gradient-to-b from-black to-zinc-950">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to join?
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to join?</h2>
           <p className="text-xl text-zinc-400 mb-8">
             Your invitation expires in {timeLeft.days} days. Secure your founding member rate now.
           </p>
@@ -456,7 +445,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-zinc-800 py-8 px-4">
         <div className="max-w-6xl mx-auto text-center text-zinc-500 text-sm">
           <p>© 2025 The Circle Network. All rights reserved.</p>
