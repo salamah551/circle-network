@@ -1,29 +1,51 @@
 // app/api/stripe/checkout/route.js
 import { NextResponse } from 'next/server';
 import { createCheckoutSession } from '@/lib/stripe';
-import { auth } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request) {
   try {
     const { priceId } = await request.json();
 
-    const { user, error: authError } = await auth.getUser();
-
-    if (authError || !user) {
+    // Get the authorization token from the header
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - No token provided' },
         { status: 401 }
       );
     }
 
-    const validPriceIds = [
-      process.env.STRIPE_ANNUAL_PRICE_ID,
-      process.env.STRIPE_MONTHLY_PRICE_ID,
-    ];
+    const token = authHeader.replace('Bearer ', '');
 
-    if (!validPriceIds.includes(priceId)) {
+    // Create Supabase client with the user's token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      }
+    );
+
+    // Get the user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error('User error:', userError);
       return NextResponse.json(
-        { error: 'Invalid price ID' },
+        { error: 'Unauthorized - Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // Validate price ID
+    if (!priceId) {
+      return NextResponse.json(
+        { error: 'Price ID is required' },
         { status: 400 }
       );
     }
