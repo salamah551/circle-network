@@ -432,47 +432,68 @@ export default function Home() {
       <section className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Real Results From Real Members</h2>
-            <p className="text-zinc-400 text-lg">See what happens when you connect with the right people</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Guarantees To You</h2>
+            <p className="text-zinc-400 text-lg">We are committed to delivering real value, fast</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
             {[
               {
-                result: 'Closed $2M Series A',
-                story: 'Connected with a lead investor through The Circle who led our round in 6 weeks.',
-                name: 'Sarah Chen',
-                title: 'Founder, AI Startup'
+                title: 'Connections Within 7 Days',
+                desc: 'Make at least 3 meaningful connections with relevant members in your first week, or we will extend your membership free.',
+                icon: Users
               },
               {
-                result: 'Hired VP of Sales',
-                story: 'Posted on the requests board and had 3 qualified candidates referred within 48 hours.',
-                name: 'Michael Torres',
-                title: 'CEO, SaaS Company'
+                title: '$10,000 Value Guarantee',
+                desc: 'If you do not receive at least $10,000 in measurable value within 12 months, we will refund your entire membership fee.',
+                icon: TrendingUp
               },
               {
-                result: 'Landed $500K Client',
-                story: 'A member intro led to our biggest enterprise deal. Paid for membership 25x over.',
-                name: 'David Park',
-                title: 'Agency Owner'
+                title: 'Response Within 12 Hours',
+                desc: 'Post a request and get at least one quality response within 12 hours, or your next month is free.',
+                icon: Clock
               }
-            ].map((testimonial, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                <div className="text-amber-400 font-bold text-lg mb-3">{testimonial.result}</div>
-                <p className="text-zinc-300 mb-4 text-sm leading-relaxed">{testimonial.story}</p>
-                <div className="pt-4 border-t border-zinc-800">
-                  <div className="font-semibold text-sm">{testimonial.name}</div>
-                  <div className="text-zinc-500 text-xs">{testimonial.title}</div>
+            ].map((guarantee, i) => (
+              <div key={i} className="bg-zinc-900 border-2 border-amber-500/30 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
+                <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center mb-4">
+                  <guarantee.icon className="w-6 h-6 text-amber-400" />
                 </div>
+                <h3 className="text-xl font-bold mb-3">{guarantee.title}</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{guarantee.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-2xl p-6 md:p-8 text-center">
-            <h3 className="text-xl md:text-2xl font-bold mb-3">Average Member ROI: 47x</h3>
-            <p className="text-zinc-400 max-w-2xl mx-auto">
-              Our members report an average of $9,400 in value per month from introductions, deals, and hires made through The Circle.
-            </p>
+          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-2xl p-6 md:p-8">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold mb-3">What $10,000 in Value Looks Like</h3>
+                <ul className="space-y-3 text-zinc-300">
+                  <li className="flex gap-3">
+                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">One investor intro that leads to funding</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">One client referral worth $10K+</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">One key hire that saves you months of searching</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Strategic advice that prevents costly mistakes</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="text-center md:text-right">
+                <div className="inline-block bg-zinc-900 border border-amber-500/30 rounded-2xl p-8">
+                  <div className="text-5xl font-bold text-amber-400 mb-2">50+</div>
+                  <div className="text-zinc-400">qualified professionals ready to help you succeed</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -589,4 +610,3 @@ export default function Home() {
     </div>
   );
 }
-
