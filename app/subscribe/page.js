@@ -2,6 +2,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Loader2, Shield, Lock } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 function SubscribePage() {
   const router = useRouter();
@@ -10,27 +16,53 @@ function SubscribePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
+  const [session, setSession] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
-    if (!emailParam) {
-      router.push('/');
-      return;
+    if (emailParam) {
+      setEmail(emailParam);
     }
-    setEmail(emailParam);
-  }, [searchParams, router]);
+
+    // Check authentication
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Session error:', error);
+        setError('Authentication error. Please try again.');
+        setCheckingAuth(false);
+        return;
+      }
+
+      if (!session) {
+        setError('Not authenticated. Please use the magic link from your email.');
+        setCheckingAuth(false);
+        return;
+      }
+
+      setSession(session);
+      setCheckingAuth(false);
+    });
+  }, [searchParams]);
 
   const handleCheckout = async () => {
+    if (!session) {
+      setError('Not authenticated. Please use the magic link from your email.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({
-          priceId: process.env.NEXT_PUBLIC_STRIPE_MEMBERSHIP_PRICE_ID,
-          isFoundingMember: true,
+          priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID,
         }),
       });
 
@@ -48,9 +80,35 @@ function SubscribePage() {
     }
   };
 
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error && !session) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-red-500 rounded-2xl p-8 text-center">
+          <div className="text-red-400 text-lg font-bold mb-4">Authentication Required</div>
+          <p className="text-zinc-400 mb-6">{error}</p>
+          <button 
+            onClick={() => router.push('/')}
+            className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition-colors"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4">
       <div className="max-w-2xl mx-auto">
+        {/* Rest of your subscribe page UI stays the same */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
             <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
@@ -127,21 +185,6 @@ function SubscribePage() {
           <div className="flex items-center justify-center gap-2 mt-4 text-zinc-500 text-xs">
             <Shield className="w-4 h-4" />
             <span>Secure payment powered by Stripe</span>
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-amber-400 mb-1">1,000</div>
-            <div className="text-sm text-zinc-500">Founding Members</div>
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-amber-400 mb-1">$10K+</div>
-            <div className="text-sm text-zinc-500">Avg Deal Value</div>
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-amber-400 mb-1">&lt;12hr</div>
-            <div className="text-sm text-zinc-500">Response Time</div>
           </div>
         </div>
 
