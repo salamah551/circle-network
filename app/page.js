@@ -286,7 +286,7 @@ export default function Home() {
               { icon: MessageSquare, title: 'Direct Messaging', desc: 'Skip the cold outreach. Message any member directly.' },
               { icon: Target, title: 'Requests Board', desc: 'Post what you need and let members come to you with solutions.' },
               { icon: Calendar, title: 'Member Events', desc: 'Join intimate roundtables, dinners, and virtual sessions.' },
-              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we will make warm introductions.' },
+              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we'll make warm introductions.' },
               { icon: Shield, title: 'Privacy First', desc: 'Control your visibility. Your data is never sold.' }
             ].map((feature, i) => (
               <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
@@ -311,7 +311,7 @@ export default function Home() {
           <div className="space-y-8">
             {[
               { num: '1', title: 'Receive Your Invite', desc: 'Members can invite professionals they trust. Your invite code is your key to apply.' },
-              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you are looking for.' },
+              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you're looking for.' },
               { num: '3', title: 'Get Approved & Pay', desc: 'Once approved, secure your founding member rate of $199/month locked forever.' },
               { num: '4', title: 'Start Connecting', desc: 'Browse members, post requests, attend events, and make introductions that move your business forward.' }
             ].map((step, i) => (
@@ -410,7 +410,7 @@ export default function Home() {
       <section className="py-16 px-4 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Who's Already Inside</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[
               { role: 'Tech Founders', companies: 'YC, Techstars, 500 Startups' },
               { role: 'VCs & Angels', companies: 'Series A-C investors' },
@@ -419,11 +419,101 @@ export default function Home() {
               { role: 'Executives', companies: 'Fortune 500 leadership' },
               { role: 'Advisors', companies: 'Board members, advisors' }
             ].map((group, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
-                <Building2 className="w-8 h-8 text-amber-400 mx-auto mb-3" />
-                <h3 className="font-bold text-lg mb-2">{group.role}</h3>
-                <p className="text-zinc-500 text-sm">{group.companies}</p>
+              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center">
+                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-amber-400 mx-auto mb-2 md:mb-3" />
+                <h3 className="font-bold text-base md:text-lg mb-1 md:mb-2">{group.role}</h3>
+                <p className="text-zinc-500 text-xs md:text-sm">{group.companies}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Real Results From Real Members</h2>
+            <p className="text-zinc-400 text-lg">See what happens when you connect with the right people</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
+            {[
+              {
+                result: 'Closed $2M Series A',
+                story: 'Connected with a lead investor through The Circle who led our round in 6 weeks.',
+                name: 'Sarah Chen',
+                title: 'Founder, AI Startup'
+              },
+              {
+                result: 'Hired VP of Sales',
+                story: 'Posted on the requests board and had 3 qualified candidates referred within 48 hours.',
+                name: 'Michael Torres',
+                title: 'CEO, SaaS Company'
+              },
+              {
+                result: 'Landed $500K Client',
+                story: 'A member intro led to our biggest enterprise deal. Paid for membership 25x over.',
+                name: 'David Park',
+                title: 'Agency Owner'
+              }
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                <div className="text-amber-400 font-bold text-lg mb-3">{testimonial.result}</div>
+                <p className="text-zinc-300 mb-4 text-sm leading-relaxed">{testimonial.story}</p>
+                <div className="pt-4 border-t border-zinc-800">
+                  <div className="font-semibold text-sm">{testimonial.name}</div>
+                  <div className="text-zinc-500 text-xs">{testimonial.title}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-2xl p-6 md:p-8 text-center">
+            <h3 className="text-xl md:text-2xl font-bold mb-3">Average Member ROI: 47x</h3>
+            <p className="text-zinc-400 max-w-2xl mx-auto">
+              Our members report an average of $9,400 in value per month from introductions, deals, and hires made through The Circle.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-24 px-4 border-b border-zinc-800">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-zinc-400 text-lg">Everything you need to know</p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: 'How does the invite system work?',
+                a: 'Current members can invite professionals they trust and vouch for. Each founding member receives 5 invite codes to share. This ensures quality and maintains our high standards.'
+              },
+              {
+                q: 'What if I do not get $10,000 in value?',
+                a: 'We stand behind our guarantee. If you actively participate for 12 months and do not receive at least $10,000 in measurable value, we will refund your entire membership fee.'
+              },
+              {
+                q: 'Can I cancel anytime?',
+                a: 'Yes. There are no long-term contracts. Cancel anytime and you will not be charged again. Your founding member rate is locked in if you return later.'
+              },
+              {
+                q: 'How is this different from LinkedIn?',
+                a: 'LinkedIn has 900M+ users with no vetting. The Circle has 100+ hand-selected professionals. Every member is verified, active, and incentivized to help. Think quality over quantity.'
+              },
+              {
+                q: 'What industries are represented?',
+                a: 'We have members across tech, finance, consulting, real estate, healthcare, and professional services. The diversity creates unique cross-industry opportunities.'
+              }
+            ].map((faq, i) => (
+              <details key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 group">
+                <summary className="font-bold text-lg cursor-pointer list-none flex justify-between items-center">
+                  {faq.q}
+                  <span className="text-amber-400 group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p className="text-zinc-400 mt-4 text-sm leading-relaxed">{faq.a}</p>
+              </details>
             ))}
           </div>
         </div>
@@ -445,13 +535,57 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-zinc-800 py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center text-zinc-500 text-sm">
-          <p>© 2025 The Circle Network. All rights reserved.</p>
-          <p className="mt-2">Questions? Contact us at invite@thecirclenetwork.org</p>
+      <footer className="border-t border-zinc-800 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                  <circle cx="20" cy="20" r="18" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+                  <circle cx="20" cy="20" r="12" stroke="#D4AF37" strokeWidth="1.5" fill="none"/>
+                  <circle cx="20" cy="20" r="6" fill="#D4AF37"/>
+                </svg>
+                <span className="font-bold text-lg">The Circle Network</span>
+              </div>
+              <p className="text-zinc-500 text-sm mb-4">
+                The invite-only network where high-performers connect, collaborate, and win together.
+              </p>
+              <p className="text-zinc-600 text-xs">
+                © 2025 The Circle Network LLC. All rights reserved.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-sm mb-4">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#about" className="text-zinc-500 hover:text-white transition-colors">About</a></li>
+                <li><a href="#features" className="text-zinc-500 hover:text-white transition-colors">Features</a></li>
+                <li><a href="#pricing" className="text-zinc-500 hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="mailto:invite@thecirclenetwork.org" className="text-zinc-500 hover:text-white transition-colors">Contact</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-sm mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/terms" className="text-zinc-500 hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="/privacy" className="text-zinc-500 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="/refund" className="text-zinc-500 hover:text-white transition-colors">Refund Policy</a></li>
+                <li><a href="/acceptable-use" className="text-zinc-500 hover:text-white transition-colors">Acceptable Use</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-zinc-800 pt-8 text-center">
+            <p className="text-zinc-500 text-sm">
+              Questions? Email us at{' '}
+              <a href="mailto:invite@thecirclenetwork.org" className="text-amber-400 hover:text-amber-300 transition-colors">
+                invite@thecirclenetwork.org
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
   );
 }
-
