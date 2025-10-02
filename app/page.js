@@ -1,612 +1,896 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { Check, Users, MessageSquare, Zap, Shield, TrendingUp, Calendar, Award, ArrowRight, Clock, X, Menu, Star, Building2, Sparkles, Target, Briefcase, Network } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
+import { 
+  ArrowRight, Check, Users, MessageSquare, Calendar, 
+  Target, Sparkles, TrendingUp, Zap, X, Loader2
+} from 'lucide-react';
 
-export default function Home() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+export default function LandingPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [inviteCode, setInviteCode] = useState('');
-  const [timeLeft, setTimeLeft] = useState({ days: 14 });
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showExitPopup, setShowExitPopup] = useState(false);
+  const [memberCount, setMemberCount] = useState(0);
+  const [spotsLeft, setSpotsLeft] = useState(1000);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev.days > 0 ? { days: prev.days - 1 } : prev);
-    }, 86400000);
-    return () => clearInterval(timer);
+    loadMemberCount();
+    
+    // Exit intent detection
+    const handleMouseLeave = (e) => {
+      if (e.clientY <= 0 && !showExitPopup) {
+        setShowExitPopup(true);
+      }
+    };
+    
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
   }, []);
 
-  const handleSubmit = async () => {
-    if (!email || !inviteCode) {
-      setError('Please enter both email and invite code');
-      return;
-    }
+  const loadMemberCount = async () => {
+    const { count } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+    
+    setMemberCount(count || 0);
+    setSpotsLeft(1000 - (count || 0));
+  };
 
-    setIsLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError('');
+    setIsValidating(true);
 
     try {
-      const validateResponse = await fetch('/api/auth/validate-invite', {
+      const response = await fetch('/api/auth/validate-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, inviteCode }),
+        body: JSON.stringify({ email, inviteCode })
       });
 
-      const validateData = await validateResponse.json();
+      const data = await response.json();
 
-      if (!validateResponse.ok) {
-        throw new Error(validateData.error || 'Invalid invite code');
+      if (!response.ok) {
+        setError(data.error || 'Invalid invite code or email');
+        setIsValidating(false);
+        return;
       }
 
+      // Send magic link
       const magicLinkResponse = await fetch('/api/auth/magic-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, inviteCode }),
+        body: JSON.stringify({ email, inviteCode })
       });
 
-      const magicLinkData = await magicLinkResponse.json();
-
-      if (!magicLinkResponse.ok) {
-        throw new Error(magicLinkData.error || 'Failed to send magic link');
+      if (magicLinkResponse.ok) {
+        router.push(`/welcome?email=${encodeURIComponent(email)}`);
+      } else {
+        setError('Failed to send magic link. Please try again.');
+        setIsValidating(false);
       }
-
-      setIsSubmitted(true);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
+      setError('Something went wrong. Please try again.');
+      setIsValidating(false);
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-8 text-center">
-          <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-amber-400" />
+  return (
+    <div className="min-h-screen bg-[#0A0F1E]">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-purple-500/10" />
+        
+        {/* Navigation */}
+        <nav className="relative border-b border-white/10 bg-[#0A0F1E]/80 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-white">The Circle</span>
+              </div>
+              
+              <a 
+                href="/login"
+                className="text-white/80 hover:text-white transition-colors text-sm"
+              >
+                Member Login
+              </a>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Check your email!</h2>
-          <p className="text-zinc-400 mb-6">We sent a magic link to <strong className="text-white">{email}</strong></p>
-          <p className="text-sm text-zinc-500 mb-4">Click the link in your email to continue your application. The link expires in 1 hour.</p>
-          <p className="text-xs text-zinc-600">Didn't receive it? Check your spam folder or try again in a few minutes.</p>
+        </nav>
+
+        {/* Hero Content */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Live counter badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full mb-8">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-emerald-400 text-sm font-medium">
+                {memberCount > 0 ? `${memberCount} founders already in The Circle` : 'Founding members now enrolling'}
+              </span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+              Stop Networking Alone.<br/>
+              <span className="bg-gradient-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
+                Build With 1,000 Founders
+              </span><br/>
+              Who've Been There.
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-white/70 mb-12 leading-relaxed max-w-3xl mx-auto">
+              The Circle is where ambitious founders get introductions that matter, 
+              advice that works, and partnerships that scale—without the noise of 
+              LinkedIn or the awkwardness of cold DMs.
+            </p>
+
+            {/* CTA Form */}
+            <div className="max-w-2xl mx-auto">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="px-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-lg"
+                  />
+                  <input
+                    type="text"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    placeholder="INVITE CODE"
+                    required
+                    className="px-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-lg uppercase"
+                  />
+                </div>
+                
+                {error && (
+                  <p className="text-red-400 text-sm">{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isValidating}
+                  className="w-full px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isValidating ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      Lock In Founding Member Rate ($199/mo Forever)
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <p className="text-white/60 text-sm mt-4">
+                {spotsLeft > 0 ? (
+                  <>⚡ {spotsLeft} founding member spots remaining at this price</>
+                ) : (
+                  <>Founding member rate available for limited time</>
+                )}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <header className="bg-black/95 backdrop-blur-sm border-b border-zinc-800 py-4 px-4 md:px-6 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="flex-shrink-0">
-              <circle cx="20" cy="20" r="18" stroke="#D4AF37" strokeWidth="2" fill="none"/>
-              <circle cx="20" cy="20" r="12" stroke="#D4AF37" strokeWidth="1.5" fill="none"/>
-              <circle cx="20" cy="20" r="6" fill="#D4AF37"/>
-            </svg>
-            <div>
-              <span className="font-bold text-lg md:text-xl block leading-none">The Circle Network</span>
-              <span className="text-xs text-amber-400 uppercase tracking-wider">Invitation Only</span>
+      {/* Urgency Bar */}
+      {spotsLeft > 0 && spotsLeft < 100 && (
+        <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-y border-red-500/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-center gap-3 text-center">
+              <Zap className="w-5 h-5 text-orange-400" />
+              <p className="text-white font-medium">
+                Only {spotsLeft} founding member spots left • Price increases to $249/mo at member #1,000
+              </p>
             </div>
           </div>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-zinc-400 hover:text-white transition-colors">Features</a>
-            <a href="#how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors">How It Works</a>
-            <a href="#pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">Pricing</a>
-            <button 
-              onClick={() => document.getElementById('cta-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition-colors text-sm"
-            >
-              Apply Now
-            </button>
-          </nav>
-
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-white"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
+      )}
 
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-zinc-800 pt-4">
-            <nav className="flex flex-col gap-4">
-              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm text-zinc-400 hover:text-white">Features</a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm text-zinc-400 hover:text-white">How It Works</a>
-              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm text-zinc-400 hover:text-white">Pricing</a>
-              <button 
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  document.getElementById('cta-form')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="bg-amber-500 text-black font-bold px-6 py-2 rounded-lg text-sm"
-              >
-                Apply Now
-              </button>
-            </nav>
-          </div>
-        )}
-      </header>
-
-      <section className="bg-black py-12 md:py-20 px-4 md:px-6 border-b border-zinc-800">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-block bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
-            <span className="text-amber-400 text-sm font-medium">Founding Member Cohort Now Open</span>
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="text-white">Where High-Performers</span><br />
-            <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">Connect</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-zinc-400 mb-8 max-w-3xl mx-auto px-4">
-            The invite-only network for professionals who have the money, skills, and connections to help each other win. No noise. Just results.
-          </p>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8 max-w-lg mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-amber-400 flex-shrink-0" />
-              <span className="text-zinc-300 text-sm font-medium">Applications Close In</span>
+      {/* Value Propositions */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Value Prop 1 */}
+          <div className="group">
+            <div className="bg-gradient-to-br from-emerald-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-emerald-500/30 transition-all">
+              <Users className="w-12 h-12 text-emerald-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Get Warm Intros to People Who Actually Matter
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                Forget scrolling LinkedIn for hours. Our member directory connects you with the exact founder who solved your problem last month. Real intros. Real conversations. Real results.
+              </p>
+              <p className="text-emerald-400 text-sm italic">
+                "The intro I needed used to take 6 months of cold outreach. Here it took 6 hours."
+              </p>
             </div>
-            <div className="text-center">
-              <div className="text-5xl md:text-6xl font-bold text-amber-400">{timeLeft.days}</div>
-              <div className="text-sm text-zinc-500 uppercase mt-2">Days Remaining</div>
+          </div>
+
+          {/* Value Prop 2 */}
+          <div className="group">
+            <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all">
+              <MessageSquare className="w-12 h-12 text-purple-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Text-Like Conversations That Actually Lead Somewhere
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                No more "happy to chat" messages that go nowhere. Circle members respond in under 2 hours average because everyone here is serious about helping each other win.
+              </p>
+              <p className="text-purple-400 text-sm italic">
+                "Finally, a place where people don't just say they'll help—they actually do."
+              </p>
             </div>
-            <p className="text-zinc-500 text-sm mt-6">Limited to first 1,000 founding members</p>
           </div>
 
-          <div id="cta-form" className="max-w-md mx-auto space-y-3 px-4">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email address"
-              className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
-              disabled={isLoading}
-            />
-            <input
-              type="text"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              placeholder="Your invitation code"
-              className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-50"
-            >
-              {isLoading ? 'Sending...' : 'Claim Your Founding Member Spot'}
-              {!isLoading && <ArrowRight className="w-5 h-5" />}
-            </button>
+          {/* Value Prop 3 */}
+          <div className="group">
+            <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-blue-500/30 transition-all">
+              <Target className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Post What You Need. Get Help By Lunch.
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                Need a designer intro? Looking for your first sales hire? Want advice on pricing? Post it by 9am, get 5+ qualified responses by noon. Our members actually show up.
+              </p>
+              <p className="text-blue-400 text-sm italic">
+                "I posted a question at 8am. Had 7 thoughtful replies by 10am. This is different."
+              </p>
+            </div>
           </div>
 
-          <p className="text-zinc-500 text-sm mt-4 px-4">
-            <span className="text-amber-400">$199/month</span> founding member price • Locked forever
-          </p>
+          {/* Value Prop 4 */}
+          <div className="group">
+            <div className="bg-gradient-to-br from-yellow-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-yellow-500/30 transition-all">
+              <Calendar className="w-12 h-12 text-yellow-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Monthly Events Where Real Deals Happen
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                Not another awkward networking event. Intimate gatherings (max 15 people) with founders at your stage. Real conversations. Real connections. Real outcomes.
+              </p>
+              <p className="text-yellow-400 text-sm italic">
+                "These aren't networking events. They're where my next co-founder is sitting."
+              </p>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className="bg-zinc-950 py-12 px-4 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {[
-            { number: '100+', label: 'Members', icon: Users },
-            { number: '$2.3M+', label: 'Deals Closed', icon: TrendingUp },
-            { number: '<12hr', label: 'Avg Response', icon: Clock },
-            { number: '94%', label: 'Satisfaction', icon: Star }
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="flex justify-center mb-3">
-                <stat.icon className="w-8 h-8 text-amber-400" />
-              </div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.number}</div>
-              <div className="text-sm text-zinc-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Founder's Letter */}
+      <div className="bg-gradient-to-br from-emerald-500/5 to-purple-500/5 border-y border-white/10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">A Letter From The Founder</h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-emerald-400 to-purple-400 mx-auto" />
+          </div>
 
-      <section className="py-16 md:py-24 px-4 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 mb-16">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center justify-center mb-6">
-                <X className="w-6 h-6 text-red-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">The Problem</h3>
-              <ul className="space-y-3 text-zinc-400">
-                <li className="flex gap-3">
-                  <span className="text-red-400 mt-1">•</span>
-                  <span>Traditional networking events waste your time with unqualified contacts</span>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 md:p-12">
+            <div className="prose prose-lg prose-invert max-w-none">
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                Hey, I'm Nadeem.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                I've been exactly where you are right now.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                Staring at LinkedIn, wondering if that cold DM will ever get a response. Joining Slack groups that feel like ghost towns. Going to "networking events" where everyone's looking past you for someone more important.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                Building a company is the loneliest thing I've ever done. And I kept thinking: "There has to be a better way to connect with people who actually get it."
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                So I built The Circle.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                <strong className="text-white">Not another networking platform.</strong> Not another directory you browse once and forget about. Not another community where everyone's "too busy" to actually help.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                <strong className="text-emerald-400">A real network of founders who show up for each other.</strong>
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                Here's what makes The Circle different:
+              </p>
+
+              <ul className="text-white/80 text-lg leading-relaxed mb-6 space-y-3">
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <span><strong className="text-white">We're curated.</strong> Every member is personally reviewed. No tire-kickers. No "just exploring." Only people who are actually building.</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="text-red-400 mt-1">•</span>
-                  <span>LinkedIn is flooded with spam and people pitching services</span>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <span><strong className="text-white">We're intimate.</strong> Capped at 1,000 members. Small enough that you actually get to know people. Big enough that someone always has the answer you need.</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="text-red-400 mt-1">•</span>
-                  <span>Most exclusive networks aren't actually exclusive</span>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <span><strong className="text-white">We're active.</strong> Average response time under 2 hours. Monthly events that people actually attend. Introductions that actually happen.</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="text-red-400 mt-1">•</span>
-                  <span>Finding the right intro at the right time is nearly impossible</span>
+                <li className="flex items-start gap-3">
+                  <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <span><strong className="text-white">We're about outcomes.</strong> Not engagement metrics. Not vanity metrics. Real business wins. Deals closed. Hires made. Problems solved.</span>
                 </li>
               </ul>
-            </div>
 
-            <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-2xl p-8">
-              <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-lg flex items-center justify-center mb-6">
-                <Check className="w-6 h-6 text-amber-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">The Circle Solution</h3>
-              <ul className="space-y-3 text-zinc-300">
-                <li className="flex gap-3">
-                  <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <span>Invite-only vetting ensures every member is high-caliber</span>
-                </li>
-                <li className="flex gap-3">
-                  <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <span>Post specific asks and get responses within 12 hours</span>
-                </li>
-                <li className="flex gap-3">
-                  <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <span>Curated member directory with verified backgrounds</span>
-                </li>
-                <li className="flex gap-3">
-                  <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <span>Concierge service to facilitate high-value introductions</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                I'm not going to promise you'll get your next investor from The Circle (though you might).
+              </p>
 
-      <section id="features" className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Built For High-Performers</h2>
-            <p className="text-zinc-400 text-lg">Everything you need to expand your network and close more deals</p>
-          </div>
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                I'm not going to promise you'll find your co-founder here (though you might).
+              </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: Users, title: 'Member Directory', desc: 'Browse vetted professionals by industry, expertise, and location.' },
-              { icon: MessageSquare, title: 'Direct Messaging', desc: 'Skip the cold outreach. Message any member directly.' },
-              { icon: Target, title: 'Requests Board', desc: 'Post what you need and let members come to you with solutions.' },
-              { icon: Calendar, title: 'Member Events', desc: 'Join intimate roundtables, dinners, and virtual sessions.' },
-              { icon: Briefcase, title: 'Concierge Intros', desc: 'Tell us who you need to meet and we will make warm introductions.' },
-              { icon: Shield, title: 'Privacy First', desc: 'Control your visibility. Your data is never sold.' }
-            ].map((feature, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
-                <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-amber-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-zinc-400 text-sm">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                <strong className="text-white">What I will promise:</strong> If you show up—even just a little—you'll stop feeling like you're building alone.
+              </p>
 
-      <section id="how-it-works" className="py-16 md:py-24 px-4 border-b border-zinc-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-zinc-400 text-lg">From invite to your first valuable connection</p>
-          </div>
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                You'll have people to text when you're stuck. People who actually reply. People who've been there and want to help you through it.
+              </p>
 
-          <div className="space-y-8">
-            {[
-              { num: '1', title: 'Receive Your Invite', desc: 'Members can invite professionals they trust. Your invite code is your key to apply.' },
-              { num: '2', title: 'Complete Your Profile', desc: 'Share your background, expertise, and what you are looking for.' },
-              { num: '3', title: 'Get Approved & Pay', desc: 'Once approved, secure your founding member rate of $199/month locked forever.' },
-              { num: '4', title: 'Start Connecting', desc: 'Browse members, post requests, attend events, and make introductions that move your business forward.' }
-            ].map((step, i) => (
-              <div key={i} className="flex gap-6 items-start">
-                <div className="w-12 h-12 bg-amber-500 text-black font-bold text-xl rounded-full flex items-center justify-center flex-shrink-0">
-                  {step.num}
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                That's worth more than any feature list.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                <strong className="text-emerald-400">The founding member window is real.</strong> First 1,000 members get $199/mo locked in forever. After that, it's $249/mo. No exceptions. No grandfather clauses if you leave and come back.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                I'm not creating artificial scarcity. I genuinely want to keep The Circle small enough that it stays valuable. 1,000 committed founders who actually help each other beats 10,000 lurkers any day.
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                So if you're tired of building alone...
+                <br />If you're ready to stop networking and start connecting...
+                <br />If you want to be part of something that actually works...
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-8">
+                <strong className="text-white">Join us.</strong>
+              </p>
+
+              <p className="text-white/80 text-lg leading-relaxed mb-6">
+                See you inside,
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                  N
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                  <p className="text-zinc-400">{step.desc}</p>
+                  <p className="text-white font-bold text-xl">Nadeem Asheh</p>
+                  <p className="text-white/60">Founder, The Circle</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section id="pricing" className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-zinc-400 text-lg">Lock in your founding member rate today</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-zinc-900 border-2 border-amber-500 rounded-2xl p-8 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-amber-500 text-black text-xs font-bold px-4 py-1 rounded-full">FOUNDING MEMBER</span>
-              </div>
-              <div className="text-center mb-8">
-                <div className="text-5xl font-bold text-amber-400 mb-2">$199</div>
-                <div className="text-zinc-400">/month</div>
-                <div className="text-amber-400 text-sm font-semibold mt-2">Price locked forever</div>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Full platform access',
-                  'Direct messaging',
-                  'Requests board',
-                  'Member events',
-                  'Concierge intros',
-                  'Invite 5 members',
-                  'Founding member badge',
-                  'Cancel anytime'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0" />
-                    <span className="text-zinc-300">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <button 
-                onClick={() => document.getElementById('cta-form')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg transition-colors"
-              >
-                Claim This Rate →
-              </button>
-            </div>
-
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 opacity-60">
-              <div className="text-center mb-8">
-                <div className="text-5xl font-bold text-white mb-2">$249</div>
-                <div className="text-zinc-400">/month</div>
-                <div className="text-zinc-500 text-sm mt-2">After 1,000 members</div>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Full platform access',
-                  'Direct messaging',
-                  'Requests board',
-                  'Member events',
-                  'Concierge intros',
-                  'Invite 3 members',
-                  'Standard badge',
-                  'Cancel anytime'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-zinc-600 flex-shrink-0" />
-                    <span className="text-zinc-500">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="w-full bg-zinc-800 text-zinc-600 font-bold py-3 rounded-lg text-center">
-                Not Available Yet
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-6 text-center">
-            <h3 className="text-lg font-bold text-amber-400 mb-2">$10,000 Value Guarantee</h3>
-            <p className="text-zinc-400">If The Circle doesn't provide at least $10,000 in value in your first year, we'll refund your full membership fee.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 px-4 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Who's Already Inside</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {[
-              { role: 'Tech Founders', companies: 'YC, Techstars, 500 Startups' },
-              { role: 'VCs & Angels', companies: 'Series A-C investors' },
-              { role: 'Operators', companies: 'VP+ at growth companies' },
-              { role: 'Consultants', companies: 'McKinsey, Bain, BCG alumni' },
-              { role: 'Executives', companies: 'Fortune 500 leadership' },
-              { role: 'Advisors', companies: 'Board members, advisors' }
-            ].map((group, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center">
-                <Building2 className="w-6 h-6 md:w-8 md:h-8 text-amber-400 mx-auto mb-2 md:mb-3" />
-                <h3 className="font-bold text-base md:text-lg mb-1 md:mb-2">{group.role}</h3>
-                <p className="text-zinc-500 text-xs md:text-sm">{group.companies}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 px-4 bg-zinc-950 border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Guarantees To You</h2>
-            <p className="text-zinc-400 text-lg">We are committed to delivering real value, fast</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
-            {[
-              {
-                title: 'Connections Within 7 Days',
-                desc: 'Make at least 3 meaningful connections with relevant members in your first week, or we will extend your membership free.',
-                icon: Users
-              },
-              {
-                title: '$10,000 Value Guarantee',
-                desc: 'If you do not receive at least $10,000 in measurable value within 12 months, we will refund your entire membership fee.',
-                icon: TrendingUp
-              },
-              {
-                title: 'Response Within 12 Hours',
-                desc: 'Post a request and get at least one quality response within 12 hours, or your next month is free.',
-                icon: Clock
-              }
-            ].map((guarantee, i) => (
-              <div key={i} className="bg-zinc-900 border-2 border-amber-500/30 rounded-xl p-6 hover:border-amber-500/50 transition-colors">
-                <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center mb-4">
-                  <guarantee.icon className="w-6 h-6 text-amber-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-3">{guarantee.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{guarantee.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30 rounded-2xl p-6 md:p-8">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-3">What $10,000 in Value Looks Like</h3>
-                <ul className="space-y-3 text-zinc-300">
-                  <li className="flex gap-3">
-                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">One investor intro that leads to funding</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">One client referral worth $10K+</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">One key hire that saves you months of searching</span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Strategic advice that prevents costly mistakes</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="text-center md:text-right">
-                <div className="inline-block bg-zinc-900 border border-amber-500/30 rounded-2xl p-8">
-                  <div className="text-5xl font-bold text-amber-400 mb-2">50+</div>
-                  <div className="text-zinc-400">qualified professionals ready to help you succeed</div>
-                </div>
+              <div className="mt-8 pt-8 border-t border-white/10">
+                <p className="text-white/60 text-sm italic">
+                  P.S. - Still not sure? I get it. That's why there's a 30-day money-back guarantee. 
+                  Try it. If you don't get value, I'll refund you personally. No questions. No hard feelings. 
+                  But I'm confident you'll see why this is different within your first week.
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="py-16 md:py-24 px-4 border-b border-zinc-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-zinc-400 text-lg">Everything you need to know</p>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: 'How does the invite system work?',
-                a: 'Current members can invite professionals they trust and vouch for. Each founding member receives 5 invite codes to share. This ensures quality and maintains our high standards.'
-              },
-              {
-                q: 'What if I do not get $10,000 in value?',
-                a: 'We stand behind our guarantee. If you actively participate for 12 months and do not receive at least $10,000 in measurable value, we will refund your entire membership fee.'
-              },
-              {
-                q: 'Can I cancel anytime?',
-                a: 'Yes. There are no long-term contracts. Cancel anytime and you will not be charged again. Your founding member rate is locked in if you return later.'
-              },
-              {
-                q: 'How is this different from LinkedIn?',
-                a: 'LinkedIn has 900M+ users with no vetting. The Circle has 100+ hand-selected professionals. Every member is verified, active, and incentivized to help. Think quality over quantity.'
-              },
-              {
-                q: 'What industries are represented?',
-                a: 'We have members across tech, finance, consulting, real estate, healthcare, and professional services. The diversity creates unique cross-industry opportunities.'
-              }
-            ].map((faq, i) => (
-              <details key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 group">
-                <summary className="font-bold text-lg cursor-pointer list-none flex justify-between items-center">
-                  {faq.q}
-                  <span className="text-amber-400 group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <p className="text-zinc-400 mt-4 text-sm leading-relaxed">{faq.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 px-4 bg-gradient-to-b from-black to-zinc-950">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to join?</h2>
-          <p className="text-xl text-zinc-400 mb-8">
-            Your invitation expires in {timeLeft.days} days. Secure your founding member rate now.
+      {/* ROI Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            The Math That Matters
+          </h2>
+          <p className="text-xl text-white/70 max-w-3xl mx-auto">
+            At $199/month, The Circle needs to help you with just ONE thing to 10x your investment
           </p>
-          <button 
-            onClick={() => document.getElementById('cta-form')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold px-8 py-4 rounded-lg transition-all inline-flex items-center gap-2 text-lg shadow-lg shadow-amber-500/20"
-          >
-            Claim Your Spot
-            <ArrowRight className="w-5 h-5" />
-          </button>
         </div>
-      </section>
 
-      <footer className="border-t border-zinc-800 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                  <circle cx="20" cy="20" r="18" stroke="#D4AF37" strokeWidth="2" fill="none"/>
-                  <circle cx="20" cy="20" r="12" stroke="#D4AF37" strokeWidth="1.5" fill="none"/>
-                  <circle cx="20" cy="20" r="6" fill="#D4AF37"/>
-                </svg>
-                <span className="font-bold text-lg">The Circle Network</span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+            <h4 className="text-lg font-bold text-white mb-2">One Key Hire</h4>
+            <p className="text-3xl font-bold text-emerald-400 mb-2">$10,000+</p>
+            <p className="text-white/60 text-sm">Found 2 months faster via intro</p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+            <h4 className="text-lg font-bold text-white mb-2">One Warm Investor Intro</h4>
+            <p className="text-3xl font-bold text-purple-400 mb-2">$5,000+</p>
+            <p className="text-white/60 text-sm">Market value of intro service</p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+            <h4 className="text-lg font-bold text-white mb-2">One Partnership Deal</h4>
+            <p className="text-3xl font-bold text-blue-400 mb-2">$50,000+</p>
+            <p className="text-white/60 text-sm">Average from our network</p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+            <h4 className="text-lg font-bold text-white mb-2">Peace of Mind</h4>
+            <p className="text-3xl font-bold text-yellow-400 mb-2">Priceless</p>
+            <p className="text-white/60 text-sm">Knowing you're not alone</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-emerald-500/10 to-purple-500/10 border border-emerald-500/30 rounded-2xl p-8 text-center">
+          <p className="text-2xl text-white/90 mb-4">
+            <strong className="text-white">Bottom line:</strong> You're not paying for a networking site.
+          </p>
+          <p className="text-xl text-emerald-400 font-bold">
+            You're paying for outcomes. And our members are seeing them.
+          </p>
+        </div>
+      </div>
+
+      {/* What You're Getting */}
+      <div className="bg-white/5 border-y border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-white mb-6">
+                What You are Actually Getting
+              </h2>
+              
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1">Average Response Time: Under 2 Hours</h4>
+                    <p className="text-white/60">When you post a question or request</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1">Curated Network of Builders</h4>
+                    <p className="text-white/60">Every member personally reviewed and approved</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1">Monthly In-Person & Virtual Events</h4>
+                    <p className="text-white/60">Where real relationships and deals happen</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1">Real Relationships, Real Outcomes</h4>
+                    <p className="text-white/60">Not vanity metrics, actual business wins</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-zinc-500 text-sm mb-4">
-                The invite-only network where high-performers connect, collaborate, and win together.
-              </p>
-              <p className="text-zinc-600 text-xs">
-                © 2025 The Circle Network LLC. All rights reserved.
-              </p>
             </div>
 
-            <div>
-              <h4 className="font-bold text-sm mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#about" className="text-zinc-500 hover:text-white transition-colors">About</a></li>
-                <li><a href="#features" className="text-zinc-500 hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="text-zinc-500 hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="mailto:invite@thecirclenetwork.org" className="text-zinc-500 hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
+            <div className="bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/30 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-6">The Difference?</h3>
+              
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center gap-3 text-red-400">
+                  <X className="w-5 h-5 flex-shrink-0" />
+                  <span>Where people join, lurk, and disappear</span>
+                </div>
+                <div className="flex items-center gap-3 text-red-400">
+                  <X className="w-5 h-5 flex-shrink-0" />
+                  <span>Where "networking" means collecting contacts</span>
+                </div>
+                <div className="flex items-center gap-3 text-red-400">
+                  <X className="w-5 h-5 flex-shrink-0" />
+                  <span>Where everyone's too busy to actually help</span>
+                </div>
+              </div>
 
-            <div>
-              <h4 className="font-bold text-sm mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="/terms" className="text-zinc-500 hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="/privacy" className="text-zinc-500 hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="/refund" className="text-zinc-500 hover:text-white transition-colors">Refund Policy</a></li>
-                <li><a href="/acceptable-use" className="text-zinc-500 hover:text-white transition-colors">Acceptable Use</a></li>
-              </ul>
+              <div className="w-full h-px bg-white/20 my-6" />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-emerald-400">
+                  <Check className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">We are curated, committed, and active</span>
+                </div>
+                <div className="flex items-center gap-3 text-emerald-400">
+                  <Check className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">People actually show up and help</span>
+                </div>
+                <div className="flex items-center gap-3 text-emerald-400">
+                  <Check className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">Real friendships that drive real wins</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4">Questions? We have Got Answers.</h2>
+        </div>
+
+        <div className="space-y-6">
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              Is this just another LinkedIn?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              Not even close. LinkedIn is broadcast mode—spray and pray. The Circle is peer-to-peer, curated, and intimate. Think of it as your founder WhatsApp group, but with 1,000 people who can actually help you. Real conversations. Real relationships. Real outcomes.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              What if I don't have time for another platform?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              The Circle is designed for busy founders. No pressure to be online 24/7. Post a request when you need help. Check in when you have time. Many members spend less than 30 minutes per week and still make valuable connections. It's about quality, not quantity.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              Will my competitors be in here?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              We curate carefully to avoid direct conflicts. Plus, we've found that "competitors" often become collaborators at this level. Everyone's focused on building their own thing—there's room for all of us to win.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              Can I cancel anytime?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              Yes, month-to-month. But here's what matters: <strong className="text-white">You can't get your founding member rate back once you leave.</strong> It's locked in for life only while you're an active member. Once you cancel, you're back to $249/mo if you rejoin.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              How do you ensure quality members?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              Invite-only during founding phase. Every application is personally reviewed. We're looking for builders, not tire-kickers. People who show up. People who help. People who are actually doing the work.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              I'm pre-revenue / just starting. Is this for me?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              YES. Some of our most valuable members are in the early stages. They ask the best questions. They're the most helpful. They make the best connections. Everyone started somewhere. No one judges. Everyone helps.
+            </p>
+          </details>
+
+          <details className="bg-white/5 border border-white/10 rounded-xl p-6 group">
+            <summary className="text-xl font-bold text-white cursor-pointer list-none flex items-center justify-between">
+              What if I don't like it?
+              <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
+            </summary>
+            <p className="text-white/70 mt-4 leading-relaxed">
+              Full refund in your first 30 days, no questions asked. We're confident you'll see value. But if you don't, just email us. Done.
+            </p>
+          </details>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-white/60">
+            Still have questions? <a href="mailto:support@thecirclenetwork.org" className="text-emerald-400 hover:text-emerald-300">Email us</a> - We respond in under 24 hours.
+          </p>
+        </div>
+      </div>
+
+      {/* Final CTA Section */}
+      <div className="bg-gradient-to-br from-emerald-500/10 via-purple-500/10 to-blue-500/10 border-y border-white/10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Ready to Stop Building Alone?
+          </h2>
+
+          <p className="text-xl text-white/70 mb-8 max-w-2xl mx-auto">
+            Join {memberCount > 0 ? `${memberCount} founders` : 'founders'} who decided to stop networking alone and start building together.
+          </p>
+
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-6">Here's What Happens Next:</h3>
+              
+              <div className="space-y-4 text-left">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">1</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Apply with your email & invite code</p>
+                    <p className="text-white/60 text-sm">We review within 24 hours</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">2</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Get your magic link & complete profile</p>
+                    <p className="text-white/60 text-sm">Tell us about yourself and what you're building</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">3</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Lock in $199/mo founding rate</p>
+                    <p className="text-white/60 text-sm">Secure payment via Stripe, cancel anytime</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">4</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Start connecting immediately</p>
+                    <p className="text-white/60 text-sm">Browse members, post requests, RSVP to events</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">5</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">See results</p>
+                    <p className="text-white/60 text-sm">Watch what happens when you build with others</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-zinc-800 pt-8 text-center">
-            <p className="text-zinc-500 text-sm">
-              Questions? Email us at{' '}
-              <a href="mailto:invite@thecirclenetwork.org" className="text-amber-400 hover:text-amber-300 transition-colors">
-                invite@thecirclenetwork.org
-              </a>
+          <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-4">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="px-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-lg"
+              />
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                placeholder="INVITE CODE"
+                required
+                className="px-6 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-lg uppercase"
+              />
+            </div>
+            
+            {error && (
+              <p className="text-red-400 text-sm">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isValidating}
+              className="w-full px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isValidating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Start Your Application
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <p className="text-white/60 text-sm mt-6">
+            30-day money back guarantee • Cancel anytime • Your founding rate is locked in forever
+          </p>
+
+          <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-xl">
+            <p className="text-white/80 text-lg mb-4">
+              <strong className="text-white">One last thing:</strong>
+            </p>
+            <p className="text-white/70 leading-relaxed">
+              Every founder in The Circle was exactly where you are right now. Wondering if it's worth it. Wondering if they'll actually get value. Wondering if it's just another thing to manage.
+            </p>
+            <p className="text-white/70 leading-relaxed mt-4">
+              Then they joined. And they got it.
+            </p>
+            <p className="text-white/70 leading-relaxed mt-4">
+              The intros became deals. The messages became friendships. The events became partnerships. The investment became a no-brainer.
+            </p>
+            <p className="text-emerald-400 font-medium mt-6">
+              Don't be the person who waits and watches from the outside. Be the person who shows up and builds with us.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-white">The Circle</span>
+              </div>
+              <p className="text-white/60 text-sm">
+                Where ambitious founders stop building alone.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold mb-4">Quick Links</h4>
+              <div className="space-y-2">
+                <a href="/login" className="block text-white/60 hover:text-white text-sm transition-colors">
+                  Member Login
+                </a>
+                <a href="mailto:support@thecirclenetwork.org" className="block text-white/60 hover:text-white text-sm transition-colors">
+                  Contact Support
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <div className="space-y-2">
+                <a href="/terms" className="block text-white/60 hover:text-white text-sm transition-colors">
+                  Terms of Service
+                </a>
+                <a href="/privacy" className="block text-white/60 hover:text-white text-sm transition-colors">
+                  Privacy Policy
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-white/10 text-center">
+            <p className="text-white/60 text-sm">
+              © 2025 The Circle. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
+
+      {/* Exit Intent Popup */}
+      {showExitPopup && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-2xl max-w-2xl w-full p-8 relative">
+            <button
+              onClick={() => setShowExitPopup(false)}
+              className="absolute top-4 right-4 text-white/60 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center">
+              <h3 className="text-3xl font-bold text-white mb-4">
+                Wait! Before You Go...
+              </h3>
+
+              <p className="text-xl text-white/80 mb-6">
+                You're about to miss the founding member rate.
+              </p>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <p className="text-white/80 mb-4">Here's what's happening:</p>
+                <ul className="space-y-2 text-left text-white/70">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    We're at {memberCount} / 1,000 members
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    {spotsLeft} founding spots left at $199/mo
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    After member #1,000: $249/mo (no exceptions)
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-2xl font-bold text-emerald-400 mb-6">
+                That's $600/year more if you wait.
+              </p>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowExitPopup(false)}
+                  className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 rounded-xl transition-all"
+                >
+                  No Thanks, I'll Pay $249 Later
+                </button>
+                <button
+                  onClick={() => {
+                    setShowExitPopup(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all"
+                >
+                  Lock In $199/mo Now
+                </button>
+              </div>
+
+              <p className="text-white/60 text-sm mt-4 italic">
+                "I almost left to 'think about it.' So glad I didn't. Already made 2 valuable connections in my first week."
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating CTA (shows on scroll) */}
+      {memberCount > 0 && spotsLeft < 100 && (
+        <div className="fixed bottom-8 right-8 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl max-w-xs hidden lg:block">
+          <p className="font-bold mb-1">⚡ {spotsLeft} spots left</p>
+          <p className="text-sm text-white/90 mb-2">at $199/mo founding rate</p>
+          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-white transition-all" 
+              style={{ width: `${(memberCount / 1000) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
