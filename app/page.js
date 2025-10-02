@@ -1159,45 +1159,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Existing Member Popup */}
-      {showExistingMemberPopup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300">
-            <button
-              onClick={() => setShowExistingMemberPopup(false)}
-              className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-emerald-400" />
-              </div>
-
-              <h3 className="text-2xl font-bold text-white mb-3">
-                Welcome Back!
-              </h3>
-
-              <p className="text-white/80 mb-6">
-                You already have an account with us. Click below to sign in and access your dashboard.
-              </p>
-
-              <button
-                onClick={() => router.push('/login')}
-                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/50 flex items-center justify-center gap-2"
-              >
-                Sign In to Your Account
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+    
       {/* Exit Intent Popup - Shows only ONCE per session */}
       {showExitPopup && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -1315,3 +1277,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
