@@ -1078,87 +1078,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Exit Intent Popup - Shows only ONCE per session */}
-      {showExitPopup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-2xl max-w-2xl w-full p-8 relative animate-in fade-in zoom-in duration-300">
-            <button
-              onClick={() => setShowExitPopup(false)}
-              className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-red-400" />
-              </div>
-
-              <h3 className="text-3xl font-bold text-white mb-4">
-                Wait! You're About to Miss Out...
-              </h3>
-
-              <p className="text-xl text-white/80 mb-6">
-                The founding member window is closing faster than you think.
-              </p>
-
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-                <p className="text-white/80 mb-4 font-medium">Here's what's at stake:</p>
-                <ul className="space-y-3 text-left text-white/70">
-                  <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    Only the first 1,000 members lock in $199/mo forever
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    Member #1,001 pays $249/mo (no exceptions)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    That's $600/year more if you wait
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    Plus you miss founder-only benefits forever
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
-                <p className="text-2xl font-bold text-red-400 mb-2">
-                  Spots are filling every single day
-                </p>
-                <p className="text-white/70 text-sm">
-                  Other founders are locking in their rate while you're reading this.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => setShowExitPopup(false)}
-                  className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 rounded-xl transition-all text-sm"
-                >
-                  No Thanks, I'll Pay $249/mo Later
-                </button>
-                <button
-                  onClick={() => {
-                    setShowExitPopup(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-emerald-500/50"
-                >
-                  Lock In $199/mo Now →
-                </button>
-              </div>
-
-              <p className="text-white/40 text-xs mt-4 italic">
-                "Almost left to 'think about it.' So glad I didn't. Made 2 game-changing connections in my first week." - Michael R.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
+     
     
       {/* Exit Intent Popup - Shows only ONCE per session */}
       {showExitPopup && (
@@ -1277,4 +1197,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
 
