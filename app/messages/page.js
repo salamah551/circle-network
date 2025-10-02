@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { 
@@ -13,6 +13,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+function MessagesContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const messagesEndRef = useRef(null);
 export default function MessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,7 +47,18 @@ export default function MessagesPage() {
       subscription.unsubscribe();
     };
   }, []);
-
+  
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      </div>
+    }>
+      <MessagesContent />
+    </Suspense>
+  );
+}
   useEffect(() => {
     if (selectedConversation) {
       loadMessages(selectedConversation.id);
@@ -451,4 +466,5 @@ export default function MessagesPage() {
       </div>
     </div>
   );
+
 }
