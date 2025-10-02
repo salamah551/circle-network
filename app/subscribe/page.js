@@ -55,6 +55,15 @@ function SubscribePage() {
     setError('');
 
     try {
+      // Check if price ID is configured
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
+      
+      console.log('Stripe Price ID:', priceId); // Debug log
+      
+      if (!priceId) {
+        throw new Error('Stripe price ID not configured. Please contact support.');
+      }
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 
@@ -62,19 +71,22 @@ function SubscribePage() {
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID,
+          priceId: priceId,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        // Show the actual error from the API
+        throw new Error(data.error || `Failed to create checkout session (${response.status})`);
       }
 
+      // Redirect to Stripe checkout
       window.location.href = data.url;
 
     } catch (err) {
+      console.error('Checkout error:', err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -108,7 +120,6 @@ function SubscribePage() {
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Rest of your subscribe page UI stays the same */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
             <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
@@ -160,7 +171,10 @@ function SubscribePage() {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm mb-6">
-              {error}
+              <strong>Error:</strong> {error}
+              <div className="mt-2 text-xs text-red-300">
+                If this persists, please contact support with this error message.
+              </div>
             </div>
           )}
 
