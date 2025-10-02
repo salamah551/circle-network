@@ -18,21 +18,14 @@ export async function POST(request) {
 
     const token = authHeader.replace('Bearer ', '');
 
-    // Create Supabase client with the user's token
+    // Create Supabase client - WITHOUT global headers to avoid Stripe SDK conflicts
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    // Get the user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Manually set the auth token for this request
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
       console.error('User error:', userError);
@@ -50,6 +43,7 @@ export async function POST(request) {
       );
     }
 
+    // Call Stripe - now without the conflicting headers
     const { session, error } = await createCheckoutSession({
       userId: user.id,
       email: user.email,
@@ -60,7 +54,7 @@ export async function POST(request) {
     if (error) {
       console.error('Error creating checkout session:', error);
       return NextResponse.json(
-        { error: 'Failed to create checkout session' },
+        { error: error.message || 'Failed to create checkout session' },
         { status: 500 }
       );
     }
