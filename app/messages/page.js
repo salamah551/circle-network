@@ -17,10 +17,6 @@ function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const messagesEndRef = useRef(null);
-export default function MessagesPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const messagesEndRef = useRef(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -47,18 +43,7 @@ export default function MessagesPage() {
       subscription.unsubscribe();
     };
   }, []);
-  
-export default function MessagesPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
-      </div>
-    }>
-      <MessagesContent />
-    </Suspense>
-  );
-}
+
   useEffect(() => {
     if (selectedConversation) {
       loadMessages(selectedConversation.id);
@@ -466,5 +451,16 @@ export default function MessagesPage() {
       </div>
     </div>
   );
+}
 
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      </div>
+    }>
+      <MessagesContent />
+    </Suspense>
+  );
 }
