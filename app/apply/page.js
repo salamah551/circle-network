@@ -57,7 +57,7 @@ function ApplicationForm() {
     setEmail(emailParam);
 
     // Check if user is authenticated
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         console.error('Session error:', error);
         setError('Authentication failed. Please try clicking the magic link again.');
@@ -72,6 +72,24 @@ function ApplicationForm() {
       }
 
       setSession(session);
+
+      // NEW: Check if user already has an application
+      const { data: existingApp } = await supabase
+        .from('applications')
+        .select('id, status')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (existingApp) {
+        // User already has an application - redirect to appropriate page
+        if (existingApp.status === 'approved') {
+          router.push('/dashboard');
+        } else {
+          router.push('/welcome');
+        }
+        return;
+      }
+
       setIsLoading(false);
     });
   }, [searchParams, router]);
