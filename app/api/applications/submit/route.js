@@ -99,24 +99,31 @@ export async function POST(request) {
 
     const userId = user.id;
 
-    // Check if application already exists
-    const { data: existingApp } = await supabaseAdmin
+    // Check if application already exists by BOTH id AND user_id
+    const { data: existingAppById } = await supabaseAdmin
+      .from('applications')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const { data: existingAppByUserId } = await supabaseAdmin
       .from('applications')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (existingApp) {
+    if (existingAppById || existingAppByUserId) {
       return NextResponse.json(
-        { error: 'Application already submitted' },
+        { error: 'Application already submitted for this user' },
         { status: 400 }
       );
     }
 
-    // Create application
+    // Create application with explicit id field
     const { data: application, error: appError } = await supabaseAdmin
       .from('applications')
       .insert({
+        id: userId,
         user_id: userId,
         email: email.toLowerCase(),
         full_name: fullName,
@@ -135,31 +142,50 @@ export async function POST(request) {
 
     if (appError) {
       console.error('Application error:', appError);
+      
+      // Check if it's a duplicate key error
+      if (appError.code === '23505') {
+        return NextResponse.json(
+          { error: 'Application already exists for this user' },
+          { status: 400 }
+        );
+      }
+      
       return NextResponse.json(
         { error: 'Failed to submit application' },
         { status: 500 }
       );
     }
 
-    // Create profile from application
-    const { error: profileError } = await supabaseAdmin
+    // Check if profile already exists
+    const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: userId,
-        email: email.toLowerCase(),
-        full_name: fullName,
-        title,
-        company,
-        location,
-        bio,
-        linkedin_url: linkedinUrl,
-        expertise,
-        needs,
-        status: 'pending',
-      });
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
 
-    if (profileError) {
-      console.error('Profile error:', profileError);
+    // Only create profile if it doesn't exist
+    if (!existingProfile) {
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: email.toLowerCase(),
+          full_name: fullName,
+          title,
+          company,
+          location,
+          bio,
+          linkedin_url: linkedinUrl,
+          expertise,
+          needs,
+          status: 'pending',
+        });
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        // Don't fail the whole request if profile creation fails
+      }
     }
 
     return NextResponse.json({
