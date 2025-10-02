@@ -467,7 +467,61 @@ export default function LandingPage() {
           </p>
         </div>
 
-        
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="group">
+            <div className="bg-gradient-to-br from-emerald-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-emerald-500/30 transition-all h-full">
+              <Users className="w-12 h-12 text-emerald-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Warm Intros That Actually Close Deals
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                Stop cold emailing. Our curated directory connects you with the exact founder who solved your problem last quarter. Real intros. Real conversations. Real revenue.
+              </p>
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+                <p className="text-emerald-400 text-sm font-medium italic">
+                  "The investor intro I needed took 6 months of cold outreach before. Here it took 48 hours. We closed the round."
+                </p>
+                <p className="text-white/40 text-xs mt-2">— Sarah K., SaaS Founder</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="group">
+            <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all h-full">
+              <MessageSquare className="w-12 h-12 text-purple-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Responses in Hours, Not Days
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                No more "let's circle back" that never happens. Circle members respond in under 2 hours average because everyone here is vetted, active, and serious about mutual success.
+              </p>
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                <p className="text-purple-400 text-sm font-medium italic">
+                  "Posted a hiring question at 9am. Had 8 qualified responses by lunch. Made the hire by Friday."
+                </p>
+                <p className="text-white/40 text-xs mt-2">— Marcus T., Fintech CEO</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="group">
+            <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-blue-500/30 transition-all h-full">
+              <Target className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Post Once, Get Help From Experts
+              </h3>
+              <p className="text-white/70 text-lg mb-4">
+                Need a designer? Looking for your first sales hire? Pricing advice? Post your request and get 5+ qualified responses by EOD. Our members actually show up.
+              </p>
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                <p className="text-blue-400 text-sm font-medium italic">
+                  "Asked for help with our pricing model. Got detailed feedback from 3 founders who'd been there. Changed everything."
+                </p>
+                <p className="text-white/40 text-xs mt-2">— James P., B2B SaaS</p>
+              </div>
+            </div>
+          </div>
+
           <div className="group">
             <div className="bg-gradient-to-br from-yellow-500/10 to-transparent border border-white/10 rounded-2xl p-8 hover:border-yellow-500/30 transition-all h-full">
               <Calendar className="w-12 h-12 text-yellow-400 mb-4" />
@@ -1144,3 +1198,122 @@ export default function LandingPage() {
   );
 }
 
+      {/* Exit Intent Popup - Shows only ONCE per session */}
+      {showExitPopup && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-2xl max-w-2xl w-full p-8 relative animate-in fade-in zoom-in duration-300">
+            <button
+              onClick={() => setShowExitPopup(false)}
+              className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-red-400" />
+              </div>
+
+              <h3 className="text-3xl font-bold text-white mb-4">
+                Wait! You're About to Miss Out...
+              </h3>
+
+              <p className="text-xl text-white/80 mb-6">
+                The founding member window is closing faster than you think.
+              </p>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <p className="text-white/80 mb-4 font-medium">Here's what's at stake:</p>
+                <ul className="space-y-3 text-left text-white/70">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    Only the first 1,000 members lock in $199/mo forever
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    Member #1,001 pays $249/mo (no exceptions)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    That's $600/year more if you wait
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    Plus you miss founder-only benefits forever
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+                <p className="text-2xl font-bold text-red-400 mb-2">
+                  Spots are filling every single day
+                </p>
+                <p className="text-white/70 text-sm">
+                  Other founders are locking in their rate while you're reading this.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => setShowExitPopup(false)}
+                  className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 rounded-xl transition-all text-sm"
+                >
+                  No Thanks, I'll Pay $249/mo Later
+                </button>
+                <button
+                  onClick={() => {
+                    setShowExitPopup(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-emerald-500/50"
+                >
+                  Lock In $199/mo Now →
+                </button>
+              </div>
+
+              <p className="text-white/40 text-xs mt-4 italic">
+                "Almost left to 'think about it.' So glad I didn't. Made 2 game-changing connections in my first week." - Michael R.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing Member Popup */}
+      {showExistingMemberPopup && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-300">
+            <button
+              onClick={() => setShowExistingMemberPopup(false)}
+              className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-emerald-400" />
+              </div>
+
+              <h3 className="text-2xl font-bold text-white mb-3">
+                Welcome Back!
+              </h3>
+
+              <p className="text-white/80 mb-6">
+                You already have an account with us. Click below to sign in and access your dashboard.
+              </p>
+
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/50 flex items-center justify-center gap-2"
+              >
+                Sign In to Your Account
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
