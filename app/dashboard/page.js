@@ -142,6 +142,45 @@ export default function DashboardPage() {
           </h1>
           <p className="text-zinc-400">Here's what's happening in your network</p>
         </div>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  {/* Existing cards... */}
+  
+  <button
+    onClick={() => router.push('/messages')}
+    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+  >
+    <MessageSquare className="w-8 h-8 text-purple-400 mb-3" />
+    <h3 className="text-lg font-bold text-white mb-2">Messages</h3>
+    <p className="text-white/60 text-sm">Chat with members</p>
+  </button>
+
+  <button
+    onClick={() => router.push('/requests')}
+    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+  >
+    <Target className="w-8 h-8 text-emerald-400 mb-3" />
+    <h3 className="text-lg font-bold text-white mb-2">Requests</h3>
+    <p className="text-white/60 text-sm">Browse asks & offers</p>
+  </button>
+
+  <button
+    onClick={() => router.push('/events')}
+    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+  >
+    <Calendar className="w-8 h-8 text-blue-400 mb-3" />
+    <h3 className="text-lg font-bold text-white mb-2">Events</h3>
+    <p className="text-white/60 text-sm">Upcoming meetups</p>
+  </button>
+
+  <button
+    onClick={() => router.push('/settings')}
+    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+  >
+    <Settings className="w-8 h-8 text-white/60 mb-3" />
+    <h3 className="text-lg font-bold text-white mb-2">Settings</h3>
+    <p className="text-white/60 text-sm">Manage your profile</p>
+  </button>
+</div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -352,4 +391,5 @@ export default function DashboardPage() {
       </div>
     </div>
   );
+
 }
