@@ -62,7 +62,7 @@ function SubscribePage() {
     });
   }, [searchParams]);
 
-  const handleCheckout = async () => {
+ const handleCheckout = async () => {
     if (!session) {
       setError('Not authenticated. Please use the magic link from your email.');
       return;
@@ -74,21 +74,36 @@ function SubscribePage() {
     try {
       // Determine which price ID to use based on selection
       let priceId;
+      let planName;
       
       if (!isLaunched || selectedPlan === 'founding') {
         // Founding member price
         priceId = process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID;
+        planName = 'Founding Member';
+        console.log('Using founding price ID:', priceId);
       } else if (selectedPlan === 'monthly') {
         // Regular monthly price
         priceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
+        planName = 'Monthly';
+        console.log('Using monthly price ID:', priceId);
       } else if (selectedPlan === 'annual') {
         // Annual price
         priceId = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID;
+        planName = 'Annual';
+        console.log('Using annual price ID:', priceId);
       }
       
       if (!priceId) {
-        throw new Error('Price ID not configured. Please contact support.');
+        console.error('Price ID missing for plan:', selectedPlan);
+        console.error('Available env vars:', {
+          founding: process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID ? 'SET' : 'MISSING',
+          monthly: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID ? 'SET' : 'MISSING',
+          annual: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID ? 'SET' : 'MISSING'
+        });
+        throw new Error(`Price ID not configured for ${planName} plan. Please contact support at support@thecirclenetwork.org`);
       }
+
+      console.log('Creating checkout session for:', planName);
 
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -104,9 +119,16 @@ function SubscribePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to create checkout session`);
+        console.error('Checkout session error:', data);
+        throw new Error(data.error || `Failed to create checkout session for ${planName} plan`);
       }
 
+      if (!data.url) {
+        console.error('No checkout URL returned:', data);
+        throw new Error('Failed to get checkout URL. Please try again.');
+      }
+
+      console.log('Redirecting to Stripe checkout...');
       // Redirect to Stripe checkout
       window.location.href = data.url;
 
@@ -417,3 +439,4 @@ export default function Subscribe() {
     </Suspense>
   );
 }
+
