@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Users, MessageSquare, TrendingUp, Calendar, 
   ArrowRight, Loader2, LogOut, Settings, 
-  Sparkles, Target, Bell, Search 
+  Sparkles, Target, Bell, Search, X, Mail
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -18,6 +18,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({
     totalMembers: 0,
     activeRequests: 0,
@@ -41,6 +43,7 @@ export default function DashboardPage() {
       setUser(session.user);
       await loadProfile(session.user.id);
       await loadStats();
+      await loadNotifications(session.user.id);
       setIsLoading(false);
     } catch (error) {
       console.error('Auth check error:', error);
@@ -81,6 +84,44 @@ export default function DashboardPage() {
     });
   };
 
+  const loadNotifications = async (userId) => {
+    // Mock notifications for now - you can replace with real data
+    setNotifications([
+      {
+        id: 1,
+        type: 'new_member',
+        title: '3 new members joined',
+        description: 'Welcome the newest Circle members',
+        time: '2 hours ago',
+        read: false
+      },
+      {
+        id: 2,
+        type: 'request',
+        title: '5 new requests posted',
+        description: 'Check out what members need help with',
+        time: '5 hours ago',
+        read: false
+      },
+      {
+        id: 3,
+        type: 'event',
+        title: 'Virtual Roundtable this Friday',
+        description: 'Don\'t forget to RSVP',
+        time: '1 day ago',
+        read: true
+      }
+    ]);
+  };
+
+  const markNotificationAsRead = async (notificationId) => {
+    setNotifications(prev =>
+      prev.map(notif =>
+        notif.id === notificationId ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
@@ -93,6 +134,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -113,10 +156,68 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors">
-                <Bell className="w-5 h-5 text-zinc-400" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full"></span>
-              </button>
+              {/* Notifications */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-zinc-400" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full"></span>
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50">
+                    <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+                      <h3 className="font-bold text-white">Notifications</h3>
+                      <button
+                        onClick={() => setShowNotifications(false)}
+                        className="text-zinc-400 hover:text-white"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <Bell className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                          <p className="text-zinc-500">No notifications yet</p>
+                        </div>
+                      ) : (
+                        notifications.map(notif => (
+                          <div
+                            key={notif.id}
+                            onClick={() => markNotificationAsRead(notif.id)}
+                            className={`p-4 border-b border-zinc-800 hover:bg-zinc-800 cursor-pointer transition-colors ${
+                              !notif.read ? 'bg-zinc-850' : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                !notif.read ? 'bg-amber-400' : 'bg-transparent'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-white text-sm mb-1">
+                                  {notif.title}
+                                </p>
+                                <p className="text-zinc-400 text-xs mb-1">
+                                  {notif.description}
+                                </p>
+                                <p className="text-zinc-500 text-xs">{notif.time}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button 
                 onClick={() => router.push('/settings')}
                 className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
@@ -142,45 +243,45 @@ export default function DashboardPage() {
           </h1>
           <p className="text-zinc-400">Here's what's happening in your network</p>
         </div>
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-  {/* Existing cards... */}
-  
-  <button
-    onClick={() => router.push('/messages')}
-    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
-  >
-    <MessageSquare className="w-8 h-8 text-purple-400 mb-3" />
-    <h3 className="text-lg font-bold text-white mb-2">Messages</h3>
-    <p className="text-white/60 text-sm">Chat with members</p>
-  </button>
 
-  <button
-    onClick={() => router.push('/requests')}
-    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
-  >
-    <Target className="w-8 h-8 text-emerald-400 mb-3" />
-    <h3 className="text-lg font-bold text-white mb-2">Requests</h3>
-    <p className="text-white/60 text-sm">Browse asks & offers</p>
-  </button>
+        {/* Main Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <button
+            onClick={() => router.push('/messages')}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+          >
+            <MessageSquare className="w-8 h-8 text-purple-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2">Messages</h3>
+            <p className="text-white/60 text-sm">Chat with members</p>
+          </button>
 
-  <button
-    onClick={() => router.push('/events')}
-    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
-  >
-    <Calendar className="w-8 h-8 text-blue-400 mb-3" />
-    <h3 className="text-lg font-bold text-white mb-2">Events</h3>
-    <p className="text-white/60 text-sm">Upcoming meetups</p>
-  </button>
+          <button
+            onClick={() => router.push('/requests')}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+          >
+            <Target className="w-8 h-8 text-emerald-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2">Requests</h3>
+            <p className="text-white/60 text-sm">Browse asks & offers</p>
+          </button>
 
-  <button
-    onClick={() => router.push('/settings')}
-    className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
-  >
-    <Settings className="w-8 h-8 text-white/60 mb-3" />
-    <h3 className="text-lg font-bold text-white mb-2">Settings</h3>
-    <p className="text-white/60 text-sm">Manage your profile</p>
-  </button>
-</div>
+          <button
+            onClick={() => router.push('/events')}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+          >
+            <Calendar className="w-8 h-8 text-blue-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2">Events</h3>
+            <p className="text-white/60 text-sm">Upcoming meetups</p>
+          </button>
+
+          <button
+            onClick={() => router.push('/settings')}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+          >
+            <Settings className="w-8 h-8 text-white/60 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2">Settings</h3>
+            <p className="text-white/60 text-sm">Manage your profile</p>
+          </button>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -249,7 +350,7 @@ export default function DashboardPage() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/requests')}
+                  onClick={() => router.push('/requests/new')}
                   className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-750 rounded-lg transition-colors group"
                 >
                   <div className="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -386,10 +487,26 @@ export default function DashboardPage() {
                 Invite Members
               </button>
             </div>
+
+            {/* Contact Us */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-400" />
+                Need Help?
+              </h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                Have questions or need support? We're here to help.
+              </p>
+              <button
+                onClick={() => router.push('/contact')}
+                className="w-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                Contact Us
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-
 }
