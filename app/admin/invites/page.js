@@ -48,10 +48,10 @@ export default function AdminInvitesPage() {
         .single();
 
       const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
-      if (!adminEmails.includes(profile?.email)) {
-        router.push('/dashboard');
-        return;
-      }
+if (!adminEmails.includes(profile?.email)) {
+  router.push('/dashboard');
+  return;
+}
 
       await loadInvites();
       setIsLoading(false);
@@ -450,3 +450,4 @@ export default function AdminInvitesPage() {
   );
 
 }
+
