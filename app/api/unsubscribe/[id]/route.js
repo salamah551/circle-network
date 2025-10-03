@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -71,4 +72,5 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
+
 }
