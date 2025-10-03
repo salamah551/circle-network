@@ -34,7 +34,7 @@ export default function AdminApplicationsPage() {
         .eq('id', session.user.id)
         .single();
 
-      const adminEmails = ['shehab@thecirclenetwork.org', 'salamah@thecirclenetwork.org'];
+      const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
       if (!adminEmails.includes(profile?.email)) {
         router.push('/dashboard');
         return;
@@ -286,4 +286,5 @@ export default function AdminApplicationsPage() {
       )}
     </div>
   );
+
 }
