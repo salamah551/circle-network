@@ -50,8 +50,8 @@ export default function AdminDashboard() {
         .single();
 
       // Add your admin email here
-      if (profile?.email !== 'shehab@thecirclenetwork.org' && 
-          profile?.email !== 'salamah@thecirclenetwork.org') {
+      if (profile?.email !== 'nahdasheh@gmail.com' && 
+          profile?.email !== 'invite@thecirclenetwork.org') {
         router.push('/dashboard');
         return;
       }
@@ -330,4 +330,5 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
+
 }
