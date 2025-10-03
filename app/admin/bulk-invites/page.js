@@ -44,10 +44,11 @@ export default function BulkInvitesPage() {
         .eq('id', session.user.id)
         .single();
 
-      if (!profile?.email.includes('@thecirclenetwork.org')) {
-        router.push('/dashboard');
-        return;
-      }
+     const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+if (!adminEmails.includes(profile?.email)) {
+  router.push('/dashboard');
+  return;
+}
 
       await loadCampaigns();
       setIsLoading(false);
@@ -478,4 +479,5 @@ export default function BulkInvitesPage() {
       )}
     </div>
   );
+
 }
