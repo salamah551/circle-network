@@ -45,11 +45,11 @@ export default function AdminMembersPage() {
         .eq('id', session.user.id)
         .single();
 
-      if (!profile?.email.includes('@thecirclenetwork.org')) {
-        router.push('/dashboard');
-        return;
-      }
-
+   const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+if (!adminEmails.includes(profile?.email)) {
+  router.push('/dashboard');
+  return;
+}
       await loadMembers();
       setIsLoading(false);
     } catch (error) {
@@ -307,4 +307,5 @@ export default function AdminMembersPage() {
       </div>
     </div>
   );
+
 }
