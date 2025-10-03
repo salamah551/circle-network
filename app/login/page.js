@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { ArrowRight, Loader2, Mail } from 'lucide-react';
@@ -13,8 +13,42 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // User is already logged in, check if admin
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', session.user.id)
+          .single();
+
+        const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+        
+        // Redirect based on role
+        if (profile && adminEmails.includes(profile.email)) {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,6 +75,15 @@ export default function LoginPage() {
     }
   };
 
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+      </div>
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -52,9 +95,15 @@ export default function LoginPage() {
           <p className="text-zinc-400 mb-6">
             We've sent a magic link to <strong className="text-white">{email}</strong>
           </p>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-500 mb-4">
             Click the link in the email to sign in to your account.
           </p>
+          <button
+            onClick={() => setSuccess(false)}
+            className="text-amber-400 hover:text-amber-300 text-sm font-medium"
+          >
+            Use a different email
+          </button>
         </div>
       </div>
     );
