@@ -56,11 +56,11 @@ export default function AdminAnalyticsPage() {
         .eq('id', session.user.id)
         .single();
 
-      const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
-      if (!adminEmails.includes(profile?.email)) {
-        router.push('/dashboard');
-        return;
-      }
+     const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+if (!adminEmails.includes(profile?.email)) {
+  router.push('/dashboard');
+  return;
+}
 
       await loadAnalytics();
       setIsLoading(false);
@@ -460,3 +460,4 @@ Total Messages,${metrics.totalMessages}
   );
 
 }
+
