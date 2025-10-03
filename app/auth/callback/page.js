@@ -21,8 +21,22 @@ export default function AuthCallback() {
         if (error) throw error;
 
         if (data.session) {
-          // Successfully logged in, redirect to dashboard
-          router.push('/dashboard');
+          // Get user profile to check if admin
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', data.session.user.id)
+            .single();
+
+          // Admin emails - these get redirected to /admin
+          const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+
+          // Smart redirect based on email
+          if (profile && adminEmails.includes(profile.email)) {
+            router.push('/admin');
+          } else {
+            router.push('/dashboard');
+          }
         } else {
           // No session, redirect to login
           router.push('/login');
