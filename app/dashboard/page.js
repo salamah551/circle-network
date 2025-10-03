@@ -188,14 +188,20 @@ export default function DashboardPage() {
                           <p className="text-zinc-500">No notifications yet</p>
                         </div>
                       ) : (
-                        notifications.map(notif => (
-                          <div
-                            key={notif.id}
-                            onClick={() => markNotificationAsRead(notif.id)}
-                            className={`p-4 border-b border-zinc-800 hover:bg-zinc-800 cursor-pointer transition-colors ${
-                              !notif.read ? 'bg-zinc-850' : ''
-                            }`}
-                          >
+                       notifications.map(notif => (
+  <div
+    key={notif.id}
+    onClick={() => {
+      markNotificationAsRead(notif.id);
+      // Route based on notification type
+      if (notif.type === 'request') router.push('/requests');
+      else if (notif.type === 'event') router.push('/events');
+      else if (notif.type === 'new_member') router.push('/members');
+    }}
+    className={`p-4 border-b border-zinc-800 hover:bg-zinc-800 cursor-pointer transition-colors ${
+      !notif.read ? 'bg-zinc-850' : ''
+    }`}
+  >
                             <div className="flex items-start gap-3">
                               <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
                                 !notif.read ? 'bg-amber-400' : 'bg-transparent'
@@ -510,3 +516,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
