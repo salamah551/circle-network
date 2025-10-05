@@ -21,11 +21,12 @@ export default function DashboardPage() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({
-    totalMembers: 0,
-    activeRequests: 0,
-    unreadMessages: 0,
-    upcomingEvents: 0
-  });
+  totalMembers: 0,
+  activeRequests: 0,
+  unreadMessages: 0,
+  upcomingEvents: 0,
+  invitesRemaining: 0  // ✅ ADD THIS LINE
+});
 
   useEffect(() => {
     checkAuth();
@@ -51,17 +52,22 @@ export default function DashboardPage() {
     }
   };
 
-  const loadProfile = async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+ const loadProfile = async (userId) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
 
-    if (!error && data) {
-      setProfile(data);
-    }
-  };
+  if (!error && data) {
+    setProfile(data);
+    // ✅ ADD THESE LINES - Update stats with invite count
+    setStats(prev => ({
+      ...prev,
+      invitesRemaining: data.invites_remaining || 0
+    }));
+  }
+};
 
   const loadStats = async () => {
     // Load member count
@@ -516,4 +522,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 
