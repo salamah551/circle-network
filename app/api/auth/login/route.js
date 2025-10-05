@@ -17,23 +17,32 @@ export async function POST(request) {
       );
     }
 
-    // Check if user exists in auth.users (not profiles table)
-    const { data: { users }, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+    const emailLower = email.toLowerCase().trim();
     
-    const userExists = users?.some(user => user.email?.toLowerCase() === email.toLowerCase());
+    // ✅ SPECIAL: Admin emails can always get magic links
+    const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+    const isAdminEmail = adminEmails.includes(emailLower);
 
-    if (!userError && !userExists) {
-      return NextResponse.json(
-        { error: 'No account found with this email' },
-        { status: 404 }
-      );
+    if (!isAdminEmail) {
+      // Check if user exists for non-admin emails
+      const { data: { users }, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+      
+      const userExists = users?.some(user => user.email?.toLowerCase() === emailLower);
+
+      if (!userError && !userExists) {
+        return NextResponse.json(
+          { error: 'No account found with this email' },
+          { status: 404 }
+        );
+      }
     }
 
     // Send magic link using Supabase Auth
     const { error: magicLinkError } = await supabaseAdmin.auth.signInWithOtp({
-      email: email.toLowerCase(),
+      email: emailLower,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        shouldCreateUser: isAdminEmail // ✅ Auto-create for admin emails
       }
     });
 
