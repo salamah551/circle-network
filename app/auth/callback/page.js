@@ -32,8 +32,9 @@ export default function AuthCallback() {
         }
 
         console.log('✅ Session found for:', data.session.user.email);
+        console.log('🆔 User ID:', data.session.user.id);
 
-        // ✅ CRITICAL: Check admin status from DATABASE
+        // Check admin status from DATABASE
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('is_admin, email, full_name')
@@ -41,7 +42,10 @@ export default function AuthCallback() {
           .single();
 
         if (profileError) {
-          console.error('⚠️ Profile error:', profileError);
+          console.error('⚠️ FULL Profile error:', profileError);
+          console.error('⚠️ Error code:', profileError.code);
+          console.error('⚠️ Error message:', profileError.message);
+          console.error('⚠️ Error details:', profileError.details);
           router.push('/dashboard');
           return;
         }
@@ -52,7 +56,7 @@ export default function AuthCallback() {
           name: profile.full_name
         });
 
-        // ✅ Redirect based on database admin status
+        // Redirect based on database admin status
         if (profile.is_admin === true) {
           console.log('🎯 ADMIN DETECTED! Redirecting to /admin');
           router.push('/admin');
