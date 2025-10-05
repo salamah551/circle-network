@@ -43,19 +43,20 @@ export default function AdminDashboard() {
       }
 
       // Check if user is admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', session.user.id)
-        .single();
+      // ✅ Check if user is admin from DATABASE
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('is_admin, email')
+  .eq('id', session.user.id)
+  .single();
 
-      // Add your admin email here
-      if (profile?.email !== 'nahdasheh@gmail.com' && 
-          profile?.email !== 'invite@thecirclenetwork.org') {
-        router.push('/dashboard');
-        return;
-      }
+if (!profile || profile.is_admin !== true) {
+  console.log('🚫 Not admin, redirecting to dashboard');
+  router.push('/dashboard');
+  return;
+}
 
+console.log('✅ Admin verified:', profile.email);
       setIsAdmin(true);
       await loadStats();
       await loadRecentActivity();
@@ -332,3 +333,4 @@ export default function AdminDashboard() {
   );
 
 }
+
