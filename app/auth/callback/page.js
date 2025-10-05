@@ -15,34 +15,65 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        console.log('🔍 Starting auth callback...');
+        
         // Get the session from the URL
         const { data, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Session error:', error);
+          throw error;
+        }
 
         if (data.session) {
-          // Get user profile to check if admin
-          const { data: profile } = await supabase
+          console.log('✅ Session found for user:', data.session.user.email);
+          
+          // Get user profile with proper error handling
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('email')
+            .select('email, full_name')
             .eq('id', data.session.user.id)
             .single();
 
-          // Admin emails - these get redirected to /admin
-          const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+          if (profileError) {
+            console.error('⚠️ Profile fetch error:', profileError);
+            // If profile doesn't exist yet, use email from session
+            const userEmail = data.session.user.email?.toLowerCase().trim() || '';
+            console.log('📧 Using session email:', userEmail);
+            
+            const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+            
+            if (adminEmails.includes(userEmail)) {
+              console.log('🎯 Admin detected! Redirecting to /admin');
+              router.push('/admin');
+            } else {
+              console.log('👤 Regular user. Redirecting to /dashboard');
+              router.push('/dashboard');
+            }
+            return;
+          }
 
-          // Smart redirect based on email
-          if (profile && adminEmails.includes(profile.email)) {
+          // Normalize email for comparison
+          const userEmail = profile?.email?.toLowerCase().trim() || '';
+          console.log('📧 Profile email:', userEmail);
+          
+          // Admin emails (hardcoded for security)
+          const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
+          
+          // Check if admin
+          if (adminEmails.includes(userEmail)) {
+            console.log('🎯 Admin detected! Redirecting to /admin');
             router.push('/admin');
           } else {
+            console.log('👤 Regular user. Redirecting to /dashboard');
             router.push('/dashboard');
           }
         } else {
-          // No session, redirect to login
+          console.log('❌ No session found. Redirecting to login');
           router.push('/login');
         }
       } catch (error) {
-        console.error('Auth callback error:', error);
+        console.error('💥 Auth callback error:', error);
         router.push('/login');
       }
     };
@@ -54,7 +85,8 @@ export default function AuthCallback() {
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-4" />
-        <p className="text-white">Signing you in...</p>
+        <p className="text-white text-lg">Signing you in...</p>
+        <p className="text-zinc-500 text-sm mt-2">Redirecting to your dashboard...</p>
       </div>
     </div>
   );
