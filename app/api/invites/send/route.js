@@ -62,10 +62,10 @@ export async function POST(request) {
           to: [{ email: email }],
           subject: `You're invited to join The Circle`
         }],
-        from: {
-          email: 'noreply@thecirclenetwork.org',
-          name: 'The Circle'
-        },
+      from: {
+  email: 'invite@thecirclenetwork.org',
+  name: 'The Circle Network'
+},
         content: [{
           type: 'text/html',
           value: `
@@ -145,3 +145,4 @@ export async function POST(request) {
     );
   }
 }
+
