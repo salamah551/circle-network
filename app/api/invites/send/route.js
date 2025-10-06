@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request) {
   try {
-    const { email, invitedBy } = await request.json();
+    const { email, invitedBy, firstName, lastName } = await request.json();
 
     if (!email || !invitedBy) {
       return NextResponse.json(
@@ -27,13 +27,15 @@ export async function POST(request) {
     // Generate unique invite code
     const inviteCode = `FOUNDING-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    // Create invite in database
+    // ✅ FIXED: Use correct column names
     const { data: invite, error: inviteError } = await supabaseAdmin
       .from('invites')
       .insert({
-        code: inviteCode,
+        invite_code: inviteCode,  // Was: code
         email: email.toLowerCase(),
-        invited_by: invitedBy,
+        first_name: firstName || 'Member',  // Added
+        last_name: lastName || '',  // Added
+        created_by: invitedBy,  // Was: invited_by
         status: 'pending',
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       })
@@ -43,7 +45,7 @@ export async function POST(request) {
     if (inviteError) {
       console.error('Invite creation error:', inviteError);
       return NextResponse.json(
-        { error: 'Failed to create invite' },
+        { error: 'Failed to create invite', details: inviteError.message },
         { status: 500 }
       );
     }
@@ -62,10 +64,10 @@ export async function POST(request) {
           to: [{ email: email }],
           subject: `You're invited to join The Circle`
         }],
-      from: {
-  email: 'invite@thecirclenetwork.org',
-  name: 'The Circle Network'
-},
+        from: {
+          email: 'invite@thecirclenetwork.org',
+          name: 'The Circle Network'
+        },
         content: [{
           type: 'text/html',
           value: `
@@ -76,7 +78,6 @@ export async function POST(request) {
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
                 .header { text-align: center; padding: 30px 0; }
-                .logo { width: 60px; height: 60px; }
                 .content { background: #f9f9f9; padding: 30px; border-radius: 10px; }
                 .button { display: inline-block; padding: 15px 30px; background: #F59E0B; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
@@ -126,7 +127,7 @@ export async function POST(request) {
       const errorData = await emailResponse.json();
       console.error('SendGrid error:', errorData);
       return NextResponse.json(
-        { error: 'Failed to send invite email' },
+        { error: 'Failed to send invite email', details: errorData },
         { status: 500 }
       );
     }
@@ -140,9 +141,8 @@ export async function POST(request) {
   } catch (error) {
     console.error('Send invite error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
   }
 }
-
