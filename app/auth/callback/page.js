@@ -22,15 +22,30 @@ export default function AuthCallback() {
           return;
         }
 
-        // Simple check - just use email from session
-        const email = data.session.user.email?.toLowerCase();
+        // Get email and log it for debugging
+        const rawEmail = data.session.user.email;
+        const email = rawEmail?.toLowerCase().trim();
         
-        if (email === 'nahdasheh@gmail.com' || email === 'invite@thecirclenetwork.org') {
+        console.log('Raw email from session:', rawEmail);
+        console.log('Cleaned email:', email);
+        console.log('Checking against: nahdasheh@gmail.com and invite@thecirclenetwork.org');
+        
+        // Check if admin
+        const isNahdasheh = email === 'nahdasheh@gmail.com';
+        const isInvite = email === 'invite@thecirclenetwork.org';
+        
+        console.log('Is nahdasheh?', isNahdasheh);
+        console.log('Is invite?', isInvite);
+        
+        if (isNahdasheh || isInvite) {
+          console.log('✅ ADMIN - Redirecting to /admin');
           router.push('/admin');
         } else {
+          console.log('❌ Not admin, redirecting to dashboard');
           router.push('/dashboard');
         }
       } catch (error) {
+        console.error('Auth error:', error);
         router.push('/login');
       }
     };
@@ -40,7 +55,10 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-4" />
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-4" />
+        <p className="text-white text-lg">Signing you in...</p>
+      </div>
     </div>
   );
 }
