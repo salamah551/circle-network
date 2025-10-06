@@ -95,10 +95,7 @@ export default function AdminInvitesPage() {
     setFilteredInvites(filtered);
   };
 
-  const generateInviteCode = () => {
-    return `FOUNDING-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-  };
-
+  // ✅ FIXED: Let API handle everything - no duplicate invites
   const createInvite = async () => {
     if (!newInvite.email || !newInvite.firstName || !newInvite.lastName) {
       alert('Please fill all fields');
@@ -108,33 +105,23 @@ export default function AdminInvitesPage() {
     setIsCreating(true);
     try {
       const session = await supabase.auth.getSession();
-      const inviteCode = generateInviteCode();
 
-      const { error } = await supabase
-        .from('invites')
-        .insert({
-          email: newInvite.email.toLowerCase(),
-          first_name: newInvite.firstName,
-          last_name: newInvite.lastName,
-          invite_code: inviteCode,
-          status: 'pending',
-          created_by: session.data.session.user.id
-        });
-
-      if (error) throw error;
-
-      // Send invite email - FIXED ENDPOINT
+      // ✅ ONLY call API - it will create invite AND send email
       const response = await fetch('/api/invites/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: newInvite.email,
+          firstName: newInvite.firstName,
+          lastName: newInvite.lastName,
           invitedBy: session.data.session.user.id
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to send invite email');
+        throw new Error(data.error || 'Failed to send invite email');
       }
 
       await loadInvites();
@@ -149,22 +136,28 @@ export default function AdminInvitesPage() {
     }
   };
 
+  // ✅ FIXED: Resend uses existing invite code from database
   const resendInvite = async (invite) => {
     try {
       const session = await supabase.auth.getSession();
       
-      // FIXED ENDPOINT
-      const response = await fetch('/api/invites/send', {
+      const response = await fetch('/api/invites/resend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          inviteId: invite.id,
           email: invite.email,
+          firstName: invite.first_name,
+          lastName: invite.last_name,
+          inviteCode: invite.invite_code,
           invitedBy: session.data.session.user.id
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to resend invite');
+        throw new Error(data.error || 'Failed to resend invite');
       }
 
       alert('Invite resent successfully!');
