@@ -1,4 +1,4 @@
-// app/api/auth/validate-invite/route.js
+// app/api/auth/magic-link/route.js
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -18,62 +18,51 @@ export async function POST(request) {
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    // ✅ FIX: Normalize invite code - add FOUNDING- prefix if not present
+    // Normalize invite code
     let normalizedCode = inviteCode.toUpperCase().trim();
     if (!normalizedCode.startsWith('FOUNDING-')) {
       normalizedCode = `FOUNDING-${normalizedCode}`;
     }
 
-    console.log('Validating invite:', {
+    console.log('Sending magic link:', {
       email: email.toLowerCase(),
-      originalCode: inviteCode,
-      normalizedCode: normalizedCode
+      code: normalizedCode
     });
 
-    // ✅ FIX: Query using normalized invite_code
-    const { data: invite, error } = await supabaseAdmin
-      .from('invites')
-      .select('*')
-      .eq('invite_code', normalizedCode)
-      .eq('email', email.toLowerCase())
-      .eq('status', 'pending')
-      .gt('expires_at', new Date().toISOString())
-      .maybeSingle();
+    // CRITICAL FIX: Build the correct redirect URL with invite code and email
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
+    
+    console.log('Redirect URL:', redirectUrl);
+
+    // CRITICAL FIX: Use signInWithOtp correctly with proper options
+    const { data, error } = await supabaseAdmin.auth.signInWithOtp({
+      email: email.toLowerCase(),
+      options: {
+        emailRedirectTo: redirectUrl,
+        shouldCreateUser: true,
+        data: {
+          invite_code: normalizedCode
+        }
+      }
+    });
 
     if (error) {
-      console.error('Invite validation error:', error);
+      console.error('Supabase Auth error:', error);
       return NextResponse.json(
-        { error: 'Failed to validate invite' },
+        { error: `Failed to send magic link: ${error.message}` },
         { status: 500 }
       );
     }
 
-    if (!invite) {
-      console.log('No matching invite found');
-      return NextResponse.json(
-        { error: 'Invalid or expired invite code for this email' },
-        { status: 400 }
-      );
-    }
-
-    console.log('Invite validated successfully:', invite.invite_code);
+    console.log('Magic link sent successfully:', data);
 
     return NextResponse.json({
       success: true,
-      message: 'Invite code is valid',
+      message: 'Magic link sent successfully',
     });
 
   } catch (error) {
-    console.error('Validate invite error:', error);
+    console.error('Magic link API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
