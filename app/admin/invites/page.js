@@ -48,10 +48,10 @@ export default function AdminInvitesPage() {
         .single();
 
       const adminEmails = ['nahdasheh@gmail.com', 'invite@thecirclenetwork.org'];
-if (!adminEmails.includes(profile?.email)) {
-  router.push('/dashboard');
-  return;
-}
+      if (!adminEmails.includes(profile?.email)) {
+        router.push('/dashboard');
+        return;
+      }
 
       await loadInvites();
       setIsLoading(false);
@@ -123,16 +123,19 @@ if (!adminEmails.includes(profile?.email)) {
 
       if (error) throw error;
 
-      // Send invite email
-      await fetch('/api/send-invite', {
+      // Send invite email - FIXED ENDPOINT
+      const response = await fetch('/api/invites/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: newInvite.email,
-          firstName: newInvite.firstName,
-          inviteCode: inviteCode
+          invitedBy: session.data.session.user.id
         })
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to send invite email');
+      }
 
       await loadInvites();
       setShowCreateModal(false);
@@ -140,7 +143,7 @@ if (!adminEmails.includes(profile?.email)) {
       alert('Invite sent successfully!');
     } catch (error) {
       console.error('Error creating invite:', error);
-      alert('Failed to create invite');
+      alert('Failed to create invite: ' + error.message);
     } finally {
       setIsCreating(false);
     }
@@ -148,20 +151,26 @@ if (!adminEmails.includes(profile?.email)) {
 
   const resendInvite = async (invite) => {
     try {
-      await fetch('/api/send-invite', {
+      const session = await supabase.auth.getSession();
+      
+      // FIXED ENDPOINT
+      const response = await fetch('/api/invites/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: invite.email,
-          firstName: invite.first_name,
-          inviteCode: invite.invite_code
+          invitedBy: session.data.session.user.id
         })
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to resend invite');
+      }
 
       alert('Invite resent successfully!');
     } catch (error) {
       console.error('Error resending invite:', error);
-      alert('Failed to resend invite');
+      alert('Failed to resend invite: ' + error.message);
     }
   };
 
@@ -448,6 +457,4 @@ if (!adminEmails.includes(profile?.email)) {
       )}
     </div>
   );
-
 }
-
