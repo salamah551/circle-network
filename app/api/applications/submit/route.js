@@ -10,6 +10,8 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 export async function POST(request) {
   try {
     const body = await request.json();
+    console.log('Received application body:', JSON.stringify(body, null, 2));
+    
     const {
       fullName,
       title,
@@ -25,7 +27,7 @@ export async function POST(request) {
       userId
     } = body;
 
-    console.log('Received application:', { email, inviteCode, userId });
+    console.log('Parsed fields:', { email, inviteCode, userId, fullName, title, company });
 
     // Validate required fields
     if (!fullName || !title || !company || !bio || !email || !inviteCode || !userId) {
@@ -42,6 +44,7 @@ export async function POST(request) {
     }
 
     // Verify invite code is still valid and matches email
+    console.log('Verifying invite code...');
     const { data: invite, error: inviteError } = await supabaseAdmin
       .from('invites')
       .select('*')
@@ -50,13 +53,23 @@ export async function POST(request) {
       .eq('status', 'pending')
       .single();
 
-    if (inviteError || !invite) {
-      console.error('Invite validation failed:', inviteError);
+    if (inviteError) {
+      console.error('Invite query error:', inviteError);
+      return NextResponse.json(
+        { error: 'Failed to verify invite', details: inviteError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!invite) {
+      console.error('No matching invite found');
       return NextResponse.json(
         { error: 'Invalid or expired invite code' },
         { status: 400 }
       );
     }
+
+    console.log('Invite verified:', invite.id);
 
     // Check if invite has expired
     if (new Date(invite.expires_at) < new Date()) {
@@ -72,13 +85,20 @@ export async function POST(request) {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // Check if application already exists for this user
-    const { data: existingApp } = await supabaseAdmin
+    console.log('Checking for existing application...');
+    const { data: existingApp, error: existingAppError } = await supabaseAdmin
       .from('applications')
       .select('id')
       .eq('user_id', userId)
       .single();
 
+    if (existingAppError && existingAppError.code !== 'PGRST116') {
+      // PGRST116 is "not found" which is OK
+      console.error('Error checking existing application:', existingAppError);
+    }
+
     if (existingApp) {
+      console.log('Updating existing application:', existingApp.id);
       // Update existing application
       const { error: updateError } = await supabaseAdmin
         .from('applications')
@@ -89,9 +109,6 @@ export async function POST(request) {
           bio,
           expertise,
           needs,
-          linkedin,
-          twitter,
-          website,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
@@ -99,12 +116,14 @@ export async function POST(request) {
       if (updateError) {
         console.error('Update application error:', updateError);
         return NextResponse.json(
-          { error: 'Failed to update application' },
+          { error: 'Failed to update application', details: updateError.message },
           { status: 500 }
         );
       }
+      console.log('Application updated successfully');
     } else {
-      // Create new application
+      console.log('Creating new application');
+      // Create new application (NO social links here - they go in profiles)
       const { error: insertError } = await supabaseAdmin
         .from('applications')
         .insert({
@@ -116,9 +135,6 @@ export async function POST(request) {
           bio,
           expertise,
           needs,
-          linkedin,
-          twitter,
-          website,
           status: 'pending',
           submitted_at: new Date().toISOString()
         });
@@ -126,22 +142,29 @@ export async function POST(request) {
       if (insertError) {
         console.error('Insert application error:', insertError);
         return NextResponse.json(
-          { error: 'Failed to submit application' },
+          { error: 'Failed to submit application', details: insertError.message },
           { status: 500 }
         );
       }
+      console.log('Application created successfully');
     }
 
     // Create or update profile
-    const { data: existingProfile } = await supabaseAdmin
+    console.log('Checking for existing profile...');
+    const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
       .from('profiles')
       .select('id')
       .eq('user_id', userId)
       .single();
 
+    if (existingProfileError && existingProfileError.code !== 'PGRST116') {
+      console.error('Error checking existing profile:', existingProfileError);
+    }
+
     if (existingProfile) {
+      console.log('Updating existing profile:', existingProfile.id);
       // Update existing profile
-      await supabaseAdmin
+      const { error: profileUpdateError } = await supabaseAdmin
         .from('profiles')
         .update({
           first_name: firstName,
@@ -150,15 +173,23 @@ export async function POST(request) {
           title,
           company,
           bio,
-          linkedin,
-          twitter,
-          website,
+          linkedin: linkedin || null,
+          twitter: twitter || null,
+          website: website || null,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
+
+      if (profileUpdateError) {
+        console.error('Profile update error:', profileUpdateError);
+        // Don't fail the whole request, just log it
+      } else {
+        console.log('Profile updated successfully');
+      }
     } else {
+      console.log('Creating new profile');
       // Create new profile
-      await supabaseAdmin
+      const { error: profileInsertError } = await supabaseAdmin
         .from('profiles')
         .insert({
           user_id: userId,
@@ -168,12 +199,19 @@ export async function POST(request) {
           title,
           company,
           bio,
-          linkedin,
-          twitter,
-          website,
+          linkedin: linkedin || null,
+          twitter: twitter || null,
+          website: website || null,
           is_founding_member: true,
           invites_remaining: 5
         });
+
+      if (profileInsertError) {
+        console.error('Profile insert error:', profileInsertError);
+        // Don't fail the whole request, just log it
+      } else {
+        console.log('Profile created successfully');
+      }
     }
 
     console.log('Application submitted successfully');
@@ -185,8 +223,13 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Submit application error:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { 
+        error: 'Internal server error', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
