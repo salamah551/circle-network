@@ -135,8 +135,8 @@ export async function POST(request) {
           bio,
           expertise,
           needs,
-          status: 'pending',
-          submitted_at: new Date().toISOString()
+          status: 'pending'
+          // Let created_at be set automatically by Supabase
         });
 
       if (insertError) {
