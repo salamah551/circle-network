@@ -27,6 +27,7 @@ export default function RequestsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState(null);
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,6 +64,15 @@ export default function RequestsPage() {
       }
 
       setCurrentUser(session.user);
+      
+      // Load current user's profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+      
+      setCurrentUserProfile(profile);
       await loadRequests();
       setIsLoading(false);
     } catch (error) {
@@ -73,15 +83,40 @@ export default function RequestsPage() {
 
   const loadRequests = async () => {
     try {
+      // Load requests with profile data
       const { data, error } = await supabase
         .from('requests')
-        .select('*, user:profiles!requests_user_id_fkey(*), replies:request_replies(count)')
+        .select(`
+          *,
+          profile:profiles!requests_user_id_fkey(*)
+        `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setRequests(data || []);
+      if (error) {
+        console.error('Error loading requests:', error);
+        setRequests([]);
+        return;
+      }
+
+      // Count replies for each request
+      const requestsWithReplies = await Promise.all(
+        (data || []).map(async (request) => {
+          const { count } = await supabase
+            .from('request_replies')
+            .select('*', { count: 'exact', head: true })
+            .eq('request_id', request.id);
+          
+          return {
+            ...request,
+            reply_count: count || 0
+          };
+        })
+      );
+
+      setRequests(requestsWithReplies);
     } catch (error) {
       console.error('Error loading requests:', error);
+      setRequests([]);
     }
   };
 
@@ -89,7 +124,10 @@ export default function RequestsPage() {
     try {
       const { data, error } = await supabase
         .from('request_replies')
-        .select('*, user:profiles!request_replies_user_id_fkey(*)')
+        .select(`
+          *,
+          profile:profiles!request_replies_user_id_fkey(*)
+        `)
         .eq('request_id', requestId)
         .order('created_at', { ascending: true });
 
@@ -97,6 +135,7 @@ export default function RequestsPage() {
       setReplies(data || []);
     } catch (error) {
       console.error('Error loading replies:', error);
+      setReplies([]);
     }
   };
 
@@ -115,9 +154,9 @@ export default function RequestsPage() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(req =>
-        req.title.toLowerCase().includes(query) ||
-        req.description.toLowerCase().includes(query) ||
-        req.user.full_name.toLowerCase().includes(query)
+        req.title?.toLowerCase().includes(query) ||
+        req.description?.toLowerCase().includes(query) ||
+        req.profile?.full_name?.toLowerCase().includes(query)
       );
     }
 
@@ -125,7 +164,10 @@ export default function RequestsPage() {
   };
 
   const createRequest = async () => {
-    if (!newRequest.title.trim() || !newRequest.description.trim()) return;
+    if (!newRequest.title.trim() || !newRequest.description.trim()) {
+      alert('Please fill in all fields');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -139,14 +181,17 @@ export default function RequestsPage() {
           status: 'open'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error:', error);
+        throw error;
+      }
 
       setShowNewRequestModal(false);
       setNewRequest({ title: '', description: '', category: 'advice' });
       await loadRequests();
     } catch (error) {
       console.error('Error creating request:', error);
-      alert('Failed to create request');
+      alert(`Failed to create request: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -353,7 +398,7 @@ export default function RequestsPage() {
                       </div>
                       
                       <p className="text-white/60 text-sm mb-2">
-                        by {request.user.full_name} • {request.user.title} at {request.user.company}
+                        by {request.profile?.full_name || 'Unknown'} • {request.profile?.title || ''} {request.profile?.company ? `at ${request.profile.company}` : ''}
                       </p>
                       
                       <p className="text-white/80 mb-4">{request.description}</p>
@@ -365,7 +410,7 @@ export default function RequestsPage() {
                           className="flex items-center gap-1 hover:text-emerald-400 transition-colors"
                         >
                           <MessageSquare className="w-4 h-4" />
-                          {request.replies[0]?.count || 0} replies
+                          {request.reply_count || 0} replies
                         </button>
                       </div>
                     </div>
@@ -486,7 +531,7 @@ export default function RequestsPage() {
                     </span>
                   </div>
                   <p className="text-white/60 text-sm">
-                    by {selectedRequest.user.full_name} • {formatDate(selectedRequest.created_at)}
+                    by {selectedRequest.profile?.full_name || 'Unknown'} • {formatDate(selectedRequest.created_at)}
                   </p>
                 </div>
                 <button
@@ -514,9 +559,9 @@ export default function RequestsPage() {
                         <User className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-white">{reply.user.full_name}</p>
+                        <p className="font-semibold text-white">{reply.profile?.full_name || 'Unknown'}</p>
                         <p className="text-xs text-white/60">
-                          {reply.user.title} at {reply.user.company}
+                          {reply.profile?.title || ''} {reply.profile?.company ? `at ${reply.profile.company}` : ''}
                         </p>
                       </div>
                       <span className="ml-auto text-xs text-white/40">
