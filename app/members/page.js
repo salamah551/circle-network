@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { 
-  ArrowLeft, Search, Filter, User, Building2, 
+  ArrowLeft, Search, User, Building2, 
   MapPin, Briefcase, Loader2, Star, MessageSquare
 } from 'lucide-react';
 
@@ -19,7 +19,6 @@ export default function MembersPage() {
   const [members, setMembers] = useState([]);
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterExpertise, setFilterExpertise] = useState('all');
 
   useEffect(() => {
     checkAuthAndLoadMembers();
@@ -27,7 +26,7 @@ export default function MembersPage() {
 
   useEffect(() => {
     filterMembers();
-  }, [members, searchQuery, filterExpertise]);
+  }, [members, searchQuery]);
 
   const checkAuthAndLoadMembers = async () => {
     try {
@@ -72,23 +71,14 @@ export default function MembersPage() {
   const filterMembers = () => {
     let filtered = [...members];
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(member =>
         member.full_name?.toLowerCase().includes(query) ||
         member.title?.toLowerCase().includes(query) ||
         member.company?.toLowerCase().includes(query) ||
-        member.bio?.toLowerCase().includes(query)
-      );
-    }
-
-    // Filter by expertise
-    if (filterExpertise !== 'all') {
-      filtered = filtered.filter(member =>
-        member.expertise?.some(exp => 
-          exp.toLowerCase().includes(filterExpertise.toLowerCase())
-        )
+        member.bio?.toLowerCase().includes(query) ||
+        member.expertise?.some(exp => exp.toLowerCase().includes(query))
       );
     }
 
@@ -140,7 +130,7 @@ export default function MembersPage() {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-500" />
             <input
               type="text"
-              placeholder="Search members by name, title, company..."
+              placeholder="Search members by name, title, company, expertise..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -193,20 +183,22 @@ export default function MembersPage() {
 
                 {/* Title & Company */}
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-zinc-300">
-                    <Briefcase className="w-4 h-4 text-zinc-500" />
-                    <span className="text-sm">{member.title || 'Title not set'}</span>
-                  </div>
+                  {member.title && (
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <Briefcase className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                      <span className="text-sm truncate">{member.title}</span>
+                    </div>
+                  )}
                   {member.company && (
                     <div className="flex items-center gap-2 text-zinc-300">
-                      <Building2 className="w-4 h-4 text-zinc-500" />
-                      <span className="text-sm">{member.company}</span>
+                      <Building2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                      <span className="text-sm truncate">{member.company}</span>
                     </div>
                   )}
                   {member.location && (
                     <div className="flex items-center gap-2 text-zinc-300">
-                      <MapPin className="w-4 h-4 text-zinc-500" />
-                      <span className="text-sm">{member.location}</span>
+                      <MapPin className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                      <span className="text-sm truncate">{member.location}</span>
                     </div>
                   )}
                 </div>
