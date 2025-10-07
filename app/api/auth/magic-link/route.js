@@ -29,20 +29,17 @@ export async function POST(request) {
       code: normalizedCode
     });
 
-    // CRITICAL FIX: Build the correct redirect URL with invite code and email
+    // Build redirect URL - Supabase will handle auth automatically via hash params
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
     
     console.log('Redirect URL:', redirectUrl);
 
-    // CRITICAL FIX: Use signInWithOtp correctly with proper options
+    // Send magic link with redirect
     const { data, error } = await supabaseAdmin.auth.signInWithOtp({
       email: email.toLowerCase(),
       options: {
         emailRedirectTo: redirectUrl,
-        shouldCreateUser: true,
-        data: {
-          invite_code: normalizedCode
-        }
+        shouldCreateUser: true
       }
     });
 
