@@ -5,7 +5,9 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Users, MessageSquare, TrendingUp, Calendar, 
   ArrowRight, Loader2, LogOut, Settings, 
-  Sparkles, Target, Mail
+  Sparkles, Target, Mail, Bell, X, Save,
+  User, Briefcase, MapPin, Link as LinkIcon,
+  Linkedin, Twitter, Globe
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -13,11 +15,385 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+// Profile Edit Modal Component
+function ProfileEditModal({ profile, onClose, onSave }) {
+  const [formData, setFormData] = useState({
+    full_name: profile?.full_name || '',
+    first_name: profile?.first_name || '',
+    last_name: profile?.last_name || '',
+    title: profile?.title || '',
+    company: profile?.company || '',
+    location: profile?.location || '',
+    bio: profile?.bio || '',
+    expertise: profile?.expertise || [],
+    needs: profile?.needs || [],
+    challenges: profile?.challenges || '',
+    linkedin: profile?.linkedin || '',
+    twitter: profile?.twitter || '',
+    website: profile?.website || ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const fullName = formData.full_name || 
+        `${formData.first_name} ${formData.last_name}`.trim();
+      
+      await onSave({
+        ...formData,
+        full_name: fullName,
+        updated_at: new Date().toISOString()
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-4xl w-full my-8">
+        {/* Header */}
+        <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Edit Your Profile</h2>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* Basic Info */}
+          <div>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <User className="w-5 h-5 text-amber-400" />
+              Basic Information
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Professional Info */}
+          <div>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-amber-400" />
+              Professional Information
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-2">Title</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">Company</label>
+                <input
+                  type="text"
+                  value={formData.company}
+                  onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">Location</label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">Bio</label>
+                <textarea
+                  rows={3}
+                  value={formData.bio}
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Expertise */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Expertise & Needs</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-2">Areas of Expertise</label>
+                <input
+                  type="text"
+                  value={formData.expertise.join(', ')}
+                  onChange={(e) => setFormData({...formData, expertise: e.target.value.split(',').map(s => s.trim()).filter(s => s)})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                  placeholder="Comma-separated"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2">What You Need Help With</label>
+                <input
+                  type="text"
+                  value={formData.needs.join(', ')}
+                  onChange={(e) => setFormData({...formData, needs: e.target.value.split(',').map(s => s.trim()).filter(s => s)})}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+                  placeholder="Comma-separated"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <LinkIcon className="w-5 h-5 text-amber-400" />
+              Social Links
+            </h3>
+            <div className="space-y-4">
+              <input
+                type="url"
+                value={formData.linkedin}
+                onChange={(e) => setFormData({...formData, linkedin: e.target.value})}
+                placeholder="LinkedIn URL"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+              />
+              <input
+                type="url"
+                value={formData.twitter}
+                onChange={(e) => setFormData({...formData, twitter: e.target.value})}
+                placeholder="Twitter URL"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+              />
+              <input
+                type="url"
+                value={formData.website}
+                onChange={(e) => setFormData({...formData, website: e.target.value})}
+                placeholder="Website URL"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-zinc-800 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="px-6 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-700 text-black font-bold rounded-lg transition-colors flex items-center gap-2"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Save Changes
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Notifications Component
+function Notifications({ userId }) {
+  const router = useRouter();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showPanel, setShowPanel] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      loadNotifications();
+      
+      const channel = supabase
+        .channel('notifications')
+        .on('postgres_changes', 
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_user_id=eq.${userId}` },
+          () => loadNotifications()
+        )
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'intro_requests', filter: `target_member_id=eq.${userId}` },
+          () => loadNotifications()
+        )
+        .subscribe();
+
+      return () => supabase.removeChannel(channel);
+    }
+  }, [userId]);
+
+  const loadNotifications = async () => {
+    try {
+      const allNotifications = [];
+
+      const { data: messages } = await supabase
+        .from('messages')
+        .select('*, from:profiles!messages_from_user_id_fkey(full_name)')
+        .eq('to_user_id', userId)
+        .is('read_at', null)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (messages) {
+        messages.forEach(m => {
+          allNotifications.push({
+            id: m.id,
+            type: 'message',
+            title: `New message from ${m.from?.full_name || 'A member'}`,
+            description: m.content.substring(0, 100),
+            time: m.created_at,
+            link: '/messages',
+            unread: true
+          });
+        });
+      }
+
+      const { data: intros } = await supabase
+        .from('intro_requests')
+        .select('*, requester:profiles!intro_requests_requester_id_fkey(full_name)')
+        .eq('target_member_id', userId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (intros) {
+        intros.forEach(i => {
+          allNotifications.push({
+            id: `intro-${i.id}`,
+            type: 'intro',
+            title: `${i.requester?.full_name || 'Someone'} wants an introduction`,
+            description: i.message.substring(0, 100),
+            time: i.created_at,
+            link: '/messages',
+            unread: true
+          });
+        });
+      }
+
+      allNotifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+      setNotifications(allNotifications.slice(0, 10));
+      setUnreadCount(allNotifications.filter(n => n.unread).length);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  };
+
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowPanel(!showPanel)}
+        className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+      >
+        <Bell className="w-5 h-5 text-zinc-400" />
+        {unreadCount > 0 && (
+          <span className="absolute top-0 right-0 bg-amber-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {showPanel && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)} />
+          
+          <div className="absolute right-0 top-full mt-2 w-96 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-[600px] overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+              <h3 className="font-bold">Notifications</h3>
+              <button onClick={() => setShowPanel(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Bell className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                  <p className="text-zinc-500 text-sm">No new notifications</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-zinc-800">
+                  {notifications.map(notif => (
+                    <button
+                      key={notif.id}
+                      onClick={() => {
+                        router.push(notif.link);
+                        setShowPanel(false);
+                      }}
+                      className="w-full text-left p-4 hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-medium text-white line-clamp-1">{notif.title}</p>
+                        {notif.unread && <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0 mt-1" />}
+                      </div>
+                      <p className="text-xs text-zinc-400 line-clamp-2 mb-1">{notif.description}</p>
+                      <p className="text-xs text-zinc-500">{formatTime(notif.time)}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [stats, setStats] = useState({
     totalMembers: 0,
     activeRequests: 0,
@@ -53,7 +429,7 @@ export default function DashboardPage() {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId) // Changed from user_id to id
+      .eq('id', userId)
       .single();
 
     if (!error && data) {
@@ -66,24 +442,21 @@ export default function DashboardPage() {
   };
 
   const loadStats = async (userId) => {
-    // Load member count (exclude current user)
     const { count: memberCount } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
-      .neq('id', userId); // Changed from user_id to id
+      .neq('id', userId);
 
-    // Load active requests count
     const { count: requestCount } = await supabase
       .from('requests')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'open');
 
-    // Load unread messages count
     const { count: messageCount } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
       .eq('to_user_id', userId)
-      .eq('read', false);
+      .is('read_at', null);
 
     setStats(prev => ({
       ...prev,
@@ -97,6 +470,21 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
+  };
+
+  const handleSaveProfile = async (updatedData) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update(updatedData)
+      .eq('id', user.id);
+    
+    if (!error) {
+      await loadProfile(user.id);
+      setShowProfileModal(false);
+      alert('Profile updated successfully!');
+    } else {
+      alert('Failed to update profile');
+    }
   };
 
   if (isLoading) {
@@ -126,6 +514,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Notifications userId={user?.id} />
               <button 
                 onClick={() => router.push('/settings')}
                 className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
@@ -310,7 +699,7 @@ export default function DashboardPage() {
               <div className="space-y-3 mb-4">
                 <div>
                   <div className="text-sm text-zinc-400 mb-1">Name</div>
-                  <div className="font-semibold">{profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Not set'}</div>
+                  <div className="font-semibold">{profile?.full_name || 'Not set'}</div>
                 </div>
                 <div>
                   <div className="text-sm text-zinc-400 mb-1">Title</div>
@@ -322,7 +711,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <button
-                onClick={() => router.push('/profile')}
+                onClick={() => setShowProfileModal(true)}
                 className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 px-4 rounded-lg transition-colors text-sm"
               >
                 Edit Profile
@@ -375,6 +764,15 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Profile Edit Modal */}
+      {showProfileModal && (
+        <ProfileEditModal
+          profile={profile}
+          onClose={() => setShowProfileModal(false)}
+          onSave={handleSaveProfile}
+        />
+      )}
     </div>
   );
 }
