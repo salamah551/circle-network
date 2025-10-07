@@ -28,6 +28,10 @@ export default function RequestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('open');
   const [showNewRequestModal, setShowNewRequestModal] = useState(false);
   
   const [newRequest, setNewRequest] = useState({
@@ -41,6 +45,10 @@ export default function RequestsPage() {
     checkAuthAndLoadData();
   }, []);
 
+  useEffect(() => {
+    filterRequests();
+  }, [requests, searchQuery, selectedCategory, selectedStatus]);
+
   const checkAuthAndLoadData = async () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -50,14 +58,53 @@ export default function RequestsPage() {
         return;
       }
 
-      console.log('Current user:', session.user.id);
       setCurrentUser(session.user);
-      
+      await loadRequests();
       setIsLoading(false);
     } catch (error) {
       console.error('Auth check error:', error);
       router.push('/login');
     }
+  };
+
+  const loadRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading requests:', error);
+        setRequests([]);
+        return;
+      }
+
+      setRequests(data || []);
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      setRequests([]);
+    }
+  };
+
+  const filterRequests = () => {
+    let filtered = [...requests];
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(req => req.category === selectedCategory);
+    }
+
+    filtered = filtered.filter(req => req.status === selectedStatus);
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.title?.toLowerCase().includes(query) ||
+        req.description?.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredRequests(filtered);
   };
 
   const createRequest = async () => {
@@ -68,14 +115,6 @@ export default function RequestsPage() {
 
     setSubmitting(true);
     try {
-      console.log('Creating request with data:', {
-        user_id: currentUser.id,
-        title: newRequest.title,
-        description: newRequest.description,
-        category: newRequest.category,
-        status: 'open'
-      });
-
       const { data, error } = await supabase
         .from('requests')
         .insert({
@@ -88,25 +127,31 @@ export default function RequestsPage() {
         .select();
 
       if (error) {
-        console.error('DETAILED INSERT ERROR:', error);
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        console.error('Error hint:', error.hint);
+        console.error('INSERT ERROR:', error);
         throw error;
       }
-
-      console.log('Request created successfully:', data);
 
       alert('Request created successfully!');
       setShowNewRequestModal(false);
       setNewRequest({ title: '', description: '', category: 'advice' });
+      await loadRequests();
     } catch (error) {
       console.error('Error creating request:', error);
       alert(`Failed to create request: ${error.message || 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return 'Today';
+    if (diffInDays === 1) return 'Yesterday';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   if (isLoading) {
@@ -130,7 +175,7 @@ export default function RequestsPage() {
                 <ArrowLeft className="w-5 h-5" />
                 <span>Dashboard</span>
               </button>
-              <h1 className="text-2xl font-bold text-white">Requests Board (DEBUG)</h1>
+              <h1 className="text-2xl font-bold text-white">Requests Board</h1>
             </div>
             
             <button
@@ -138,19 +183,116 @@ export default function RequestsPage() {
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium rounded-xl transition-all"
             >
               <Plus className="w-5 h-5" />
-              Test Create Request
+              New Request
             </button>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-          <h2 className="text-xl font-bold text-white mb-4">Debug Info</h2>
-          <div className="space-y-2 text-sm font-mono">
-            <p className="text-white/60">User ID: <span className="text-emerald-400">{currentUser?.id}</span></p>
-            <p className="text-white/60">Email: <span className="text-emerald-400">{currentUser?.email}</span></p>
+        {/* Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
+            <input
+              type="text"
+              placeholder="Search requests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
           </div>
+
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => setSelectedCategory(cat.value)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                    selectedCategory === cat.value
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedStatus('open')}
+              className={`flex-1 px-4 py-2 rounded-lg transition-all ${
+                selectedStatus === 'open'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+              }`}
+            >
+              <Clock className="w-4 h-4 inline mr-2" />
+              Open ({requests.filter(r => r.status === 'open').length})
+            </button>
+            <button
+              onClick={() => setSelectedStatus('resolved')}
+              className={`flex-1 px-4 py-2 rounded-lg transition-all ${
+                selectedStatus === 'resolved'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+              }`}
+            >
+              <CheckCircle className="w-4 h-4 inline mr-2" />
+              Resolved ({requests.filter(r => r.status === 'resolved').length})
+            </button>
+          </div>
+        </div>
+
+        {/* Requests List */}
+        <div className="space-y-4">
+          {filteredRequests.length === 0 ? (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
+              <Lightbulb className="w-16 h-16 text-white/20 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No requests found</h3>
+              <p className="text-white/60 mb-6">
+                {selectedStatus === 'open' 
+                  ? 'Be the first to post a request!'
+                  : 'No resolved requests yet.'
+                }
+              </p>
+              {selectedStatus === 'open' && (
+                <button
+                  onClick={() => setShowNewRequestModal(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-medium rounded-xl transition-all"
+                >
+                  Post Your First Request
+                </button>
+              )}
+            </div>
+          ) : (
+            filteredRequests.map(request => (
+              <div
+                key={request.id}
+                className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-lg font-bold text-white">{request.title}</h3>
+                      <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs rounded-full">
+                        {request.category}
+                      </span>
+                    </div>
+                    <p className="text-white/80 mb-4">{request.description}</p>
+                    <div className="flex items-center gap-4 text-sm text-white/60">
+                      <span>{formatDate(request.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -159,7 +301,7 @@ export default function RequestsPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#0A0F1E] border border-white/20 rounded-2xl max-w-2xl w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white">Test Create Request</h3>
+              <h3 className="text-2xl font-bold text-white">Post a Request</h3>
               <button
                 onClick={() => setShowNewRequestModal(false)}
                 className="text-white/60 hover:text-white"
@@ -202,12 +344,6 @@ export default function RequestsPage() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[150px]"
                 />
               </div>
-
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-                <p className="text-sm text-amber-400">
-                  <strong>Debug mode:</strong> Check console for detailed error logs if this fails.
-                </p>
-              </div>
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -228,7 +364,7 @@ export default function RequestsPage() {
                     Creating...
                   </>
                 ) : (
-                  'Create Request (Debug)'
+                  'Post Request'
                 )}
               </button>
             </div>
