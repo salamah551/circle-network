@@ -18,6 +18,7 @@ function ApplyPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [debugInfo, setDebugInfo] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -31,18 +32,39 @@ function ApplyPageContent() {
     website: ''
   });
 
+  const addDebug = (message) => {
+    console.log(message);
+    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      addDebug(`Auth event: ${event}`);
+      if (session) {
+        addDebug(`Session user: ${session.user.email}`);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Validate invite code on page load
   useEffect(() => {
     const validateInvite = async () => {
       try {
+        addDebug('=== STARTING VALIDATION ===');
+        addDebug(`Full URL: ${window.location.href}`);
+        addDebug(`Hash: ${window.location.hash}`);
+        
         // Get invite code and email from URL
         const code = searchParams.get('code');
         const email = searchParams.get('email');
 
-        console.log('URL params:', { code, email });
+        addDebug(`URL Params - code: ${code}, email: ${email}`);
 
         if (!code || !email) {
-          setInviteError('Missing invite code or email');
+          setInviteError('Missing invite code or email in URL');
           setValidatingInvite(false);
           return;
         }
@@ -50,17 +72,41 @@ function ApplyPageContent() {
         setInviteCode(code);
         setUserEmail(email);
 
-        // Check if user is authenticated
+        // Check for hash params (Supabase auth tokens)
+        const hash = window.location.hash;
+        addDebug(`Hash params present: ${hash ? 'YES' : 'NO'}`);
+        if (hash) {
+          addDebug(`Hash length: ${hash.length} chars`);
+        }
+
+        // Wait for Supabase to process hash params
+        addDebug('Waiting 2 seconds for session establishment...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Check for session
+        addDebug('Checking for session...');
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError || !session) {
-          console.error('Not authenticated:', sessionError);
-          setInviteError('Please click the magic link in your email to continue');
+        if (sessionError) {
+          addDebug(`Session error: ${sessionError.message}`);
+        }
+
+        if (!session) {
+          addDebug('❌ NO SESSION FOUND');
+          addDebug('Possible causes:');
+          addDebug('1. Magic link already used (one-time use)');
+          addDebug('2. Supabase redirect URL not configured');
+          addDebug('3. Hash params not in URL');
+          
+          setInviteError('Authentication failed. Please click the magic link in your email again. (Magic links can only be used once)');
           setValidatingInvite(false);
           return;
         }
 
+        addDebug(`✅ Session found! User: ${session.user.email}`);
+
         // Validate the invite code
+        addDebug('Validating invite code with API...');
         const response = await fetch('/api/auth/validate-invite', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -71,19 +117,21 @@ function ApplyPageContent() {
         });
 
         const data = await response.json();
+        addDebug(`API Response: ${JSON.stringify(data)}`);
 
         if (!response.ok || !data.valid) {
+          addDebug(`❌ Validation failed: ${data.error}`);
           setInviteError(data.error || 'Invalid or expired invite code');
           setValidatingInvite(false);
           return;
         }
 
-        // Invite is valid
-        console.log('Invite validated successfully');
+        addDebug('✅ Invite validated successfully!');
         setValidatingInvite(false);
         setLoading(false);
 
       } catch (error) {
+        addDebug(`❌ Error: ${error.message}`);
         console.error('Validation error:', error);
         setInviteError('Failed to validate invite code');
         setValidatingInvite(false);
@@ -98,7 +146,6 @@ function ApplyPageContent() {
     setSubmitting(true);
 
     try {
-      // Get current session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -107,7 +154,6 @@ function ApplyPageContent() {
         return;
       }
 
-      // Submit application
       const response = await fetch('/api/applications/submit', {
         method: 'POST',
         headers: { 
@@ -128,7 +174,6 @@ function ApplyPageContent() {
         throw new Error(data.error || 'Failed to submit application');
       }
 
-      // Redirect to payment
       router.push('/subscribe');
 
     } catch (error) {
@@ -142,23 +187,33 @@ function ApplyPageContent() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Show loading state while validating
   if (validatingInvite) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-amber-400 mx-auto mb-4" />
-          <p className="text-zinc-400">Validating your invitation...</p>
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full">
+          <div className="text-center mb-8">
+            <Loader2 className="w-12 h-12 animate-spin text-amber-400 mx-auto mb-4" />
+            <p className="text-zinc-400">Validating your invitation...</p>
+          </div>
+          
+          {/* Debug Console */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 max-h-96 overflow-y-auto">
+            <h3 className="text-sm font-bold text-amber-400 mb-2">Debug Log:</h3>
+            <div className="text-xs text-zinc-400 font-mono space-y-1">
+              {debugInfo.map((info, idx) => (
+                <div key={idx}>{info}</div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Show error if invite is invalid
   if (inviteError) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
+        <div className="max-w-2xl w-full">
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 mb-6">
             <h2 className="text-2xl font-bold text-red-400 mb-4">Invalid Invitation</h2>
             <p className="text-zinc-300 mb-6">{inviteError}</p>
@@ -168,6 +223,16 @@ function ApplyPageContent() {
             >
               Return to Home
             </button>
+          </div>
+
+          {/* Debug Console */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 max-h-96 overflow-y-auto">
+            <h3 className="text-sm font-bold text-amber-400 mb-2">Debug Log:</h3>
+            <div className="text-xs text-zinc-400 font-mono space-y-1">
+              {debugInfo.map((info, idx) => (
+                <div key={idx}>{info}</div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
