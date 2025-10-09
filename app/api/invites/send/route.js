@@ -93,7 +93,7 @@ export async function POST(request) {
         last_name: lastName || '',
         name: `${firstName || 'Member'} ${lastName || ''}`.trim(),
         invite_code: inviteCode,
-        persona: 'wildcard',
+        persona_type: 'wildcard',
         status: 'pending',
         sequence_stage: 0,
         next_email_scheduled: new Date().toISOString() // Send first email immediately
