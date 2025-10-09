@@ -360,7 +360,7 @@ function Notifications({ userId }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)} />
           
-          <div className="absolute right-0 top-full mt-2 w-96 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-[600px] overflow-hidden flex flex-col">
+          <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-[600px] overflow-hidden flex flex-col">
             <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
               <h3 className="font-bold">Notifications</h3>
               <button onClick={() => setShowPanel(false)} className="text-zinc-400 hover:text-white">
@@ -980,7 +980,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <button
-                onClick={() => router.push('/admin/invites')}
+                onClick={() => router.push('/invite')}
                 className="w-full mt-4 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
               >
                 Invite Members
@@ -1100,12 +1100,12 @@ export default function DashboardPage() {
             </div>
                 Have questions or need support? We're here to help.
               </p>
-              <a
-                href="mailto:support@thecirclenetwork.org"
+              <button
+                onClick={() => router.push('/contact')}
                 className="w-full block text-center bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
               >
                 Contact Us
-              </a>
+              </button>
             </div>
           </div>
         </div>
