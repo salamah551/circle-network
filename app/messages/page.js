@@ -160,12 +160,23 @@ function MessagesContent() {
 
   const markAsRead = async (otherUserId) => {
     try {
-      await supabase
-        .from('messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('to_user_id', currentUser.id)
-        .eq('from_user_id', otherUserId)
-        .is('read_at', null);
+      const unreadMessages = messages.filter(
+        msg => msg.to_user_id === currentUser.id && msg.from_user_id === otherUserId && !msg.read_at
+      );
+
+      if (unreadMessages.length === 0) return;
+
+      const messageIds = unreadMessages.map(msg => msg.id);
+
+      const response = await fetch('/api/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageIds })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark messages as read');
+      }
 
       // Update local state
       setConversations(prevConvs => 
@@ -470,7 +481,45 @@ function MessagesContent() {
 
                 {/* Message Input */}
                 <div className="p-4 border-t border-white/10">
+                  {selectedFile && (
+                    <div className="mb-3 p-3 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-white">
+                        <Paperclip className="w-4 h-4" />
+                        <span>{selectedFile.name}</span>
+                        <span className="text-white/40">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedFile(null)}
+                        className="text-white/60 hover:text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-end gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('File size must be less than 5MB');
+                            return;
+                          }
+                          setSelectedFile(file);
+                        }
+                      }}
+                      className="hidden"
+                      accept="image/*,.pdf,.doc,.docx"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-white/60 hover:text-white"
+                      title="Attach file or image"
+                    >
+                      <Paperclip className="w-5 h-5" />
+                    </button>
                     <textarea
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
@@ -486,7 +535,7 @@ function MessagesContent() {
                     />
                     <button
                       onClick={sendMessage}
-                      disabled={!newMessage.trim() || sending}
+                      disabled={(!newMessage.trim() && !selectedFile) || sending}
                       className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
                       {sending ? (
