@@ -244,6 +244,7 @@ function Notifications({ userId }) {
     if (userId) {
       loadNotifications();
       
+      // Real-time subscription
       const channel = supabase
         .channel('notifications')
         .on('postgres_changes', 
@@ -256,7 +257,15 @@ function Notifications({ userId }) {
         )
         .subscribe();
 
-      return () => supabase.removeChannel(channel);
+      // Polling fallback (every 30 seconds)
+      const pollInterval = setInterval(() => {
+        loadNotifications();
+      }, 30000);
+
+      return () => {
+        supabase.removeChannel(channel);
+        clearInterval(pollInterval);
+      };
     }
   }, [userId]);
 
