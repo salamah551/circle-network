@@ -33,20 +33,35 @@ function MessagesContent() {
 
   useEffect(() => {
     checkAuthAndLoadData();
+  }, []);
+
+  // Set up real-time subscription AFTER currentUser is loaded
+  useEffect(() => {
+    if (!currentUser) return;
     
-    // Set up real-time subscription for new messages
+    // Subscribe to messages where user is sender OR receiver
     const subscription = supabase
-      .channel('messages')
+      .channel('messages-realtime')
       .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        handleNewMessage
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'messages'
+        },
+        (payload) => {
+          const newMsg = payload.new;
+          // Only process if message involves current user
+          if (newMsg.from_user_id === currentUser.id || newMsg.to_user_id === currentUser.id) {
+            handleNewMessage(payload);
+          }
+        }
       )
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [currentUser, selectedConversation]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -194,7 +209,10 @@ function MessagesContent() {
   const handleNewMessage = async (payload) => {
     const newMsg = payload.new;
     
-    // If message is in current conversation, add it
+    // Determine the other user in this message
+    const otherUserId = newMsg.from_user_id === currentUser.id ? newMsg.to_user_id : newMsg.from_user_id;
+    
+    // If message is in current conversation, add it immediately
     if (selectedConversation && 
         (newMsg.from_user_id === selectedConversation.id || newMsg.to_user_id === selectedConversation.id)) {
       const attachments = await getMessageAttachments(newMsg.id);
@@ -204,8 +222,8 @@ function MessagesContent() {
       }
     }
     
-    // Reload conversations to update list
-    loadConversations(currentUser.id);
+    // Update conversations list (reload to get latest data)
+    await loadConversations(currentUser.id);
   };
 
   const sendMessage = async () => {
