@@ -5,10 +5,11 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   ArrowLeft, Send, Search, User, MessageSquare, 
   Loader2, Check, CheckCheck, MoreVertical, Trash2,
-  Archive, Star
+  Archive, Star, Paperclip, X
 } from 'lucide-react';
 import GlobalSearch from '@/components/GlobalSearch';
 
+import { uploadMessageAttachment, getMessageAttachments } from '@/lib/message-uploads';
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -17,6 +18,7 @@ const supabase = createClient(
 function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +28,7 @@ function MessagesContent() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -140,7 +143,16 @@ function MessagesContent() {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Load attachments for each message
+      const messagesWithAttachments = await Promise.all(
+        (data || []).map(async (msg) => {
+          const attachments = await getMessageAttachments(msg.id);
+          return { ...msg, attachments };
+        })
+      );
+      
+      setMessages(messagesWithAttachments);
     } catch (error) {
       console.error('Error loading messages:', error);
     }
@@ -168,13 +180,14 @@ function MessagesContent() {
     }
   };
 
-  const handleNewMessage = (payload) => {
+  const handleNewMessage = async (payload) => {
     const newMsg = payload.new;
     
     // If message is in current conversation, add it
     if (selectedConversation && 
         (newMsg.from_user_id === selectedConversation.id || newMsg.to_user_id === selectedConversation.id)) {
-      setMessages(prev => [...prev, newMsg]);
+      const attachments = await getMessageAttachments(newMsg.id);
+      setMessages(prev => [...prev, { ...newMsg, attachments }]);
       if (newMsg.to_user_id === currentUser.id) {
         markAsRead(newMsg.from_user_id);
       }
@@ -202,7 +215,21 @@ function MessagesContent() {
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, data]);
+      // Upload file if selected
+      if (selectedFile) {
+        try {
+          await uploadMessageAttachment(selectedFile, data.id, currentUser.id);
+          setSelectedFile(null);
+          // Reload messages to show attachment immediately
+          await loadMessages(selectedConversation.id);
+        } catch (uploadError) {
+          console.error('File upload error:', uploadError);
+          alert('Message sent but file upload failed');
+        }
+      } else {
+        // Add message to state only if no file upload (reload already done above)
+        setMessages(prev => [...prev, data]);
+      }
       setNewMessage('');
       loadConversations(currentUser.id);
     } catch (error) {
@@ -401,6 +428,30 @@ function MessagesContent() {
                             }`}
                           >
                             <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                            {msg.attachments && msg.attachments.length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                {msg.attachments.map(att => (
+                                  att.file_type?.startsWith('image/') ? (
+                                    <img
+                                      key={att.id}
+                                      src={att.file_url}
+                                      alt={att.file_name}
+                                      className="rounded-lg max-w-xs"
+                                    />
+                                  ) : (
+                                    <a
+                                      key={att.id}
+                                      href={att.file_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm underline opacity-80 hover:opacity-100"
+                                    >
+                                      📎 {att.file_name}
+                                    </a>
+                                  )
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className={`flex items-center gap-1 mt-1 text-xs text-white/40 ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <span>{formatTime(msg.created_at)}</span>
