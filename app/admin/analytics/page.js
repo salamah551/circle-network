@@ -263,12 +263,12 @@ Total Messages,${metrics.totalMessages}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <Crown className="w-8 h-8 text-amber-400" />
-              <span className="text-xs text-zinc-400">{((metrics.foundingMembers / 1000) * 100).toFixed(1)}%</span>
+              <span className="text-xs text-zinc-400">{((metrics.foundingMembers / 500) * 100).toFixed(1)}%</span>
             </div>
             <div className="text-3xl font-bold text-white mb-1">{metrics.foundingMembers}</div>
             <div className="text-sm text-zinc-500">Founding Members</div>
             <div className="mt-2 text-xs text-zinc-400">
-              {1000 - metrics.foundingMembers} spots left
+              {500 - metrics.foundingMembers} spots left
             </div>
           </div>
 
@@ -448,8 +448,8 @@ Total Messages,${metrics.totalMessages}
                   <div>
                     <p className="text-amber-400 font-semibold mb-1">Founding Window Closing</p>
                     <p className="text-sm text-zinc-300">
-                      {1000 - metrics.foundingMembers} founding spots left - 
-                      {((metrics.foundingMembers / 1000) * 100).toFixed(1)}% capacity
+                      {500 - metrics.foundingMembers} founding spots left - 
+                      {((metrics.foundingMembers / 500) * 100).toFixed(1)}% capacity
                     </p>
                   </div>
                 </div>
