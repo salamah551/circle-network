@@ -86,7 +86,7 @@ export async function POST(request) {
                     <a href="${inviteUrl}" class="button">Accept Invitation</a>
                   </div>
 
-                  <p style="color: #666; font-size: 14px;">This invite expires soon. First 1,000 members only.</p>
+                  <p style="color: #666; font-size: 14px;">This invite expires soon. First 500 founding members only.</p>
                 </div>
                 <div class="footer">
                   <p>The Circle Network<br>
