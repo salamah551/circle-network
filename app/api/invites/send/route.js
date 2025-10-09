@@ -52,87 +52,67 @@ export async function POST(request) {
       );
     }
 
-    // Send invite email via SendGrid
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(email)}&code=${inviteCode}`;
-    
-    const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        personalizations: [{
-          to: [{ email: email }],
-          subject: `You're invited to join The Circle`
-        }],
-        from: {
-          email: 'invite@thecirclenetwork.org',
-          name: 'The Circle Network'
-        },
-        content: [{
-          type: 'text/html',
-          value: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { text-align: center; padding: 30px 0; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 10px; }
-                .button { display: inline-block; padding: 15px 30px; background: #F59E0B; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-                .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
-                .code { background: #fff; padding: 15px; border: 2px dashed #F59E0B; border-radius: 8px; font-family: monospace; font-size: 20px; text-align: center; margin: 20px 0; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <h1 style="color: #D4AF37;">The Circle</h1>
-                  <p style="color: #666;">You've Been Invited</p>
-                </div>
-                <div class="content">
-                  <p>Hi there,</p>
-                  <p><strong>${inviterProfile?.full_name || 'A founding member'}</strong> has invited you to join <strong>The Circle</strong> - an exclusive network of 1,000 ambitious founders.</p>
-                  
-                  <p><strong>What makes this special:</strong></p>
-                  <ul>
-                    <li>✅ Skip the vetting process</li>
-                    <li>✅ Lock in founding member rate: $199/mo forever</li>
-                    <li>✅ Connect with vetted, active founders</li>
-                    <li>✅ Get intros, advice, and partnerships that actually happen</li>
-                  </ul>
+    // Create a personal campaign for this invite (or reuse existing)
+    let { data: personalCampaign } = await supabaseAdmin
+      .from('bulk_invite_campaigns')
+      .select('id')
+      .eq('name', `Personal-${invitedBy}`)
+      .eq('created_by', invitedBy)
+      .single();
 
-                  <p><strong>Your exclusive invite code:</strong></p>
-                  <div class="code">${inviteCode}</div>
+    if (!personalCampaign) {
+      const { data: newCampaign, error: campaignError } = await supabaseAdmin
+        .from('bulk_invite_campaigns')
+        .insert({
+          name: `Personal-${invitedBy}`,
+          created_by: invitedBy,
+          persona: 'wildcard',
+          daily_limit: 100,
+          status: 'active'
+        })
+        .select()
+        .single();
 
-                  <div style="text-align: center;">
-                    <a href="${inviteUrl}" class="button">Accept Invitation</a>
-                  </div>
+      if (campaignError) {
+        console.error('Campaign creation error:', campaignError);
+        return NextResponse.json(
+          { error: 'Failed to create campaign', details: campaignError.message },
+          { status: 500 }
+        );
+      }
+      personalCampaign = newCampaign;
+    }
 
-                  <p style="color: #666; font-size: 14px;">This invite expires in 7 days. First 1,000 members only.</p>
-                </div>
-                <div class="footer">
-                  <p>The Circle Network<br>
-                  <a href="https://thecirclenetwork.org">thecirclenetwork.org</a></p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `
-        }]
-      })
-    });
+    // Add recipient to bulk invite system with 4-email drip sequence
+    const { error: recipientError } = await supabaseAdmin
+      .from('bulk_invite_recipients')
+      .insert({
+        campaign_id: personalCampaign.id,
+        email: email.toLowerCase(),
+        first_name: firstName || 'Member',
+        last_name: lastName || '',
+        name: `${firstName || 'Member'} ${lastName || ''}`.trim(),
+        invite_code: inviteCode,
+        persona: 'wildcard',
+        status: 'pending',
+        sequence_stage: 0,
+        next_email_scheduled: new Date().toISOString() // Send first email immediately
+      });
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error('SendGrid error:', errorData);
+    if (recipientError) {
+      console.error('Recipient creation error:', recipientError);
       return NextResponse.json(
-        { error: 'Failed to send invite email', details: errorData },
+        { error: 'Failed to add recipient to drip sequence', details: recipientError.message },
         { status: 500 }
       );
     }
+
+    // Trigger immediate send of first email via bulk system
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ campaignId: personalCampaign.id })
+    });
 
     return NextResponse.json({
       success: true,
