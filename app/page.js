@@ -380,7 +380,7 @@ export default function LandingPage() {
               Why Founding Members Win
             </h2>
             <p className="text-xl text-white/70">
-              Lock in exclusive benefits before we hit 1,000 members
+              Lock in exclusive benefits before we hit 500 founding members
             </p>
           </div>
 
@@ -466,7 +466,7 @@ export default function LandingPage() {
               
               <div className="text-center mb-6 pb-6 border-b border-white/10">
                 <div className="text-5xl font-bold text-white/60 mb-2">$249<span className="text-xl">/mo</span></div>
-                <div className="text-white/40">After First 1,000</div>
+                <div className="text-white/40">After First 500</div>
               </div>
 
               <div className="space-y-4">
@@ -673,7 +673,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
-                  <span><strong className="text-white">We're intentionally intimate.</strong> Hard capped at 1,000 members. Small enough that you actually get to know people. Big enough that someone always has the exact answer you need.</span>
+                  <span><strong className="text-white">We're intentionally intimate.</strong> Hard capped at 500 founding members. Small enough that you actually get to know people. Big enough that someone always has the exact answer you need.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
@@ -706,11 +706,11 @@ export default function LandingPage() {
               </p>
 
               <p className="text-white/80 text-lg leading-relaxed mb-6">
-                <strong className="text-emerald-400">The founding member window isn't marketing BS. It's real.</strong> First 1,000 members get $199/mo locked in forever. Member #1,001 pays $249/mo. No exceptions. No grandfather clauses if you leave and come back. No "special deals."
+                <strong className="text-emerald-400">The founding member window isn't marketing BS. It's real.</strong> First 500 founding members get $199/mo locked in forever. Member #501 pays $249/mo. No exceptions. No grandfather clauses if you leave and come back. No "special deals."
               </p>
 
               <p className="text-white/80 text-lg leading-relaxed mb-6">
-                I'm not creating artificial scarcity because I read a growth hacking blog. I genuinely want to keep The Circle small enough that it stays valuable. 1,000 committed founders who actually help each other beats 10,000 lurkers every single time.
+                I'm not creating artificial scarcity because I read a growth hacking blog. I genuinely want to keep The Circle small enough that it stays valuable. 500 committed founders who actually help each other beats 10,000 lurkers every single time.
               </p>
 
               <p className="text-white/80 text-lg leading-relaxed mb-6">
@@ -1052,7 +1052,7 @@ export default function LandingPage() {
               <ArrowRight className="w-5 h-5 group-open:rotate-90 transition-transform" />
             </summary>
             <p className="text-white/70 mt-4 leading-relaxed">
-              Hell no. LinkedIn is spray and pray. The Circle is curated, intimate, and active. Think of it as your founder group chat, but with 1,000 people who can actually help you. Real conversations. Real relationships. Real outcomes.
+              Hell no. LinkedIn is spray and pray. The Circle is curated, intimate, and active. Think of it as your founder group chat, but with 500 founding members who can actually help you. Real conversations. Real relationships. Real outcomes.
             </p>
           </details>
 
@@ -1356,11 +1356,11 @@ export default function LandingPage() {
                 <ul className="space-y-3 text-left text-white/70">
                   <li className="flex items-center gap-2">
                     <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    Only the first 1,000 members lock in $199/mo forever
+                    Only the first 500 founding members lock in $199/mo forever
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    Member #1,001 pays $249/mo (no exceptions)
+                    Member #501 pays $249/mo (no exceptions)
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-5 h-5 text-red-400 flex-shrink-0" />
