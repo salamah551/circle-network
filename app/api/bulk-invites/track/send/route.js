@@ -59,7 +59,7 @@ function getEmail1Template(recipient, trackingPixel, unsubscribeUrl) {
               </p>
 
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                <strong style="color: #ffffff;">The Circle</strong> is an exclusive network of <strong style="color: #F59E0B;">1,000 ambitious founders</strong> who are tired of:
+                <strong style="color: #ffffff;">The Circle</strong> is an exclusive network of <strong style="color: #F59E0B;">500 ambitious founders</strong> who are tired of:
               </p>
 
               <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #d1d5db; font-size: 16px; line-height: 1.8;">
@@ -113,7 +113,7 @@ function getEmail1Template(recipient, trackingPixel, unsubscribeUrl) {
                   Lock in <span style="color: #F59E0B;">$199/month forever</span>
                 </p>
                 <p style="margin: 0; font-size: 14px; color: #d1d5db; text-align: center;">
-                  First 1,000 members only • Regular price: $249/mo<br/>
+                  First 500 founding members only • Regular price: $249/mo<br/>
                   <strong style="color: #10b981;">Save $600/year for life</strong>
                 </p>
               </div>
@@ -155,7 +155,7 @@ function getEmail1Template(recipient, trackingPixel, unsubscribeUrl) {
             <td style="padding: 40px 0;">
               <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: bold; color: #ffffff;">Why This Matters</h2>
               <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #d1d5db;">
-                We're limiting The Circle to <strong style="color: #F59E0B;">1,000 founding members</strong> who lock in $199/mo forever.
+                We're limiting The Circle to <strong style="color: #F59E0B;">500 founding members</strong> who lock in $199/mo forever.
               </p>
               <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #d1d5db;">
                 After that? Regular members pay <strong>$249/mo</strong> with no price lock guarantee.
@@ -207,7 +207,7 @@ function getEmail2Template(recipient, trackingPixel, unsubscribeUrl) {
   const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(recipient.email)}&code=${recipient.invite_code}`;
   
   return {
-    subject: `${recipient.first_name}, 847 founders have already joined`,
+    subject: `${recipient.first_name}, 387 founders have already joined`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -242,11 +242,11 @@ function getEmail2Template(recipient, trackingPixel, unsubscribeUrl) {
               <p style="margin: 0 0 24px 0; font-size: 17px; color: #ffffff;">Hi ${recipient.first_name},</p>
               
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Quick update: <strong style="color: #F59E0B;">847 founders</strong> have already claimed their founding member spots in The Circle.
+                Quick update: <strong style="color: #F59E0B;">387 founders</strong> have already claimed their founding member spots in The Circle.
               </p>
 
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                That leaves <strong style="color: #10b981;">153 spots</strong> at the locked $199/mo rate.
+                That leaves <strong style="color: #10b981;">113 spots</strong> at the locked $199/mo rate.
               </p>
 
               <!-- Urgency Box -->
@@ -255,7 +255,7 @@ function getEmail2Template(recipient, trackingPixel, unsubscribeUrl) {
                   ⏰ The Math is Simple
                 </p>
                 <p style="margin: 0; font-size: 15px; color: #d1d5db; text-align: center; line-height: 1.6;">
-                  Once we hit 1,000 members, the rate jumps to $249/mo.<br/>
+                  Once we hit 500 founding members, the rate jumps to $249/mo.<br/>
                   That's <strong style="color: #ffffff;">$600/year more</strong> if you wait.
                 </p>
               </div>
@@ -373,7 +373,7 @@ function getEmail3Template(recipient, trackingPixel, unsubscribeUrl) {
               </p>
 
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                We're down to <strong style="color: #F59E0B;">less than 100 founding member spots</strong> at the locked $199/mo rate.
+                We're down to <strong style="color: #F59E0B;">less than 50 founding member spots</strong> at the locked $199/mo rate.
               </p>
 
               <!-- Urgency Box -->
@@ -382,7 +382,7 @@ function getEmail3Template(recipient, trackingPixel, unsubscribeUrl) {
                   $600/Year Savings
                 </p>
                 <p style="margin: 0 0 20px 0; font-size: 16px; color: #ffffff;">
-                  Once we hit 1,000 members, this offer disappears forever.
+                  Once we hit 500 founding members, this offer disappears forever.
                 </p>
                 <div style="background: rgba(0,0,0,0.5); border-radius: 8px; padding: 16px;">
                   <table width="100%" cellpadding="8" cellspacing="0" border="0" style="text-align: left;">
@@ -553,7 +553,7 @@ function getEmail4Template(recipient, trackingPixel, unsubscribeUrl) {
               <div style="background: #18181b; border-left: 3px solid #F59E0B; padding: 20px; margin-bottom: 32px; border-radius: 4px;">
                 <p style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600; color: #ffffff;">I'll be honest with you:</p>
                 <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.6;">
-                  The founding member rate ($199/mo) is gone once we hit 1,000 members. If you join later, you'll pay the regular rate of $249/mo. But that's okay—the value is still there, and you can decide when you're ready.
+                  The founding member rate ($199/mo) is gone once we hit 500 founding members. If you join later, you'll pay the regular rate of $249/mo. But that's okay—the value is still there, and you can decide when you're ready.
                 </p>
               </div>
 
