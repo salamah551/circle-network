@@ -715,40 +715,69 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Welcome back, {profile?.first_name || profile?.full_name?.split(' ')[0] || 'Member'}
-          </h1>
-          <p className="text-zinc-400">Here's what's happening in your network</p>
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-black font-bold text-xl">
+              {(profile?.first_name || profile?.full_name || 'M')[0].toUpperCase()}
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+                Welcome back, {profile?.first_name || profile?.full_name?.split(' ')[0] || 'Member'}
+              </h1>
+              <p className="text-zinc-500 mt-1">Here's what's happening in your network</p>
+            </div>
+          </div>
         </div>
 
         {/* Main Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <button
             onClick={() => router.push('/impact')}
-            className="bg-gradient-to-br from-emerald-500/10 to-amber-500/10 border border-emerald-500/20 rounded-2xl p-6 hover:from-emerald-500/20 hover:to-amber-500/20 transition-all text-left"
+            className="group relative bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-amber-500/10 border border-emerald-500/30 rounded-2xl p-6 hover:from-emerald-500/20 hover:via-teal-500/20 hover:to-amber-500/20 hover:border-emerald-400/50 transition-all duration-300 text-left overflow-hidden"
           >
-            <TrendingUp className="w-8 h-8 text-emerald-400 mb-3" />
-            <h3 className="text-lg font-bold text-white mb-2">Your Impact</h3>
-            <p className="text-white/60 text-sm">View your Circle Score</p>
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/0 to-amber-400/0 group-hover:from-emerald-400/10 group-hover:to-amber-400/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Your Impact</h3>
+              <p className="text-white/60 text-sm">View your Circle Score</p>
+            </div>
           </button>
 
           <button
             onClick={() => router.push('/members')}
-            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+            className="group relative bg-zinc-900/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800/50 hover:border-amber-500/50 transition-all duration-300 text-left overflow-hidden"
           >
-            <Users className="w-8 h-8 text-amber-400 mb-3" />
-            <h3 className="text-lg font-bold text-white mb-2">Members</h3>
-            <p className="text-white/60 text-sm">Browse the directory</p>
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/0 to-amber-600/0 group-hover:from-amber-400/10 group-hover:to-amber-600/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Members</h3>
+              <p className="text-white/60 text-sm">Browse the directory</p>
+            </div>
           </button>
 
           <button
             onClick={() => router.push('/messages')}
-            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all text-left"
+            className="group relative bg-zinc-900/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800/50 hover:border-purple-500/50 transition-all duration-300 text-left overflow-hidden"
           >
-            <MessageSquare className="w-8 h-8 text-purple-400 mb-3" />
-            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">Messages {stats.unreadMessages > 0 && <span className="px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full">{stats.unreadMessages}</span>}</h3>
-            <p className="text-white/60 text-sm">Chat with members</p>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-purple-600/0 group-hover:from-purple-400/10 group-hover:to-purple-600/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <MessageSquare className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                Messages 
+                {stats.unreadMessages > 0 && (
+                  <span className="px-2.5 py-0.5 bg-purple-500 text-white text-xs rounded-full animate-pulse">
+                    {stats.unreadMessages}
+                  </span>
+                )}
+              </h3>
+              <p className="text-white/60 text-sm">Chat with members</p>
+            </div>
           </button>
 
           {isFeatureAvailable('requests') ? (
@@ -785,44 +814,44 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="group bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-amber-500/50 rounded-xl p-6 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-amber-600/20 border border-amber-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-5 h-5 text-amber-400" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stats.totalMembers}</div>
+            <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent mb-1">{stats.totalMembers}</div>
             <div className="text-sm text-zinc-500">Active Members</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-center justify-center">
+          <div className="group bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 rounded-xl p-6 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <MessageSquare className="w-5 h-5 text-blue-400" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stats.unreadMessages}</div>
+            <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent mb-1">{stats.unreadMessages}</div>
             <div className="text-sm text-zinc-500">Unread Messages</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center">
+          <div className="group bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-green-500/50 rounded-xl p-6 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Target className="w-5 h-5 text-green-400" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stats.activeRequests}</div>
+            <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent mb-1">{stats.activeRequests}</div>
             <div className="text-sm text-zinc-500">Open Requests</div>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center">
+          <div className="group bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-purple-500/50 rounded-xl p-6 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Calendar className="w-5 h-5 text-purple-400" />
               </div>
             </div>
-            <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stats.upcomingEvents}</div>
+            <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent mb-1">{stats.upcomingEvents}</div>
             <div className="text-sm text-zinc-500">Upcoming Events</div>
           </div>
         </div>
