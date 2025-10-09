@@ -28,6 +28,9 @@ export default function BulkInvitesPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [dailyLimit, setDailyLimit] = useState(100);
   const [selectedPersona, setSelectedPersona] = useState('wildcard');
+  const [recipients, setRecipients] = useState([{ firstName: '', lastName: '', email: '' }]);
+  const [duplicates, setDuplicates] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     checkAdminAndLoad();
@@ -107,30 +110,72 @@ export default function BulkInvitesPage() {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const addRecipientRow = () => {
+    setRecipients([...recipients, { firstName: '', lastName: '', email: '' }]);
+  };
 
-    setCsvFile(file);
+  const removeRecipientRow = (index) => {
+    setRecipients(recipients.filter((_, i) => i !== index));
+  };
+
+  const updateRecipient = (index, field, value) => {
+    const updated = [...recipients];
+    updated[index][field] = value;
+    setRecipients(updated);
+  };
+
+  const checkDuplicates = async () => {
+    const emails = recipients.map(r => r.email.toLowerCase().trim()).filter(e => e);
+    
+    // Check for duplicates within the form
+    const emailCounts = {};
+    emails.forEach(email => {
+      emailCounts[email] = (emailCounts[email] || 0) + 1;
+    });
+    const formDuplicates = Object.keys(emailCounts).filter(email => emailCounts[email] > 1);
+
+    // Check against existing recipients in campaign
+    const { data: existing } = await supabase
+      .from('bulk_invite_recipients')
+      .select('email')
+      .eq('campaign_id', selectedCampaign.id)
+      .in('email', emails);
+
+    const existingEmails = existing?.map(r => r.email.toLowerCase()) || [];
+    
+    const allDuplicates = [...new Set([...formDuplicates, ...existingEmails])];
+    setDuplicates(allDuplicates);
+    
+    return allDuplicates.length === 0;
   };
 
   const uploadRecipients = async () => {
-    if (!csvFile || !selectedCampaign) return;
+    if (!selectedCampaign) return;
 
+    // Validate all fields are filled
+    const validRecipients = recipients.filter(r => 
+      r.firstName.trim() && r.lastName.trim() && r.email.trim()
+    );
+
+    if (validRecipients.length === 0) {
+      alert('Please fill in all fields for at least one recipient');
+      return;
+    }
+
+    setIsUploading(true);
     try {
-      setUploadProgress(10);
-      const text = await csvFile.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      
-      const recipients = lines.slice(1).map(line => {
-        const [firstName, lastName, email] = line.split(',').map(s => s.trim());
-        return { firstName, lastName, email };
-      });
+      // Check for duplicates
+      const noDuplicates = await checkDuplicates();
+      if (!noDuplicates) {
+        alert(`Duplicate emails found: ${duplicates.join(', ')}`);
+        setIsUploading(false);
+        return;
+      }
 
       setUploadProgress(30);
 
       const session = await supabase.auth.getSession();
-      const response = await fetch('/api/bulk-invites/upload', {
+      const response = await fetch('/api/bulk-invites/track/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +183,7 @@ export default function BulkInvitesPage() {
         },
         body: JSON.stringify({
           campaignId: selectedCampaign.id,
-          recipients
+          recipients: validRecipients
         })
       });
 
@@ -148,14 +193,16 @@ export default function BulkInvitesPage() {
 
       setUploadProgress(100);
       setShowUploadModal(false);
-      setCsvFile(null);
+      setRecipients([{ firstName: '', lastName: '', email: '' }]);
+      setDuplicates([]);
       await loadCampaigns();
-      alert(`Successfully uploaded ${recipients.length} recipients!`);
+      alert(`Successfully added ${validRecipients.length} recipients!`);
     } catch (error) {
       console.error('Error uploading:', error);
       alert('Failed to upload recipients');
     } finally {
       setUploadProgress(0);
+      setIsUploading(false);
     }
   };
 
@@ -234,19 +281,13 @@ export default function BulkInvitesPage() {
             <div>
               <h3 className="font-bold text-blue-400 mb-2">How Bulk Invites Work</h3>
               <ul className="text-sm text-zinc-300 space-y-1">
-                <li>• Upload CSV with First Name, Last Name, Email</li>
+                <li>• Add recipients with inline form (First Name, Last Name, Email)</li>
+                <li>• Automatic duplicate checking against existing recipients</li>
                 <li>• System sends max 100 emails/day (SendGrid limit)</li>
                 <li>• 4-email sequence: Day 0, Day 3, Day 7, Day 14</li>
                 <li>• Auto-stops if recipient converts or unsubscribes</li>
                 <li>• Full tracking: opens, clicks, conversions</li>
               </ul>
-              <button
-                onClick={downloadCSVTemplate}
-                className="mt-3 flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                Download CSV Template
-              </button>
             </div>
           </div>
         </div>
@@ -301,8 +342,8 @@ export default function BulkInvitesPage() {
                         }}
                         className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-lg transition-colors flex items-center gap-2"
                       >
-                        <Upload className="w-4 h-4" />
-                        Upload Recipients
+                        <Plus className="w-4 h-4" />
+                        Add Recipients
                       </button>
                     )}
                     <button
@@ -435,29 +476,84 @@ export default function BulkInvitesPage() {
 
       {showUploadModal && selectedCampaign && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-8">
-            <h3 className="text-2xl font-bold text-white mb-2">Upload Recipients</h3>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8">
+            <h3 className="text-2xl font-bold text-white mb-2">Add Recipients</h3>
             <p className="text-zinc-400 text-sm mb-6">Campaign: {selectedCampaign.name}</p>
             
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                Upload CSV File
-              </label>
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-500 file:text-black file:font-medium hover:file:bg-amber-600 file:cursor-pointer"
-              />
-              <p className="text-xs text-zinc-500 mt-2">
-                CSV format: First Name, Last Name, Email
-              </p>
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-3 text-xs font-medium text-zinc-400 px-3">
+                <div className="flex-1">First Name</div>
+                <div className="flex-1">Last Name</div>
+                <div className="flex-1">Email</div>
+                <div className="w-10"></div>
+              </div>
+
+              {recipients.map((recipient, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={recipient.firstName}
+                    onChange={(e) => updateRecipient(index, 'firstName', e.target.value)}
+                    placeholder="John"
+                    className={`flex-1 px-3 py-2 bg-zinc-800 border ${
+                      duplicates.includes(recipient.email.toLowerCase().trim()) 
+                        ? 'border-red-500' 
+                        : 'border-zinc-700'
+                    } rounded-lg text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                  />
+                  <input
+                    type="text"
+                    value={recipient.lastName}
+                    onChange={(e) => updateRecipient(index, 'lastName', e.target.value)}
+                    placeholder="Doe"
+                    className={`flex-1 px-3 py-2 bg-zinc-800 border ${
+                      duplicates.includes(recipient.email.toLowerCase().trim()) 
+                        ? 'border-red-500' 
+                        : 'border-zinc-700'
+                    } rounded-lg text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                  />
+                  <input
+                    type="email"
+                    value={recipient.email}
+                    onChange={(e) => updateRecipient(index, 'email', e.target.value)}
+                    placeholder="john@example.com"
+                    className={`flex-1 px-3 py-2 bg-zinc-800 border ${
+                      duplicates.includes(recipient.email.toLowerCase().trim()) 
+                        ? 'border-red-500' 
+                        : 'border-zinc-700'
+                    } rounded-lg text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                  />
+                  <button
+                    onClick={() => removeRecipientRow(index)}
+                    disabled={recipients.length === 1}
+                    className="w-10 h-10 flex items-center justify-center text-red-400 hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={addRecipientRow}
+                className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Another Recipient
+              </button>
             </div>
+
+            {duplicates.length > 0 && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-sm text-red-400">
+                  <strong>Duplicate emails found:</strong> {duplicates.join(', ')}
+                </p>
+              </div>
+            )}
 
             {uploadProgress > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-zinc-400">Uploading...</span>
+                  <span className="text-zinc-400">Adding recipients...</span>
                   <span className="text-amber-400 font-medium">{uploadProgress}%</span>
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
@@ -473,7 +569,8 @@ export default function BulkInvitesPage() {
               <button
                 onClick={() => {
                   setShowUploadModal(false);
-                  setCsvFile(null);
+                  setRecipients([{ firstName: '', lastName: '', email: '' }]);
+                  setDuplicates([]);
                   setUploadProgress(0);
                 }}
                 className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors"
@@ -482,11 +579,20 @@ export default function BulkInvitesPage() {
               </button>
               <button
                 onClick={uploadRecipients}
-                disabled={!csvFile || uploadProgress > 0}
+                disabled={isUploading || uploadProgress > 0}
                 className="flex-1 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <Upload className="w-5 h-5" />
-                Upload
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Add Recipients
+                  </>
+                )}
               </button>
             </div>
           </div>
