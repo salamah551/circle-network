@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
 import { generateEmail, getNextEmailDelay } from '@/lib/sendgrid-templates';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
