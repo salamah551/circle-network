@@ -204,25 +204,22 @@ export default function RequestsPage() {
 
       if (error) throw error;
 
-      // Send email notification to request owner
+      // Send email notification to request owner (fire-and-forget)
       if (selectedRequest.user_id !== currentUser.id) {
-        try {
-          await fetch('/api/notifications/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'request_reply',
-              recipientId: selectedRequest.user_id,
-              data: {
-                replierName: currentUserProfile?.full_name || 'A member',
-                requestTitle: selectedRequest.title,
-                reply: replyContent
-              }
-            })
-          });
-        } catch (emailError) {
+        fetch('/api/notifications/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'request_reply',
+            recipientEmail: selectedRequest.profile?.email,
+            recipientName: selectedRequest.profile?.full_name,
+            senderName: currentUserProfile?.full_name || 'A member',
+            requestTitle: selectedRequest.title,
+            replyPreview: replyContent
+          })
+        }).catch(emailError => {
           console.error('Email notification failed:', emailError);
-        }
+        });
       }
 
       setReplyContent('');
