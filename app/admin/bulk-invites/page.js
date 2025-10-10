@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   ArrowLeft, Upload, Send, Users, Mail, 
   TrendingUp, Clock, Loader2, Plus, Eye,
-  Download, AlertCircle, CheckCircle
+  Download, AlertCircle, CheckCircle, X
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -114,6 +114,18 @@ export default function BulkInvitesPage() {
     setRecipients([...recipients, { firstName: '', lastName: '', email: '' }]);
   };
 
+  const addMultipleRows = (count) => {
+    const newRows = Array(count).fill(null).map(() => ({ firstName: '', lastName: '', email: '' }));
+    setRecipients([...recipients, ...newRows]);
+  };
+
+  const clearAllRows = () => {
+    if (confirm('Clear all recipients? This cannot be undone.')) {
+      setRecipients([{ firstName: '', lastName: '', email: '' }]);
+      setDuplicates([]);
+    }
+  };
+
   const removeRecipientRow = (index) => {
     setRecipients(recipients.filter((_, i) => i !== index));
   };
@@ -146,7 +158,7 @@ export default function BulkInvitesPage() {
     const allDuplicates = [...new Set([...formDuplicates, ...existingEmails])];
     setDuplicates(allDuplicates);
     
-    return allDuplicates.length === 0;
+    return allDuplicates; // Return array instead of boolean
   };
 
   const uploadRecipients = async () => {
@@ -165,9 +177,9 @@ export default function BulkInvitesPage() {
     setIsUploading(true);
     try {
       // Check for duplicates
-      const noDuplicates = await checkDuplicates();
-      if (!noDuplicates) {
-        alert(`Duplicate emails found: ${duplicates.join(', ')}`);
+      const foundDuplicates = await checkDuplicates();
+      if (foundDuplicates.length > 0) {
+        alert(`Duplicate emails found: ${foundDuplicates.join(', ')}`);
         setIsUploading(false);
         return;
       }
@@ -466,12 +478,49 @@ export default function BulkInvitesPage() {
 
       {showUploadModal && selectedCampaign && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <h3 className="text-2xl font-bold text-white mb-2">Add Recipients</h3>
-            <p className="text-zinc-400 text-sm mb-6">Campaign: {selectedCampaign.name}</p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-1">Add Recipients</h3>
+                <p className="text-zinc-400 text-sm">Campaign: {selectedCampaign.name}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-amber-400">{recipients.length}</div>
+                <div className="text-xs text-zinc-500">Recipients</div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-6 p-4 bg-zinc-800/50 rounded-lg">
+              <span className="text-sm text-zinc-400 mr-2">Quick Add:</span>
+              <button
+                onClick={() => addMultipleRows(10)}
+                className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded-md transition-colors"
+              >
+                +10 Rows
+              </button>
+              <button
+                onClick={() => addMultipleRows(25)}
+                className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded-md transition-colors"
+              >
+                +25 Rows
+              </button>
+              <button
+                onClick={() => addMultipleRows(50)}
+                className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded-md transition-colors"
+              >
+                +50 Rows
+              </button>
+              <button
+                onClick={clearAllRows}
+                className="ml-auto px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm rounded-md transition-colors"
+              >
+                Clear All
+              </button>
+            </div>
             
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center gap-3 text-xs font-medium text-zinc-400 px-3">
+            <div className="space-y-2 mb-6 max-h-[400px] overflow-y-auto pr-2">
+              <div className="flex items-center gap-3 text-xs font-medium text-zinc-400 px-3 pb-2 sticky top-0 bg-zinc-900 z-10">
+                <div className="w-8 text-center">#</div>
                 <div className="flex-1">First Name</div>
                 <div className="flex-1">Last Name</div>
                 <div className="flex-1">Email</div>
@@ -480,6 +529,7 @@ export default function BulkInvitesPage() {
 
               {recipients.map((recipient, index) => (
                 <div key={index} className="flex items-center gap-3">
+                  <div className="w-8 text-center text-zinc-500 text-sm">{index + 1}</div>
                   <input
                     type="text"
                     value={recipient.firstName}
@@ -518,7 +568,7 @@ export default function BulkInvitesPage() {
                     disabled={recipients.length === 1}
                     className="w-10 h-10 flex items-center justify-center text-red-400 hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
-                    <XCircle className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               ))}
