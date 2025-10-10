@@ -230,16 +230,6 @@ export default function BulkInvitesPage() {
     }
   };
 
-  const downloadCSVTemplate = () => {
-    const csv = 'First Name,Last Name,Email\nJohn,Doe,john@example.com\nJane,Smith,jane@example.com';
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bulk_invite_template.csv';
-    a.click();
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
