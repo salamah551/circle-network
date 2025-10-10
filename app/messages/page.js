@@ -244,6 +244,21 @@ function MessagesContent() {
 
       if (error) throw error;
 
+      // Send email notification to recipient (fire-and-forget)
+      fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'new_message',
+          recipientEmail: data.to_user.email,
+          recipientName: data.to_user.full_name,
+          senderName: data.from_user.full_name,
+          messagePreview: data.content
+        })
+      }).catch(emailError => {
+        console.error('Failed to send email notification:', emailError);
+      });
+
       // Upload file if selected
       if (selectedFile) {
         try {
