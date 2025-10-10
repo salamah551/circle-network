@@ -3,64 +3,98 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 
-export async function POST(request) {
+export async function GET(request) {
   // Initialize at runtime
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
   try {
-    const { campaignId, recipients } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const recipientId = searchParams.get('rid');
+    const eventType = searchParams.get('type');
 
-    if (!campaignId || !recipients || recipients.length === 0) {
-      return NextResponse.json(
-        { error: 'Campaign ID and recipients required' },
-        { status: 400 }
+    if (!recipientId || !eventType) {
+      // Return 1x1 transparent pixel even on error
+      return new NextResponse(
+        Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64'),
+        {
+          headers: {
+            'Content-Type': 'image/gif',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        }
       );
     }
 
-    // Generate unique invite codes and prepare recipients
-    const recipientsToInsert = recipients.map(r => ({
-      campaign_id: campaignId,
-      first_name: r.firstName,
-      last_name: r.lastName,
-      email: r.email.toLowerCase(),
-      invite_code: `FOUNDING-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      status: 'pending',
-      sequence_stage: 0,
-      next_email_scheduled: new Date()
-    }));
-
-    // Insert recipients
-    const { data, error } = await supabaseAdmin
-      .from('bulk_invite_recipients')
-      .insert(recipientsToInsert)
-      .select();
-
-    if (error) {
-      console.error('Insert error:', error);
-      return NextResponse.json(
-        { error: 'Failed to upload recipients' },
-        { status: 500 }
-      );
-    }
-
-    // Update campaign total
+    // Record tracking event
     await supabaseAdmin
-      .from('bulk_invite_campaigns')
-      .update({ total_recipients: recipientsToInsert.length })
-      .eq('id', campaignId);
+      .from('email_tracking')
+      .insert({
+        recipient_id: recipientId,
+        event_type: eventType,
+        event_data: { user_agent: request.headers.get('user-agent') }
+      });
 
-    return NextResponse.json({ 
-      success: true, 
-      count: recipientsToInsert.length 
-    });
+    // Update recipient status
+    if (eventType === 'open') {
+      await supabaseAdmin
+        .from('bulk_invite_recipients')
+        .update({ 
+          status: 'opened',
+          opened_at: new Date().toISOString()
+        })
+        .eq('id', recipientId)
+        .is('opened_at', null);
+
+      // Update campaign stats
+      const { data: recipient } = await supabaseAdmin
+        .from('bulk_invite_recipients')
+        .select('campaign_id')
+        .eq('id', recipientId)
+        .single();
+
+      if (recipient) {
+        await supabaseAdmin.rpc('increment_campaign_opens', {
+          campaign_id: recipient.campaign_id
+        });
+      }
+    } else if (eventType === 'click') {
+      await supabaseAdmin
+        .from('bulk_invite_recipients')
+        .update({ 
+          status: 'clicked',
+          clicked_at: new Date().toISOString()
+        })
+        .eq('id', recipientId);
+    }
+
+    // Return 1x1 transparent pixel
+    return new NextResponse(
+      Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64'),
+      {
+        headers: {
+          'Content-Type': 'image/gif',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }
+    );
 
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    console.error('Tracking error:', error);
+    // Still return pixel on error
+    return new NextResponse(
+      Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64'),
+      {
+        headers: {
+          'Content-Type': 'image/gif'
+        }
+      }
     );
   }
+
 }
