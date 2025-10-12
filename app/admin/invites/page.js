@@ -1,204 +1,164 @@
 'use client';
-export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import { Download, Upload, Plus, Search, Users, Loader2, Filter, Send, FileDown } from 'lucide-react';
-
+import { Download, Upload, RefreshCw, Archive } from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export default function AdminInvitesPage() {
-  const searchParams = useSearchParams();
-  const defaultCampaignId = searchParams.get('campaignId') || null;
-
-  const [campaigns, setCampaigns] = useState([]);
-  const [campaignId, setCampaignId] = useState(defaultCampaignId);
+export default function InvitesAdminPage() {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState('');
-
-  // Manual add form
-  const [form, setForm] = useState({
-    full_name: '',
-    email: '',
-    company: '',
-    title: '',
-    notes: '',
-    code: ''
-  });
-  const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
 
   useEffect(() => {
-    loadCampaigns();
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        // Load latest invites; adjust table name if your schema differs.
+        const { data, error } = await supabase
+          .from('bulk_invites')
+          .select('id, full_name, email, company, title, status, campaign_id, created_at')
+          .order('created_at', { ascending: false })
+          .limit(500);
+        if (error) throw error;
+        if (mounted) setInvites(data || []);
+      } catch (e) {
+        if (mounted) setErr(e.message || 'Failed to load invites.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (campaignId) loadInvites(campaignId);
-  }, [campaignId]);
-
-  const loadCampaigns = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('bulk_invite_campaigns')
-      .select('id,name,created_at')
-      .order('created_at', { ascending: false });
-    if (!error) setCampaigns(data || []);
-    if (!defaultCampaignId && data && data.length) setCampaignId(data[0].id);
-    setLoading(false);
-  };
-
-  const loadInvites = async (cid) => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('bulk_invites')
-      .select('id,full_name,email,code,meta,created_at,status,company,title')
-      .eq('campaign_id', cid)
-      .order('created_at', { ascending: false });
-    if (!error) setInvites(data || []);
-    setLoading(false);
-  };
-
-  const onDownloadTemplate = () => {
-    window.location.href = '/api/bulk-invites/template';
-  };
-
-  const onExportCampaign = () => {
-    if (!campaignId) return;
-    window.location.href = '/api/bulk-invites/export?campaignId=' + campaignId;
-  };
-
-  const onAddInvite = async (e) => {
-    e.preventDefault();
-    if (!campaignId) return;
-    if (!form.email?.trim()) return;
-    setSubmitting(true);
-
-    // Dedupe within campaign (client-side sanity)
-    const exists = invites.some(v => v.email?.toLowerCase() === form.email.trim().toLowerCase());
-    if (exists) {
-      alert('This email already exists in the selected campaign.');
-      setSubmitting(false);
-      return;
+  async function act(url) {
+    setMsg('');
+    setErr('');
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'Request failed');
+      setMsg('Action completed.');
+    } catch (e) {
+      setErr(e.message || 'Request failed.');
     }
-
-    const payload = {
-      campaign_id: campaignId,
-      full_name: form.full_name || null,
-      email: form.email.trim(),
-      code: form.code || null,
-      company: form.company || null,
-      title: form.title || null,
-      meta: { notes: form.notes || '' }
-    };
-
-    const { error } = await supabase.from('bulk_invites').insert(payload);
-    if (error) {
-      alert(error.message);
-    } else {
-      setForm({ full_name:'', email:'', company:'', title:'', notes:'', code:'' });
-      await loadInvites(campaignId);
-    }
-    setSubmitting(false);
-  };
-
-  const filtered = invites.filter(v => {
-    const s = (q || '').toLowerCase();
-    if (!s) return true;
-    return [v.full_name, v.email, v.company, v.title, v.code, v.status].filter(Boolean).join(' ').toLowerCase().includes(s);
-  });
+  }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <Users className="w-5 h-5 text-amber-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-white">Invites</h1>
-            <p className="text-white/60 text-sm">View, add, and export invites per campaign.</p>
-          </div>
+    <div className="p-6 text-white">
+      <h1 className="text-2xl font-semibold mb-2">Bulk Invites</h1>
+      <p className="text-white/60 mb-6">
+        Download the CSV template, fill it, and upload. You can also resend or archive individual invites.
+      </p>
+
+      {msg && (
+        <div className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-emerald-200">
+          {msg}
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={onDownloadTemplate} className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-sm border border-white/10 flex items-center gap-2">
-            <FileDown className="w-4 h-4" /> CSV Template
-          </button>
-          <button onClick={onExportCampaign} className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-sm border border-white/10 flex items-center gap-2">
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
+      )}
+      {err && (
+        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-red-200">
+          {err}
         </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <a
+          href="/api/bulk-invites/template"
+          className="px-3 py-2 rounded-lg bg-zinc-800 border border-white/10 inline-flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Download CSV Template
+        </a>
+
+        <form
+          action="/api/bulk-invites/upload"
+          method="post"
+          encType="multipart/form-data"
+          className="inline-flex items-center gap-2"
+        >
+          <input type="file" name="file" accept=".csv" className="text-sm" required />
+          <button
+            className="px-3 py-2 rounded-lg bg-amber-500 text-black inline-flex items-center gap-2"
+            type="submit"
+          >
+            <Upload className="w-4 h-4" />
+            Upload CSV
+          </button>
+        </form>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-3">
-            <select value={campaignId || ''} onChange={e => setCampaignId(e.target.value)} className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90 w-72">
-              <option value="">Select Campaign</option>
-              {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 text-white/40 absolute left-3 top-3" />
-              <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search invites…" className="w-full bg-zinc-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-white/90" />
-            </div>
-          </div>
+      {/* Table */}
+      <div className="rounded-2xl border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-zinc-900/60">
+            <tr>
+              <th className="text-left p-3">Name</th>
+              <th className="text-left p-3">Email</th>
+              <th className="text-left p-3">Company</th>
+              <th className="text-left p-3">Title</th>
+              <th className="text-left p-3">Status</th>
+              <th className="text-left p-3">Campaign</th>
+              <th className="text-left p-3">Sent</th>
+              <th className="text-left p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr>
+                <td className="p-4 text-white/60" colSpan={8}>Loading…</td>
+              </tr>
+            )}
 
-          <div className="rounded-xl border border-white/10 bg-zinc-950 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-900/60">
-                <tr className="text-left text-white/60">
-                  <th className="px-3 py-2">Name</th>
-                  <th className="px-3 py-2">Email</th>
-                  <th className="px-3 py-2">Company</th>
-                  <th className="px-3 py-2">Title</th>
-                  <th className="px-3 py-2">Code</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className=\"px-3 py-2\">Created</th><th className=\"px-3 py-2\">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(v => (
-                  <tr key={v.id} className="border-t border-white/5">
-                    <td className="px-3 py-2">{v.full_name || '-'}</td>
-                    <td className="px-3 py-2">{v.email}</td>
-                    <td className="px-3 py-2">{v.company || '-'}</td>
-                    <td className="px-3 py-2">{v.title || '-'}</td>
-                    <td className="px-3 py-2">{v.code || '-'}</td>
-                    <td className="px-3 py-2">{v.status}</td>
-                    <td className="px-3 py-2">{new Date(v.created_at).toLocaleString()}</td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr><td colSpan="7" className="px-3 py-6 text-center text-white/50">No invites found.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            {!loading && invites.length === 0 && (
+              <tr>
+                <td className="p-4 text-white/60" colSpan={8}>No invites yet.</td>
+              </tr>
+            )}
 
-        <div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-4">
-            <h3 className="text-white font-semibold mb-2 flex items-center gap-2"><Plus className="w-4 h-4" /> Add Single Invite</h3>
-            <form onSubmit={onAddInvite} className="space-y-2">
-              <input value={form.full_name} onChange={e=>setForm({...form, full_name:e.target.value})} placeholder="Full name" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90" />
-              <input required value={form.email} onChange={e=>setForm({...form, email:e.target.value})} placeholder="Email *" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90" />
-              <input value={form.company} onChange={e=>setForm({...form, company:e.target.value})} placeholder="Company" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90" />
-              <input value={form.title} onChange={e=>setForm({...form, title:e.target.value})} placeholder="Title" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90" />
-              <input value={form.code} onChange={e=>setForm({...form, code:e.target.value})} placeholder="Invite code (optional)" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90" />
-              <textarea value={form.notes} onChange={e=>setForm({...form, notes:e.target.value})} placeholder="Notes" className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 text-white/90 min-h-[80px]" />
-              <button disabled={!campaignId || submitting} className="w-full px-3 py-2 rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 disabled:opacity-50">
-                {submitting ? 'Adding…' : 'Add to Campaign'}
-              </button>
-            </form>
-            <div className="mt-4 text-xs text-white/50">
-              Tip: You can <a href="/api/bulk-invites/template" className="underline">download the CSV template</a>, fill it, then upload from Bulk Invites.
-            </div>
-          </div>
-        </div>
+            {invites.map((inv) => (
+              <tr key={inv.id} className="border-t border-white/10">
+                <td className="p-3">{inv.full_name || '-'}</td>
+                <td className="p-3">{inv.email}</td>
+                <td className="p-3">{inv.company || '-'}</td>
+                <td className="p-3">{inv.title || '-'}</td>
+                <td className="p-3">{inv.status || '-'}</td>
+                <td className="p-3">{inv.campaign_id ? String(inv.campaign_id).slice(0, 8) : '-'}</td>
+                <td className="p-3">
+                  {inv.created_at ? new Date(inv.created_at).toLocaleDateString() : '-'}
+                </td>
+                <td className="p-3">
+                  <button
+                    onClick={() => act(`/api/bulk-invites/resend?id=${encodeURIComponent(inv.id)}`)}
+                    className="px-2 py-1 rounded bg-zinc-800 border border-white/10 mr-2 inline-flex items-center gap-1"
+                    title="Resend"
+                    type="button"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Resend
+                  </button>
+
+                  <button
+                    onClick={() => act(`/api/bulk-invites/archive?id=${encodeURIComponent(inv.id)}`)}
+                    className="px-2 py-1 rounded bg-zinc-800 border border-white/10 inline-flex items-center gap-1"
+                    title="Archive"
+                    type="button"
+                  >
+                    <Archive className="w-3 h-3" />
+                    Archive
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
