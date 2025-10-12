@@ -50,7 +50,6 @@ export default function AdminDashboard() {
           return;
         }
 
-        // Verify admin
         const { data: profile, error: profErr } = await supabase
           .from('profiles')
           .select('is_admin, email')
@@ -74,9 +73,7 @@ export default function AdminDashboard() {
         if (mounted) setIsLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [router]);
 
   async function loadStats() {
@@ -257,4 +254,97 @@ export default function AdminDashboard() {
             onClick={() => router.push('/admin/members')}
             className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
           >
-            <Users class
+            <Users className="w-8 h-8 text-blue-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              Manage Members
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">View and manage all members</p>
+            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/invites')}
+            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
+          >
+            <Mail className="w-8 h-8 text-amber-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              Invites
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">Create and track invites</p>
+            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/bulk-invites')}
+            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
+          >
+            <Upload className="w-8 h-8 text-purple-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              Bulk Invites
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">CSV upload & email campaigns</p>
+            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/applications')}
+            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
+          >
+            <UserCheck className="w-8 h-8 text-emerald-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              Applications
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">Review pending applications</p>
+            {/* Optional badge if you want a count visible here */}
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/analytics')}
+            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
+          >
+            <TrendingUp className="w-8 h-8 text-purple-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              Analytics
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">View detailed analytics</p>
+            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+          </button>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-6">Recent Member Activity</h2>
+          <div className="space-y-4">
+            {recentActivity.map((activity, idx) => (
+              <div
+                key={`${activity.full_name || 'member'}-${idx}`}
+                className="flex items-center justify-between py-3 border-b border-zinc-800 last:border-0"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {activity.full_name?.charAt(0) || 'M'}
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">{activity.full_name}</p>
+                    <p className="text-zinc-500 text-sm">
+                      {new Date(activity.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    activity.status === 'active'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-amber-500/20 text-amber-400'
+                  }`}
+                >
+                  {activity.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
