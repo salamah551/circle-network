@@ -1,34 +1,23 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Calendar, Lock, Rocket } from 'lucide-react';
-import { getCurrentLaunchPhase, getLaunchMessage, LAUNCH_CONFIG } from '@/lib/launch-config';
+import { Calendar, Rocket } from 'lucide-react';
+import { isLaunched, msUntilLaunch, LAUNCH_DATE } from '@/lib/launch-config';
 
 export default function PreLaunchBanner() {
-  const [phase, setPhase] = useState(null);
-  const [message, setMessage] = useState(null);
   const [countdown, setCountdown] = useState('');
-
-  useEffect(() => {
-    const updatePhase = () => {
-      const currentPhase = getCurrentLaunchPhase();
-      setPhase(currentPhase);
-      setMessage(getLaunchMessage());
-    };
-
-    updatePhase();
-    const interval = setInterval(updatePhase, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
+  const [launched, setLaunched] = useState(true);
 
   useEffect(() => {
     const updateCountdown = () => {
-      const now = Date.now();
-      const targetDate = phase === LAUNCH_CONFIG.PHASE.PRE_INVITE 
-        ? LAUNCH_CONFIG.INVITE_START_DATE 
-        : LAUNCH_CONFIG.FULL_LAUNCH_DATE;
-      
-      const diff = targetDate - now;
+      const isNowLaunched = isLaunched();
+      setLaunched(isNowLaunched);
+
+      if (isNowLaunched) {
+        setCountdown('');
+        return;
+      }
+
+      const diff = msUntilLaunch();
       
       if (diff <= 0) {
         setCountdown('');
@@ -48,24 +37,22 @@ export default function PreLaunchBanner() {
       }
     };
 
-    if (phase && phase !== LAUNCH_CONFIG.PHASE.FULL_LAUNCH) {
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [phase]);
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000); // Update every minute
 
-  if (!phase || !message || phase === LAUNCH_CONFIG.PHASE.FULL_LAUNCH) {
+    return () => clearInterval(interval);
+  }, []);
+
+  // Don't show banner if launched
+  if (launched) {
     return null;
   }
 
-  const getIcon = () => {
-    if (phase === LAUNCH_CONFIG.PHASE.PRE_INVITE) return Calendar;
-    if (phase === LAUNCH_CONFIG.PHASE.INVITE_ONLY) return Lock;
-    return Rocket;
-  };
-
-  const Icon = getIcon();
+  const launchDateFormatted = LAUNCH_DATE.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
 
   return (
     <div className="bg-gradient-to-r from-emerald-500/10 via-amber-500/10 to-emerald-500/10 border-b border-emerald-500/20">
@@ -73,11 +60,11 @@ export default function PreLaunchBanner() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-amber-500 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-white" />
+              <Rocket className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="font-bold text-white">{message.title}</div>
-              <div className="text-sm text-zinc-400">{message.subtitle}</div>
+              <div className="font-bold text-white">Platform Preview - Full Launch Coming Soon</div>
+              <div className="text-sm text-zinc-400">All features unlock on {launchDateFormatted}</div>
             </div>
           </div>
           {countdown && (
