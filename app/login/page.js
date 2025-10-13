@@ -1,12 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase-client';
+import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
 import { ArrowRight, Loader2, Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = getSupabaseClient();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -14,7 +13,6 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
     checkExistingSession();
   }, []);
 
@@ -23,14 +21,12 @@ export default function LoginPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // User is already logged in, check if admin
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', session.user.id)
           .single();
         
-        // Redirect based on role
         if (profile?.is_admin) {
           router.push('/admin');
         } else {
@@ -69,7 +65,6 @@ export default function LoginPage() {
     }
   };
 
-  // Show loading while checking auth
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
