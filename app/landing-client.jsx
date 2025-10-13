@@ -48,6 +48,39 @@ export default function LandingClient() {
 
   return (
     <main className="min-h-screen bg-black text-white">
+      {/* ===== NAVIGATION ===== */}
+      <nav className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-black" />
+              </div>
+              <span className="text-xl font-bold group-hover:text-amber-400 transition-colors">
+                Circle Network
+              </span>
+            </Link>
+
+            {/* Right side buttons */}
+            <div className="flex items-center gap-3">
+              <Link 
+                href="/login"
+                className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all"
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/apply"
+                className="text-sm bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition-all"
+              >
+                Apply Now
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
@@ -308,38 +341,7 @@ export default function LandingClient() {
         </div>
       </section>
 
-      {/* ===== EARLY TRACTION / SOCIAL PROOF ===== */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold">Who's already inside</h2>
-          <p className="text-white/60 mt-3 text-lg">
-            Founding members span tech, finance, real estate, and healthcare
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-4 gap-6">
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6 text-center hover:border-amber-500/30 transition-all">
-            <div className="text-4xl font-bold text-amber-400">$2.1B+</div>
-            <div className="text-sm text-white/60 mt-2">Combined portfolio value</div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6 text-center hover:border-amber-500/30 transition-all">
-            <div className="text-4xl font-bold text-amber-400">{membersJoined}</div>
-            <div className="text-sm text-white/60 mt-2">Founding members</div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6 text-center hover:border-amber-500/30 transition-all">
-            <div className="text-4xl font-bold text-amber-400">12</div>
-            <div className="text-sm text-white/60 mt-2">Industries represented</div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6 text-center hover:border-amber-500/30 transition-all">
-            <div className="text-4xl font-bold text-amber-400">94%</div>
-            <div className="text-sm text-white/60 mt-2">Member satisfaction</div>
-          </div>
-        </div>
-        
-        <p className="text-xs text-white/40 text-center mt-6">
-          *Metrics from pre-launch beta cohort (August-October 2025)
-        </p>
-      </section>
+
 
       {/* ===== WHO WE INVITE ===== */}
       <section className="max-w-6xl mx-auto px-6 py-20">
