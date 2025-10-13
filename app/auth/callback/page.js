@@ -1,17 +1,13 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase-client';
 import { Loader2 } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export default function AuthCallback() {
   const router = useRouter();
   const hasRun = useRef(false);
+  const supabase = getSupabaseClient();
 
   useEffect(() => {
     // Prevent double execution
@@ -41,7 +37,7 @@ export default function AuthCallback() {
     };
 
     handleCallback();
-  }, [router]);
+  }, [router, supabase]);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
