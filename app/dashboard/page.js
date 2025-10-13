@@ -12,7 +12,7 @@ import {
 import { getRecommendations } from '@/lib/recommendations';
 import PreLaunchBanner from '@/components/PreLaunchBanner';
 import FeatureLockedCard from '@/components/FeatureLockedCard';
-import { isFeatureAvailable } from '@/lib/launch-config';
+import { isFeatureAvailable } from '@/lib/feature-flags';
 import GlobalSearch from '@/components/GlobalSearch';
 import OnboardingCarousel from '@/components/OnboardingCarousel';
 
