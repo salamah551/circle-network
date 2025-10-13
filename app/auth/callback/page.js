@@ -1,13 +1,12 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseClient } from '@/lib/supabase-client';
+import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
 import { Loader2 } from 'lucide-react';
 
 export default function AuthCallback() {
   const router = useRouter();
   const hasRun = useRef(false);
-  const supabase = getSupabaseClient();
 
   useEffect(() => {
     // Prevent double execution
@@ -37,7 +36,7 @@ export default function AuthCallback() {
     };
 
     handleCallback();
-  }, [router, supabase]);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
