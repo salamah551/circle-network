@@ -233,7 +233,7 @@ function ProfileEditModal({ profile, onClose, onSave }) {
   );
 }
 
-// Notifications Component
+// Notifications Component - FIXED VERSION
 function Notifications({ userId }) {
   const router = useRouter();
   const [notifications, setNotifications] = useState([]);
@@ -346,6 +346,38 @@ function Notifications({ userId }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const handleNotificationClick = async (notif) => {
+    // Mark as read based on type
+    try {
+      if (notif.type === 'message') {
+        await supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('id', notif.id);
+      } else if (notif.type === 'intro') {
+        const introId = notif.id.replace('intro-', '');
+        // Update intro_requests to mark as viewed (you may need to add a viewed_at column)
+        // For now, we'll just update the status or you can add a viewed_at timestamp column
+        await supabase
+          .from('intro_requests')
+          .update({ status: 'viewed' })
+          .eq('id', introId);
+      }
+      
+      // Reload notifications immediately to update the UI
+      await loadNotifications();
+      
+      // Navigate and close panel
+      router.push(notif.link);
+      setShowPanel(false);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      // Still navigate even if marking as read fails
+      router.push(notif.link);
+      setShowPanel(false);
+    }
+  };
+
   return (
     <div className="relative">
       <button
@@ -364,8 +396,9 @@ function Notifications({ userId }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)} />
           
-          <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-[600px] overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+          {/* IMPROVED MOBILE STYLING */}
+          <div className="absolute right-0 sm:right-0 left-0 sm:left-auto top-full mt-2 mx-4 sm:mx-0 sm:w-96 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 max-h-[calc(100vh-8rem)] overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-zinc-800 flex items-center justify-between sticky top-0 bg-zinc-900">
               <h3 className="font-bold">Notifications</h3>
               <button onClick={() => setShowPanel(false)} className="text-zinc-400 hover:text-white">
                 <X className="w-5 h-5" />
@@ -383,11 +416,8 @@ function Notifications({ userId }) {
                   {notifications.map(notif => (
                     <button
                       key={notif.id}
-                      onClick={() => {
-                        router.push(notif.link);
-                        setShowPanel(false);
-                      }}
-                      className="w-full text-left p-4 hover:bg-zinc-800 transition-colors"
+                      onClick={() => handleNotificationClick(notif)}
+                      className="w-full text-left p-4 hover:bg-zinc-800 active:bg-zinc-750 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <p className="text-sm font-medium text-white line-clamp-1">{notif.title}</p>
@@ -400,6 +430,31 @@ function Notifications({ userId }) {
                 </div>
               )}
             </div>
+
+            {notifications.length > 0 && (
+              <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+                <button
+                  onClick={async () => {
+                    // Mark all as read
+                    const messageIds = notifications
+                      .filter(n => n.type === 'message')
+                      .map(n => n.id);
+                    
+                    if (messageIds.length > 0) {
+                      await supabase
+                        .from('messages')
+                        .update({ read_at: new Date().toISOString() })
+                        .in('id', messageIds);
+                    }
+                    
+                    await loadNotifications();
+                  }}
+                  className="w-full text-center text-sm text-amber-400 hover:text-amber-300 font-medium py-2"
+                >
+                  Mark all as read
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -419,7 +474,8 @@ export default function DashboardPage() {
     activeRequests: 0,
     unreadMessages: 0,
     upcomingEvents: 0,
-    invitesRemaining: 0
+    invitesRemaining: 0,
+    pendingIntros: 0
   });
   const [recommendations, setRecommendations] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -542,12 +598,20 @@ export default function DashboardPage() {
       .eq('to_user_id', userId)
       .is('read_at', null);
 
+    // Get pending intros count
+    const { count: introsCount } = await supabase
+      .from('strategic_intros')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'pending');
+
     setStats(prev => ({
       ...prev,
       totalMembers: memberCount || 0,
       activeRequests: requestCount || 0,
       unreadMessages: messageCount || 0,
-      upcomingEvents: 0
+      upcomingEvents: 0,
+      pendingIntros: introsCount || 0
     }));
   };
 
@@ -750,6 +814,27 @@ export default function DashboardPage() {
           </button>
 
           <button
+            onClick={() => router.push('/intros')}
+            className="group relative bg-gradient-to-br from-amber-500/10 via-amber-600/10 to-yellow-500/10 border border-amber-500/30 rounded-2xl p-6 hover:from-amber-500/20 hover:via-amber-600/20 hover:to-yellow-500/20 hover:border-amber-400/50 transition-all duration-300 text-left overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/0 to-yellow-400/0 group-hover:from-amber-400/10 group-hover:to-yellow-400/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                Strategic Intros
+                {stats.pendingIntros > 0 && (
+                  <span className="px-2.5 py-0.5 bg-amber-500 text-black text-xs rounded-full font-bold">
+                    {stats.pendingIntros}
+                  </span>
+                )}
+              </h3>
+              <p className="text-white/60 text-sm">AI-curated connections</p>
+            </div>
+          </button>
+
+          <button
             onClick={() => router.push('/members')}
             className="group relative bg-zinc-900/50 border border-zinc-700 rounded-2xl p-6 hover:bg-zinc-800/50 hover:border-amber-500/50 transition-all duration-300 text-left overflow-hidden"
           >
@@ -869,6 +954,27 @@ export default function DashboardPage() {
                 Quick Actions
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => router.push('/intros')}
+                  className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 hover:from-amber-500/20 hover:to-yellow-500/20 border border-amber-500/30 rounded-lg transition-colors group"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold mb-1 flex items-center gap-2">
+                      Strategic Intros
+                      {stats.pendingIntros > 0 && (
+                        <span className="px-2 py-0.5 bg-amber-500 text-black text-xs rounded-full font-bold">
+                          {stats.pendingIntros}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-zinc-500">AI-curated connections</div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                </button>
+
                 <button
                   onClick={() => router.push('/members')}
                   className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-750 rounded-lg transition-colors group"
@@ -1038,7 +1144,6 @@ export default function DashboardPage() {
               </button>
             </div>
 
-
             {/* Recent Activity Feed */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -1081,6 +1186,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
             {/* Contact Us */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -1088,49 +1194,6 @@ export default function DashboardPage() {
                 Need Help?
               </h3>
               <p className="text-sm text-zinc-400 mb-4">
-
-            {/* Recent Activity Feed */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
-                Recent Activity
-              </h3>
-              
-              {recentActivity.length === 0 ? (
-                <p className="text-sm text-zinc-500">No recent activity</p>
-              ) : (
-                <div className="space-y-3">
-                  {recentActivity.slice(0, 5).map((activity) => {
-                    const timeAgo = new Date(activity.time).toLocaleDateString();
-                    let icon;
-                    switch (activity.icon) {
-                      case 'users':
-                        icon = <Users className="w-4 h-4 text-blue-400" />;
-                        break;
-                      case 'target':
-                        icon = <Target className="w-4 h-4 text-purple-400" />;
-                        break;
-                      case 'calendar':
-                        icon = <Calendar className="w-4 h-4 text-emerald-400" />;
-                        break;
-                      default:
-                        icon = <TrendingUp className="w-4 h-4 text-zinc-400" />;
-                    }
-                    
-                    return (
-                      <div key={activity.id} className="flex gap-3 items-start pb-3 border-b border-zinc-800 last:border-0 last:pb-0">
-                        <div className="flex-shrink-0 mt-1">{icon}</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white font-medium line-clamp-1">{activity.title}</p>
-                          <p className="text-xs text-zinc-400 line-clamp-1">{activity.description}</p>
-                          <p className="text-xs text-zinc-600 mt-1">{timeAgo}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
                 Have questions or need support? We're here to help.
               </p>
               <button
