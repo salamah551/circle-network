@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import {
   Shield, Lock, Crown, ArrowRight, Star, Sparkles, CheckCircle, Users, Briefcase, Handshake,
 } from 'lucide-react';
-import { LAUNCH_DATE, isLaunched, msUntilLaunch } from '../lib/launch-config';
+import { LAUNCH_DATE, isLaunched, msUntilLaunch } from '@/lib/launch-config';
 
 const foundingPrice = process.env.NEXT_PUBLIC_FOUNDING_PRICE || '497';
 const premiumPrice  = process.env.NEXT_PUBLIC_PREMIUM_PRICE  || '997';
@@ -114,14 +114,14 @@ export default function LandingClient() {
           <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6">
             <Shield className="w-6 h-6 text-amber-400" />
             <h3 className="mt-3 text-xl font-semibold">Privacy & Integrity, by Design</h3>
-            <p className="mt-2 text-white/70">No ads. No data resale. Member curation and zero-tolerance on spam. You’re here for outcomes, not feeds.</p>
+            <p className="mt-2 text-white/70">No ads. No data resale. Member curation and zero-tolerance on spam. You're here for outcomes, not feeds.</p>
           </div>
         </div>
       </section>
 
       {/* ===== PROOF OF INNOVATION ===== */}
       <section className="max-w-6xl mx-auto px-6 py-12">
-        <h2 className="text-2xl font-semibold mb-6">Why this isn’t “LinkedIn for the wealthy.”</h2>
+        <h2 className="text-2xl font-semibold mb-6">Why this isn't "LinkedIn for the wealthy."</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black p-6">
             <h3 className="text-lg font-semibold">Strategic Intros AI</h3>
@@ -129,11 +129,11 @@ export default function LandingClient() {
           </div>
           <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black p-6">
             <h3 className="text-lg font-semibold">Impact Score</h3>
-            <p className="mt-2 text-white/70">Reputation you can’t buy. Earn status by helping others: intros, advice, contributions. Visibility and privileges scale with impact.</p>
+            <p className="mt-2 text-white/70">Reputation you can't buy. Earn status by helping others: intros, advice, contributions. Visibility and privileges scale with impact.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black p-6">
             <h3 className="text-lg font-semibold">Value Exchange</h3>
-            <p className="mt-2 text-white/70">A frictionless marketplace of “asks” and “offers,” enabling focused, high-value exchanges without noise or spam.</p>
+            <p className="mt-2 text-white/70">A frictionless marketplace of "asks" and "offers," enabling focused, high-value exchanges without noise or spam.</p>
           </div>
         </div>
       </section>
@@ -173,7 +173,7 @@ export default function LandingClient() {
 
       {/* ===== WHAT'S LIVE VS COMING ===== */}
       <section className="max-w-6xl mx-auto px-6 py-12">
-        <h2 className="text-2xl font-semibold mb-6">What’s available today — and what’s next</h2>
+        <h2 className="text-2xl font-semibold mb-6">What's available today — and what's next</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6">
             <h3 className="text-lg font-semibold">Live now</h3>
@@ -326,11 +326,11 @@ export default function LandingClient() {
           </div>
           <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6">
             <h3 className="font-semibold">How do you protect privacy?</h3>
-            <p className="text-white/70 text-sm mt-2">We don’t sell data or run ads. Profiles are visible within the network; introductions are mutual-opt-in.</p>
+            <p className="text-white/70 text-sm mt-2">We don't sell data or run ads. Profiles are visible within the network; introductions are mutual-opt-in.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6">
             <h3 className="font-semibold">Are the intelligence services included?</h3>
-            <p className="text-white/70 text-sm mt-2">They’re optional paid add-ons. Founding members get early access when they launch.</p>
+            <p className="text-white/70 text-sm mt-2">They're optional paid add-ons. Founding members get early access when they launch.</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-zinc-950 p-6">
             <h3 className="font-semibold">Who reviews applications?</h3>
