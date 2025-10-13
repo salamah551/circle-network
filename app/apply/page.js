@@ -1,6 +1,9 @@
 import { Suspense } from 'react';
 import ApplyForm from './apply-form';
 
+// Force dynamic rendering (required for useSearchParams)
+export const dynamic = 'force-dynamic';
+
 export default function ApplyPage() {
   return (
     <Suspense fallback={<ApplyPageSkeleton />}>
