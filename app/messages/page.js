@@ -37,7 +37,7 @@ function MessagesContent() {
 
   // Set up real-time subscription AFTER currentUser is loaded
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.id) return;
     
     // Subscribe to messages where user is sender OR receiver
     const subscription = supabase
@@ -56,12 +56,29 @@ function MessagesContent() {
           }
         }
       )
+      .on('postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages'
+        },
+        () => {
+          // Reload conversations when messages are updated (marked as read)
+          loadConversations(currentUser.id);
+        }
+      )
       .subscribe();
+
+    // Also poll every 10 seconds as fallback
+    const pollInterval = setInterval(() => {
+      loadConversations(currentUser.id);
+    }, 10000);
 
     return () => {
       subscription.unsubscribe();
+      clearInterval(pollInterval);
     };
-  }, [currentUser, selectedConversation]);
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (selectedConversation) {
