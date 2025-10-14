@@ -35,7 +35,7 @@ function MessagesContent() {
     checkAuthAndLoadData();
   }, []);
 
-  // Set up real-time subscription AFTER currentUser is loaded
+  // Set up real-time subscription AFTER currentUser is loaded - FIXED VERSION
   useEffect(() => {
     if (!currentUser?.id) return;
     
@@ -69,7 +69,7 @@ function MessagesContent() {
       )
       .subscribe();
 
-    // Also poll every 10 seconds as fallback
+    // Poll every 10 seconds as fallback for real-time
     const pollInterval = setInterval(() => {
       loadConversations(currentUser.id);
     }, 10000);
@@ -81,11 +81,14 @@ function MessagesContent() {
   }, [currentUser?.id]);
 
   useEffect(() => {
-    if (selectedConversation) {
+    if (selectedConversation && currentUser) {
       loadMessages(selectedConversation.id);
-      markAsRead(selectedConversation.id);
+      // Small delay to ensure messages are loaded before marking as read
+      setTimeout(() => {
+        markAsRead(selectedConversation.id);
+      }, 500);
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, currentUser]);
 
   useEffect(() => {
     scrollToBottom();
@@ -190,13 +193,20 @@ function MessagesContent() {
     }
   };
 
+  // FIXED VERSION - properly marks messages as read and updates UI
   const markAsRead = async (otherUserId) => {
+    if (!currentUser?.id) return;
+    
     try {
-      const unreadMessages = messages.filter(
-        msg => msg.to_user_id === currentUser.id && msg.from_user_id === otherUserId && !msg.read_at
-      );
+      // Get unread messages in this conversation
+      const { data: unreadMessages, error: fetchError } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('to_user_id', currentUser.id)
+        .eq('from_user_id', otherUserId)
+        .is('read_at', null);
 
-      if (unreadMessages.length === 0) return;
+      if (fetchError || !unreadMessages || unreadMessages.length === 0) return;
 
       const messageIds = unreadMessages.map(msg => msg.id);
 
@@ -210,7 +220,16 @@ function MessagesContent() {
         throw new Error('Failed to mark messages as read');
       }
 
-      // Update local state
+      // Update local messages state immediately
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          messageIds.includes(msg.id) 
+            ? { ...msg, read_at: new Date().toISOString() }
+            : msg
+        )
+      );
+
+      // Update conversations list immediately
       setConversations(prevConvs => 
         prevConvs.map(conv => 
           conv.id === otherUserId 
@@ -218,13 +237,38 @@ function MessagesContent() {
             : conv
         )
       );
+      
+      // Reload conversations in background to ensure sync
+      setTimeout(() => {
+        loadConversations(currentUser.id);
+      }, 1000);
     } catch (error) {
       console.error('Error marking as read:', error);
     }
   };
 
+  // FIXED VERSION - properly handles new messages with user data
   const handleNewMessage = async (payload) => {
     const newMsg = payload.new;
+    
+    // Fetch user data for the new message
+    const { data: fromUser } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', newMsg.from_user_id)
+      .single();
+    
+    const { data: toUser } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', newMsg.to_user_id)
+      .single();
+    
+    const fullMsg = {
+      ...newMsg,
+      from_user: fromUser,
+      to_user: toUser
+    };
     
     // Determine the other user in this message
     const otherUserId = newMsg.from_user_id === currentUser.id ? newMsg.to_user_id : newMsg.from_user_id;
@@ -233,14 +277,14 @@ function MessagesContent() {
     if (selectedConversation && 
         (newMsg.from_user_id === selectedConversation.id || newMsg.to_user_id === selectedConversation.id)) {
       const attachments = await getMessageAttachments(newMsg.id);
-      setMessages(prev => [...prev, { ...newMsg, attachments }]);
+      setMessages(prev => [...prev, { ...fullMsg, attachments }]);
       if (newMsg.to_user_id === currentUser.id) {
         markAsRead(newMsg.from_user_id);
       }
     }
     
-    // Update conversations list (reload to get latest data)
-    await loadConversations(currentUser.id);
+    // ALWAYS reload conversations list to update badge counts
+    loadConversations(currentUser.id);
   };
 
   const sendMessage = async () => {
