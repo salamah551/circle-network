@@ -346,37 +346,43 @@ function Notifications({ userId }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const handleNotificationClick = async (notif) => {
-    // Mark as read based on type
-    try {
-      if (notif.type === 'message') {
-        await supabase
-          .from('messages')
-          .update({ read_at: new Date().toISOString() })
-          .eq('id', notif.id);
-      } else if (notif.type === 'intro') {
-        const introId = notif.id.replace('intro-', '');
-        // Update intro_requests to mark as viewed (you may need to add a viewed_at column)
-        // For now, we'll just update the status or you can add a viewed_at timestamp column
-        await supabase
-          .from('intro_requests')
-          .update({ status: 'viewed' })
-          .eq('id', introId);
-      }
-      
-      // Reload notifications immediately to update the UI
-      await loadNotifications();
-      
-      // Navigate and close panel
-      router.push(notif.link);
-      setShowPanel(false);
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      // Still navigate even if marking as read fails
-      router.push(notif.link);
-      setShowPanel(false);
+const handleNotificationClick = async (notif) => {
+  try {
+    // IMMEDIATE UI UPDATE - Remove notification from list right away
+    setNotifications(prev => prev.filter(n => n.id !== notif.id));
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    // Close panel and navigate immediately
+    setShowPanel(false);
+    router.push(notif.link);
+    
+    // Mark as read in background (don't wait for it)
+    if (notif.type === 'message') {
+      supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', notif.id)
+        .then(() => {
+          // Silently reload in background
+          loadNotifications();
+        });
+    } else if (notif.type === 'intro') {
+      const introId = notif.id.replace('intro-', '');
+      supabase
+        .from('intro_requests')
+        .update({ status: 'viewed' })
+        .eq('id', introId)
+        .then(() => {
+          // Silently reload in background
+          loadNotifications();
+        });
     }
-  };
+  } catch (error) {
+    console.error('Error handling notification:', error);
+    // Reload notifications to sync state
+    loadNotifications();
+  }
+};
 
   return (
     <div className="relative">
