@@ -2,53 +2,93 @@
 import { useState } from 'react';
 import { 
   X, ChevronRight, ChevronLeft, Users, MessageSquare, 
-  Calendar, HelpCircle, Sparkles, CheckCircle 
+  Calendar, Target, Sparkles, CheckCircle, GraduationCap,
+  TrendingUp, Bookmark, Bell
 } from 'lucide-react';
 
 const ONBOARDING_STEPS = [
   {
     icon: Sparkles,
-    title: 'Welcome to The Circle!',
-    description: 'You\'re now part of an exclusive community of 100 high-performing professionals. Here\'s how to make the most of your membership.',
+    title: 'Welcome to Circle Network!',
+    description: 'You\'re now part of an exclusive community of elite professionals. This quick tour will show you how to maximize your membership and build valuable connections.',
     action: 'Get Started',
     color: 'from-amber-500 to-amber-600'
   },
   {
+    icon: Sparkles,
+    title: 'Strategic Intros (Always Available)',
+    description: 'Every week, our AI analyzes the network and recommends 3 high-value connections just for you. Accept intros to unlock automated introductions via email. This feature is always available!',
+    action: 'View Intros',
+    link: '/intros',
+    color: 'from-amber-500 to-yellow-500'
+  },
+  {
     icon: Users,
-    title: 'Discover Members',
-    description: 'Browse the member directory to find professionals in finance, tech, consulting, and commerce. Filter by expertise and connect with those who can help you.',
+    title: 'Browse Members',
+    description: 'Discover and connect with founders, investors, and executives. Search by expertise, filter by industry, and send direct messages to anyone. Build relationships that matter.',
     action: 'Explore Directory',
     link: '/members',
     color: 'from-blue-500 to-blue-600'
   },
   {
     icon: MessageSquare,
-    title: 'Start Conversations',
-    description: 'Direct message any member to introduce yourself, ask for advice, or explore collaboration opportunities. Real connections happen here.',
+    title: 'Direct Messaging',
+    description: 'Have private conversations with any member. Your unread message count appears on the dashboard and resets to 0 when you visit Messages - keeping you organized.',
     action: 'View Messages',
     link: '/messages',
-    color: 'from-emerald-500 to-emerald-600'
-  },
-  {
-    icon: Calendar,
-    title: 'Join Events',
-    description: 'Attend exclusive virtual and in-person events. From masterclasses to networking dinners, these are where deals happen.',
-    action: 'See Events',
-    link: '/events',
     color: 'from-purple-500 to-purple-600'
   },
   {
-    icon: HelpCircle,
-    title: 'Post Requests',
-    description: 'Need an intro, looking for talent, or seeking expertise? Post a request and get help from the community within hours.',
+    icon: Bell,
+    title: 'Smart Notifications',
+    description: 'Click the bell icon to see new messages and intro matches. Click "Mark all as read" to clear notifications and reset your count to 0. Stay on top of important updates!',
+    action: 'Next',
+    color: 'from-indigo-500 to-indigo-600'
+  },
+  {
+    icon: Target,
+    title: 'Request Board',
+    description: 'Need help? Post a request for introductions, advice, partnerships, or expertise. The community responds within hours. Helping others earns you Impact Score points.',
     action: 'Browse Requests',
     link: '/requests',
-    color: 'from-orange-500 to-orange-600'
+    color: 'from-green-500 to-green-600'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Value Exchange Marketplace',
+    description: 'Post what you OFFER (expertise, intros, resources) and what you ASK for. Filter by category, search by keyword, and earn Impact Score points for every fulfilled exchange.',
+    action: 'Explore Exchange',
+    link: '/exchange',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  {
+    icon: GraduationCap,
+    title: 'Expert Sessions',
+    description: 'Book 1-on-1 consultation time with network experts. Offer your own expertise too! Choose duration (15-120 min), set your availability, and build your reputation through reviews.',
+    action: 'View Sessions',
+    link: '/expert-sessions',
+    color: 'from-indigo-500 to-purple-500'
+  },
+  {
+    icon: Bookmark,
+    title: 'Saved Items',
+    description: 'Bookmark members, requests, events, and exchanges for later. Access all your saved content in one place - your personal knowledge hub.',
+    action: 'View Saved',
+    link: '/saved',
+    color: 'from-amber-500 to-orange-500'
+  },
+  {
+    icon: Calendar,
+    title: 'Exclusive Events',
+    description: 'Join virtual and in-person gatherings, masterclasses, and networking dinners. RSVP to events, add to your calendar, and connect with attendees in real life.',
+    action: 'See Events',
+    link: '/events',
+    color: 'from-purple-500 to-pink-500'
   },
   {
     icon: CheckCircle,
     title: 'You\'re All Set!',
-    description: 'Remember: Give value first, build genuine relationships, and leverage the collective wisdom of The Circle. Your success is our success.',
+    description: 'Pro tips: Give value first, respond to requests, accept intros, and book expert sessions. Your Impact Score grows as you help others. Welcome to Circle Network!',
     action: 'Start Exploring',
     color: 'from-amber-500 to-amber-600'
   }
@@ -89,6 +129,7 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10"
+            data-testid="button-close-onboarding"
           >
             <X className="w-6 h-6" />
           </button>
@@ -96,7 +137,7 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
           <div className={`bg-gradient-to-r ${step.color} p-12 rounded-t-2xl text-center`}>
             <Icon className="w-20 h-20 text-white mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-white mb-3">{step.title}</h2>
-            <p className="text-white/90 text-lg max-w-lg mx-auto">{step.description}</p>
+            <p className="text-white/90 text-lg max-w-lg mx-auto leading-relaxed">{step.description}</p>
           </div>
 
           <div className="p-8">
@@ -105,6 +146,7 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
                 onClick={handlePrev}
                 disabled={currentStep === 0}
                 className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                data-testid="button-onboarding-prev"
               >
                 <ChevronLeft className="w-5 h-5" />
                 Previous
@@ -122,6 +164,7 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
                         ? 'bg-amber-500/50'
                         : 'bg-zinc-700'
                     }`}
+                    data-testid={`dot-onboarding-${index}`}
                   />
                 ))}
               </div>
@@ -130,6 +173,7 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
                 onClick={handleNext}
                 disabled={isLastStep}
                 className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                data-testid="button-onboarding-next"
               >
                 Next
                 <ChevronRight className="w-5 h-5" />
@@ -140,12 +184,14 @@ export default function OnboardingCarousel({ onComplete, onClose }) {
               <button
                 onClick={onClose}
                 className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors"
+                data-testid="button-skip-tour"
               >
                 Skip Tour
               </button>
               <button
                 onClick={handleActionClick}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-lg transition-all"
+                data-testid="button-onboarding-action"
               >
                 {step.action}
               </button>
