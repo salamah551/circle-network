@@ -3,7 +3,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Validate API key exists
+if (!process.env.SENDGRID_API_KEY) {
+  console.error('❌ SENDGRID_API_KEY is not set in environment variables');
+}
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'invite@thecirclenetwork.org';
 const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'The Circle Network';
@@ -17,7 +22,7 @@ function htmlForInvite({ invite, appUrl }) {
     <div style="opacity:.7;font-size:13px;">Invitation-only • Manual approval • Privacy-first</div>
   </div>
   <div style="background:white;padding:28px;border-radius:12px;margin-top:16px;border:1px solid #eee">
-    <h1 style="margin:0 0 8px 0;font-weight:600;">You’re invited, ${invite.full_name || ''}</h1>
+    <h1 style="margin:0 0 8px 0;font-weight:600;">You're invited, ${invite.full_name || ''}</h1>
     <p style="margin:0 0 12px 0;opacity:.8">A private operating network for elite founders & investors.</p>
     <p style="margin:0 0 10px 0;"><b>What you get:</b> 3 strategic introductions weekly, a high-signal value exchange, and a reputation system that rewards contribution.</p>
     <div style="background:#0b0b0b;color:white;padding:14px;border-radius:8px;margin:16px 0;">
@@ -36,50 +41,196 @@ function htmlForInvite({ invite, appUrl }) {
 }
 
 export async function POST(req) {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
   try {
+    // Validate SendGrid API key
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error('SendGrid API key is missing');
+      return NextResponse.json(
+        { error: 'Email service is not configured. Please contact administrator.' },
+        { status: 500 }
+      );
+    }
+
+    // Validate Supabase credentials
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Supabase credentials are missing');
+      return NextResponse.json(
+        { error: 'Database service is not configured. Please contact administrator.' },
+        { status: 500 }
+      );
+    }
+
+    // Create authenticated client to check user permissions
+    const authClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get('Authorization') || ''
+          }
+        }
+      }
+    );
+
+    // Check authentication and admin status
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Verify user is admin
+    const { data: profile, error: profileError } = await authClient
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.is_admin) {
+      return NextResponse.json(
+        { error: 'Forbidden - admin access required' },
+        { status: 403 }
+      );
+    }
+
+    // Now use service role for bulk operations (authenticated user is admin)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
+
     const body = await req.json();
     const campaignId = body.campaignId || null;
     const inviteId = body.inviteId || null;
 
-    let invites = [];
-    if (inviteId) {
-      const { data, error } = await supabase.from('bulk_invites').select('*').eq('id', inviteId).limit(1);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-      invites = data || [];
-    } else if (campaignId) {
-      const { data, error } = await supabase.from('bulk_invites').select('*').eq('campaign_id', campaignId).in('status', ['queued','resend']).limit(10000);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-      invites = data || [];
-    } else {
-      return NextResponse.json({ error: 'campaignId or inviteId required' }, { status: 400 });
+    if (!campaignId && !inviteId) {
+      return NextResponse.json(
+        { error: 'campaignId or inviteId required' },
+        { status: 400 }
+      );
     }
 
-    if (!invites.length) return NextResponse.json({ success: true, sent: 0 });
+    let invites = [];
+    if (inviteId) {
+      const { data, error } = await supabase
+        .from('bulk_invites')
+        .select('*')
+        .eq('id', inviteId)
+        .limit(1);
+
+      if (error) {
+        console.error('Database error fetching invite:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      invites = data || [];
+    } else if (campaignId) {
+      const { data, error } = await supabase
+        .from('bulk_invites')
+        .select('*')
+        .eq('campaign_id', campaignId)
+        .in('status', ['queued', 'resend'])
+        .limit(10000);
+
+      if (error) {
+        console.error('Database error fetching campaign invites:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      invites = data || [];
+    }
+
+    if (!invites.length) {
+      return NextResponse.json({
+        success: true,
+        sent: 0,
+        message: 'No invites found to send'
+      });
+    }
 
     const sentIds = [];
+    const errors = [];
+
     for (const inv of invites) {
       try {
+        // Validate email
+        if (!inv.email || !inv.email.includes('@')) {
+          errors.push({ id: inv.id, email: inv.email, error: 'Invalid email address' });
+          await supabase
+            .from('bulk_invite_events')
+            .insert({
+              invite_id: inv.id,
+              event: 'error',
+              details: { message: 'Invalid email address' }
+            });
+          continue;
+        }
+
         const msg = {
           to: inv.email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
           subject: `${inv.full_name || 'Founder'}, your invitation to The Circle Network`,
           html: htmlForInvite({ invite: inv, appUrl }),
           mailSettings: { bypassListManagement: { enable: true } },
-          customArgs: { invite_id: inv.id, campaign_id: inv.campaign_id }
+          customArgs: {
+            invite_id: String(inv.id),
+            campaign_id: String(inv.campaign_id || '')
+          }
         };
+
         await sgMail.send(msg);
         sentIds.push(inv.id);
+
+        // Log success event
+        await supabase
+          .from('bulk_invite_events')
+          .insert({
+            invite_id: inv.id,
+            event: 'sent',
+            details: { email: inv.email }
+          });
+
       } catch (e) {
-        await supabase.from('bulk_invite_events').insert({ invite_id: inv.id, event: 'error', details: { message: String(e) } });
+        console.error(`Error sending to ${inv.email}:`, e);
+        errors.push({ id: inv.id, email: inv.email, error: String(e) });
+
+        await supabase
+          .from('bulk_invite_events')
+          .insert({
+            invite_id: inv.id,
+            event: 'error',
+            details: { message: String(e) }
+          });
       }
     }
 
-    if (sentIds.length) await supabase.from('bulk_invites').update({ status: 'sent' }).in('id', sentIds);
-    return NextResponse.json({ success: true, sent: sentIds.length });
+    // Update status for successfully sent invites
+    if (sentIds.length) {
+      await supabase
+        .from('bulk_invites')
+        .update({ status: 'sent' })
+        .in('id', sentIds);
+    }
+
+    return NextResponse.json({
+      success: true,
+      sent: sentIds.length,
+      total: invites.length,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
   } catch (e) {
-    console.error('Send error', e);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    console.error('Send error:', e);
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? String(e) : undefined
+      },
+      { status: 500 }
+    );
   }
 }
