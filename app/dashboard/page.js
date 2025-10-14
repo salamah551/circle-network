@@ -273,6 +273,17 @@ function Notifications({ userId }) {
     }
   }, [userId]);
 
+  // Mark all notifications as read when panel is opened
+  useEffect(() => {
+    if (showPanel && notifications.length > 0) {
+      // Delay to ensure notifications are loaded first
+      const timer = setTimeout(() => {
+        markAllNotificationsAsRead();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showPanel, notifications.length]);
+
   const loadNotifications = async () => {
     try {
       const allNotifications = [];
@@ -326,6 +337,43 @@ function Notifications({ userId }) {
       setUnreadCount(allNotifications.filter(n => n.unread).length);
     } catch (error) {
       console.error('Error loading notifications:', error);
+    }
+  };
+
+  // Mark all notifications as read when bell icon is opened
+  const markAllNotificationsAsRead = async () => {
+    try {
+      // Mark all unread messages as read
+      const { data: unreadMessages } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('to_user_id', userId)
+        .is('read_at', null);
+
+      if (unreadMessages && unreadMessages.length > 0) {
+        const messageIds = unreadMessages.map(m => m.id);
+        await fetch('/api/messages/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageIds })
+        });
+      }
+
+      // Mark all pending intros as viewed
+      await supabase
+        .from('intro_requests')
+        .update({ status: 'viewed' })
+        .eq('target_member_id', userId)
+        .eq('status', 'pending');
+
+      // Clear local notifications and count
+      setNotifications([]);
+      setUnreadCount(0);
+      
+      // Reload to sync
+      setTimeout(loadNotifications, 500);
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
     }
   };
 
@@ -620,6 +668,27 @@ export default function DashboardPage() {
       pendingIntros: introsCount || 0
     }));
   };
+
+  // Real-time subscription to update stats when messages are read
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('dashboard-stats')
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `to_user_id=eq.${user.id}` },
+        () => loadStats(user.id)
+      )
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_user_id=eq.${user.id}` },
+        () => loadStats(user.id)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const loadRecommendations = async (userId, userProfile) => {
     try {
