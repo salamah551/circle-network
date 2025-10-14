@@ -116,6 +116,10 @@ function MessagesContent() {
 
       setCurrentUser(session.user);
       await loadConversations(session.user.id);
+      
+      // Mark ALL unread messages as read when visiting messages page
+      await markAllMessagesAsRead(session.user.id);
+      
       setIsLoading(false);
     } catch (error) {
       console.error('Auth check error:', error);
@@ -190,6 +194,39 @@ function MessagesContent() {
       setMessages(messagesWithAttachments);
     } catch (error) {
       console.error('Error loading messages:', error);
+    }
+  };
+
+  // Mark ALL unread messages as read when visiting messages page
+  const markAllMessagesAsRead = async (userId) => {
+    try {
+      // Get ALL unread messages for this user
+      const { data: unreadMessages, error: fetchError } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('to_user_id', userId)
+        .is('read_at', null);
+
+      if (fetchError || !unreadMessages || unreadMessages.length === 0) return;
+
+      const messageIds = unreadMessages.map(msg => msg.id);
+
+      const response = await fetch('/api/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageIds })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark messages as read');
+      }
+
+      // Update conversations to show 0 unread
+      setConversations(prevConvs => 
+        prevConvs.map(conv => ({ ...conv, unread_count: 0 }))
+      );
+    } catch (error) {
+      console.error('Error marking all messages as read:', error);
     }
   };
 
