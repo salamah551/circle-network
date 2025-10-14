@@ -7,7 +7,7 @@ import {
   ArrowRight, Loader2, LogOut, Settings, 
   Sparkles, Target, Mail, Bell, X, Save,
   User, Briefcase, MapPin, Link as LinkIcon,
-  Linkedin, Twitter, Globe, Bookmark
+  Linkedin, Twitter, Globe, Bookmark, GraduationCap
 } from 'lucide-react';
 import { getRecommendations } from '@/lib/recommendations';
 import PreLaunchBanner from '@/components/PreLaunchBanner';
@@ -1116,6 +1116,21 @@ export default function DashboardPage() {
                     <div className="text-sm text-zinc-500">View saved content</div>
                   </div>
                   <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                </button>
+
+                <button
+                  onClick={() => router.push('/expert-sessions')}
+                  className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-lg transition-colors group"
+                  data-testid="button-expert-sessions"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <GraduationCap className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold mb-1">Expert Sessions</div>
+                    <div className="text-sm text-zinc-500">Book time with experts</div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />
                 </button>
 
                 {isFeatureAvailable('events') ? (
