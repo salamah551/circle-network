@@ -489,21 +489,11 @@ const handleNotificationClick = async (notif) => {
               <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
                 <button
                   onClick={async () => {
-                    // Mark all as read
-                    const messageIds = notifications
-                      .filter(n => n.type === 'message')
-                      .map(n => n.id);
-                    
-                    if (messageIds.length > 0) {
-                      await supabase
-                        .from('messages')
-                        .update({ read_at: new Date().toISOString() })
-                        .in('id', messageIds);
-                    }
-                    
-                    await loadNotifications();
+                    // Mark all as read using the proper function
+                    await markAllNotificationsAsRead();
                   }}
                   className="w-full text-center text-sm text-amber-400 hover:text-amber-300 font-medium py-2"
+                  data-testid="button-mark-all-read"
                 >
                   Mark all as read
                 </button>
@@ -1050,19 +1040,32 @@ export default function DashboardPage() {
                   <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
                 </button>
 
-                <button
-                  onClick={() => router.push('/members')}
-                  className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-750 rounded-lg transition-colors group"
-                >
-                  <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-amber-400" />
+                {isFeatureAvailable('members_directory') ? (
+                  <button
+                    onClick={() => router.push('/members')}
+                    className="flex items-center gap-4 p-4 bg-zinc-800 hover:bg-zinc-750 rounded-lg transition-colors group"
+                    data-testid="button-browse-members"
+                  >
+                    <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Users className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold mb-1">Browse Members</div>
+                      <div className="text-sm text-zinc-500">Discover and connect</div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+                  </button>
+                ) : (
+                  <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg opacity-60">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-6 h-6 text-zinc-500" />
+                      <div className="text-left flex-1">
+                        <div className="font-semibold text-zinc-400 mb-1">Browse Members</div>
+                        <div className="text-xs text-zinc-600">Unlocks Nov 1</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-left flex-1">
-                    <div className="font-semibold mb-1">Browse Members</div>
-                    <div className="text-sm text-zinc-500">Discover and connect</div>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
-                </button>
+                )}
 
                 {isFeatureAvailable('requests') ? (
                   <button
@@ -1118,20 +1121,59 @@ export default function DashboardPage() {
                   <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
                 </button>
 
-                <button
-                  onClick={() => router.push('/expert-sessions')}
-                  className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-lg transition-colors group"
-                  data-testid="button-expert-sessions"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="w-6 h-6 text-white" />
+                {isFeatureAvailable('expert_sessions') ? (
+                  <button
+                    onClick={() => router.push('/expert-sessions')}
+                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-indigo-500/30 rounded-lg transition-colors group"
+                    data-testid="button-expert-sessions"
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <GraduationCap className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold mb-1">Expert Sessions</div>
+                      <div className="text-sm text-zinc-500">Book time with experts</div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />
+                  </button>
+                ) : (
+                  <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg opacity-60">
+                    <div className="flex items-center gap-3">
+                      <GraduationCap className="w-6 h-6 text-zinc-500" />
+                      <div className="text-left flex-1">
+                        <div className="font-semibold text-zinc-400 mb-1">Expert Sessions</div>
+                        <div className="text-xs text-zinc-600">Unlocks Nov 1</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-left flex-1">
-                    <div className="font-semibold mb-1">Expert Sessions</div>
-                    <div className="text-sm text-zinc-500">Book time with experts</div>
+                )}
+
+                {isFeatureAvailable('value_exchange') ? (
+                  <button
+                    onClick={() => router.push('/exchange')}
+                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-emerald-500/30 rounded-lg transition-colors group"
+                    data-testid="button-value-exchange"
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <TrendingUp className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold mb-1">Value Exchange</div>
+                      <div className="text-sm text-zinc-500">Offer & request help</div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-emerald-400 transition-colors" />
+                  </button>
+                ) : (
+                  <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg opacity-60">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="w-6 h-6 text-zinc-500" />
+                      <div className="text-left flex-1">
+                        <div className="font-semibold text-zinc-400 mb-1">Value Exchange</div>
+                        <div className="text-xs text-zinc-600">Unlocks Nov 1</div>
+                      </div>
+                    </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-indigo-400 transition-colors" />
-                </button>
+                )}
 
                 {isFeatureAvailable('events') ? (
                   <button
