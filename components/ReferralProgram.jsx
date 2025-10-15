@@ -5,41 +5,41 @@ import { showToast } from './Toast';
 
 export default function ReferralProgram({ userId, userEmail, userName }) {
   const [referralCode, setReferralCode] = useState('');
-  const [referralStats, setReferralStats] = useState({
-    total: 0,
-    pending: 0,
-    accepted: 0,
-    credited: 0
-  });
+  const [referralLink, setReferralLink] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (userId) {
-      loadReferralData();
+      loadReferralCode();
     }
   }, [userId]);
 
-  const loadReferralData = async () => {
+  const loadReferralCode = async () => {
     try {
-      const response = await fetch(`/api/referrals?userId=${userId}`);
+      // Use YOUR existing API endpoint
+      const response = await fetch('/api/referrals/generate-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
       const data = await response.json();
-      setReferralCode(data.referralCode);
-      setReferralStats(data.stats);
+      
+      if (data.referral_code) {
+        setReferralCode(data.referral_code);
+        setReferralLink(data.referral_link);
+      }
     } catch (error) {
-      console.error('Error loading referral data:', error);
+      console.error('Error loading referral code:', error);
+      showToast('Failed to load referral code', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getReferralLink = () => {
-    return `${process.env.NEXT_PUBLIC_APP_URL}/apply?ref=${referralCode}`;
-  };
-
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(getReferralLink());
+      await navigator.clipboard.writeText(referralLink);
       setCopied(true);
       showToast('Referral link copied!', 'success');
       setTimeout(() => setCopied(false), 3000);
@@ -49,9 +49,9 @@ export default function ReferralProgram({ userId, userEmail, userName }) {
   };
 
   const shareViaEmail = () => {
-    const subject = encodeURIComponent('Join Circle Network');
+    const subject = encodeURIComponent('Join Circle Network - Exclusive Invitation');
     const body = encodeURIComponent(
-      `Hi,\n\nI'm part of Circle Network, an exclusive community of accomplished professionals. I think you'd be a great fit.\n\nHere's your invitation link:\n${getReferralLink()}\n\nCircle Network is invitation-only with only 250 founding member spots available. The platform connects you with high-achievers across all industries for meaningful partnerships and growth.\n\nHope to see you inside!\n\n${userName || 'A fellow member'}`
+      `Hi,\n\nI'm part of Circle Network, an exclusive community of accomplished professionals across all industries. I think you'd be a great fit.\n\nHere's your personal invitation link:\n${referralLink}\n\nCircle Network is invitation-only with only 250 founding member spots available. The platform connects you with high-achievers for meaningful partnerships, strategic introductions, and accelerated growth.\n\nKey benefits:\n• AI-powered strategic introductions\n• Direct access to decision-makers\n• Exclusive events and roundtables\n• Problem-solving support from experts\n\nPlatform launches November 10, 2025. Join now to lock in founding member pricing ($2,497/year vs. $4,997 after launch).\n\nHope to see you inside!\n\n${userName || 'A fellow member'}`
     );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
@@ -71,11 +71,6 @@ export default function ReferralProgram({ userId, userEmail, userName }) {
     { threshold: 10, reward: 'Lifetime Elite membership', icon: '👑' }
   ];
 
-  const nextReward = rewards.find(r => referralStats.credited < r.threshold);
-  const progress = nextReward 
-    ? (referralStats.credited / nextReward.threshold) * 100 
-    : 100;
-
   return (
     <div className="space-y-6">
       {/* Header Card */}
@@ -87,52 +82,16 @@ export default function ReferralProgram({ userId, userEmail, userName }) {
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-2">Invite Fellow Professionals</h2>
             <p className="text-zinc-400">
-              Know someone who'd thrive in Circle Network? Refer them and earn rewards when they join.
+              Know someone who'd thrive in Circle Network? Share your referral link and earn rewards when they join.
             </p>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-            <div className="text-2xl font-bold text-white mb-1">{referralStats.total}</div>
-            <div className="text-xs text-zinc-500">Total Invites</div>
-          </div>
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-            <div className="text-2xl font-bold text-amber-400 mb-1">{referralStats.pending}</div>
-            <div className="text-xs text-zinc-500">Pending</div>
-          </div>
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-            <div className="text-2xl font-bold text-emerald-400 mb-1">{referralStats.accepted}</div>
-            <div className="text-xs text-zinc-500">Accepted</div>
-          </div>
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700">
-            <div className="text-2xl font-bold text-purple-400 mb-1">{referralStats.credited}</div>
-            <div className="text-xs text-zinc-500">Credited</div>
-          </div>
+        {/* Your Referral Code Display */}
+        <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 mb-4">
+          <div className="text-sm text-zinc-500 mb-2">Your Referral Code</div>
+          <div className="text-2xl font-bold text-amber-400 font-mono">{referralCode}</div>
         </div>
-
-        {/* Progress to next reward */}
-        {nextReward && (
-          <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/5 to-blue-500/5 border border-purple-500/20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-zinc-400">Next Reward</span>
-              <span className="text-sm font-bold text-purple-400">
-                {referralStats.credited}/{nextReward.threshold} referrals
-              </span>
-            </div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden mb-2">
-              <div
-                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{nextReward.icon}</span>
-              <span className="text-sm font-semibold text-white">{nextReward.reward}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Your Referral Link */}
@@ -144,7 +103,7 @@ export default function ReferralProgram({ userId, userEmail, userName }) {
 
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg font-mono text-sm text-zinc-300 overflow-x-auto">
-            {getReferralLink()}
+            {referralLink}
           </div>
           <button
             onClick={copyToClipboard}
@@ -181,39 +140,24 @@ export default function ReferralProgram({ userId, userEmail, userName }) {
         </h3>
 
         <div className="space-y-3">
-          {rewards.map((reward, i) => {
-            const achieved = referralStats.credited >= reward.threshold;
-            return (
-              <div
-                key={i}
-                className={`p-4 rounded-lg border transition-all ${
-                  achieved
-                    ? 'bg-emerald-500/10 border-emerald-500/30'
-                    : 'bg-zinc-800/50 border-zinc-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{reward.icon}</span>
-                    <div>
-                      <div className={`font-semibold ${achieved ? 'text-emerald-400' : 'text-white'}`}>
-                        {reward.reward}
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        {reward.threshold} successful referral{reward.threshold !== 1 ? 's' : ''}
-                      </div>
+          {rewards.map((reward, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-lg border bg-zinc-800/50 border-zinc-700"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{reward.icon}</span>
+                  <div>
+                    <div className="font-semibold text-white">{reward.reward}</div>
+                    <div className="text-xs text-zinc-500">
+                      {reward.threshold} successful referral{reward.threshold !== 1 ? 's' : ''}
                     </div>
                   </div>
-                  {achieved && (
-                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
-                      <Check className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs font-bold text-emerald-400">Earned</span>
-                    </div>
-                  )}
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
 
