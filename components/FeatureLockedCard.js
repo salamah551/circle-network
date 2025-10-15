@@ -1,7 +1,7 @@
 'use client';
 import { Lock, Calendar } from 'lucide-react';
 
-export default function FeatureLockedCard({ title, description, unlockDate = 'November 1, 2025' }) {
+export default function FeatureLockedCard({ title, description, unlockDate = 'November 10, 2025' }) {
   return (
     <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950">
       <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5" />
