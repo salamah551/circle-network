@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { getRecommendations } from '@/lib/recommendations';
 import PreLaunchBanner from '@/components/PreLaunchBanner';
+import SuccessDashboard from '@/components/SuccessDashboard';
 import FeatureLockedCard from '@/components/FeatureLockedCard';
 import { isFeatureAvailable, getFeatureStatus, isAdmin } from '@/lib/feature-flags';
 import GlobalSearch from '@/components/GlobalSearch';
@@ -889,6 +890,17 @@ export default function DashboardPage() {
             </Link>
           ))}
         </div>
+
+{/* Success Dashboard */}
+<div className="mb-10">
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h2 className="text-2xl font-bold">Your Impact & Progress</h2>
+      <p className="text-sm text-zinc-500">Track your success within the Circle community</p>
+    </div>
+  </div>
+  <SuccessDashboard userId={user?.id} />
+</div>
 
         {/* ✅ Quick Actions - feature-aware */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
