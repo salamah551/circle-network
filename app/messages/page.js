@@ -8,8 +8,9 @@ import {
   Archive, Star, Paperclip, X
 } from 'lucide-react';
 import GlobalSearch from '@/components/GlobalSearch';
+import LockedFeature from '@/components/LockedFeature';
+import { getFeatureStatus } from '@/lib/feature-flags';
 
-import { uploadMessageAttachment, getMessageAttachments } from '@/lib/message-uploads';
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -18,8 +19,8 @@ const supabase = createClient(
 function MessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const messageContainerRef = useRef(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -28,32 +29,71 @@ function MessagesContent() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [featureStatus, setFeatureStatus] = useState(null);
 
+  // Check auth and feature access
   useEffect(() => {
-    checkAuthAndLoadData();
+    checkAuthAndLoad();
   }, []);
 
-  // Set up real-time subscription AFTER currentUser is loaded - FIXED VERSION
+  const checkAuthAndLoad = async () => {
+    try {
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      if (authError || !session) {
+        router.push('/login');
+        return;
+      }
+
+      // Get user profile for feature check
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+      }
+
+      setCurrentUser(profile || { id: session.user.id });
+
+      // Check feature status
+      const status = getFeatureStatus('messaging', profile);
+      setFeatureStatus(status);
+
+      // Load conversations if unlocked or admin
+      if (status.unlocked || status.adminBypass) {
+        await loadConversations(session.user.id);
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      router.push('/login');
+    }
+  };
+
+  // ✅ REAL-TIME: Set up live message subscriptions
   useEffect(() => {
     if (!currentUser?.id) return;
     
-    // Subscribe to messages where user is sender OR receiver
-    const subscription = supabase
-      .channel('messages-realtime')
+    console.log('🔴 Setting up real-time subscriptions for user:', currentUser.id);
+    
+    // Subscribe to new messages where user is recipient
+    const messageChannel = supabase
+      .channel('messages-realtime-new')
       .on('postgres_changes', 
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'messages'
+          table: 'messages',
+          filter: `to_user_id=eq.${currentUser.id}`
         },
         (payload) => {
-          const newMsg = payload.new;
-          // Only process if message involves current user
-          if (newMsg.from_user_id === currentUser.id || newMsg.to_user_id === currentUser.id) {
-            handleNewMessage(payload);
-          }
+          console.log('🔴 NEW MESSAGE RECEIVED:', payload);
+          handleNewMessage(payload.new);
         }
       )
       .on('postgres_changes',
@@ -62,40 +102,271 @@ function MessagesContent() {
           schema: 'public',
           table: 'messages'
         },
-        () => {
-          // Reload conversations when messages are updated (marked as read)
-          loadConversations(currentUser.id);
+        (payload) => {
+          console.log('🔴 MESSAGE UPDATED:', payload);
+          handleMessageUpdate(payload.new);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('🔴 Subscription status:', status);
+      });
 
-    // Poll every 10 seconds as fallback for real-time
+    // Poll every 5 seconds as fallback
     const pollInterval = setInterval(() => {
-      loadConversations(currentUser.id);
-    }, 10000);
+      if (currentUser?.id) {
+        loadConversations(currentUser.id, true); // silent reload
+      }
+    }, 5000);
 
     return () => {
-      subscription.unsubscribe();
+      console.log('🔴 Cleaning up subscriptions');
+      supabase.removeChannel(messageChannel);
       clearInterval(pollInterval);
     };
   }, [currentUser?.id]);
 
+  // ✅ REAL-TIME: Handle incoming messages
+  const handleNewMessage = async (newMsg) => {
+    console.log('📨 Processing new message:', newMsg);
+    
+    // If message is for current conversation, add it immediately
+    if (selectedConversation) {
+      const isForCurrentConvo = 
+        (newMsg.from_user_id === selectedConversation.other_user.id && newMsg.to_user_id === currentUser.id) ||
+        (newMsg.to_user_id === selectedConversation.other_user.id && newMsg.from_user_id === currentUser.id);
+      
+      if (isForCurrentConvo) {
+        setMessages(prev => {
+          // Prevent duplicates
+          if (prev.some(m => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        });
+        
+        // Auto-mark as read if it's for us
+        if (newMsg.to_user_id === currentUser.id) {
+          setTimeout(() => markAsRead(selectedConversation.other_user.id), 500);
+        }
+        
+        // Scroll to bottom
+        setTimeout(scrollToBottom, 100);
+      }
+    }
+    
+    // Always reload conversations to update unread counts
+    loadConversations(currentUser.id, true);
+  };
+
+  // ✅ REAL-TIME: Handle message updates (read receipts)
+  const handleMessageUpdate = (updatedMsg) => {
+    console.log('📝 Message updated:', updatedMsg);
+    
+    // Update in current messages list
+    setMessages(prev => prev.map(m => 
+      m.id === updatedMsg.id ? { ...m, ...updatedMsg } : m
+    ));
+    
+    // Reload conversations to update unread counts
+    loadConversations(currentUser.id, true);
+  };
+
+  // ✅ Load conversations with optional silent mode
+  const loadConversations = async (userId, silent = false) => {
+    if (!silent) {
+      console.log('📂 Loading conversations...');
+    }
+    
+    try {
+      const { data: sentMessages } = await supabase
+        .from('messages')
+        .select('to_user_id, created_at, content, read_at')
+        .eq('from_user_id', userId)
+        .order('created_at', { ascending: false });
+
+      const { data: receivedMessages } = await supabase
+        .from('messages')
+        .select('from_user_id, created_at, content, read_at')
+        .eq('to_user_id', userId)
+        .order('created_at', { ascending: false });
+
+      const userIds = new Set();
+      [...(sentMessages || []), ...(receivedMessages || [])].forEach(msg => {
+        if (msg.to_user_id && msg.to_user_id !== userId) userIds.add(msg.to_user_id);
+        if (msg.from_user_id && msg.from_user_id !== userId) userIds.add(msg.from_user_id);
+      });
+
+      if (userIds.size === 0) {
+        setConversations([]);
+        return;
+      }
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, first_name, last_name, title, company, avatar_url, last_active_at')
+        .in('id', Array.from(userIds));
+
+      const convos = Array.from(userIds).map(otherUserId => {
+        const profile = profiles?.find(p => p.id === otherUserId);
+        const userMessages = [
+          ...(sentMessages?.filter(m => m.to_user_id === otherUserId) || []),
+          ...(receivedMessages?.filter(m => m.from_user_id === otherUserId) || [])
+        ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        const lastMessage = userMessages[0];
+        const unreadCount = receivedMessages?.filter(m => 
+          m.from_user_id === otherUserId && !m.read_at
+        ).length || 0;
+
+        return {
+          id: otherUserId,
+          other_user: {
+            id: otherUserId,
+            full_name: profile?.full_name || 'Unknown User',
+            first_name: profile?.first_name || 'Unknown',
+            title: profile?.title || '',
+            company: profile?.company || '',
+            avatar_url: profile?.avatar_url || null,
+            last_active_at: profile?.last_active_at
+          },
+          last_message: lastMessage?.content || '',
+          last_message_time: lastMessage?.created_at || new Date().toISOString(),
+          unread_count: unreadCount
+        };
+      });
+
+      convos.sort((a, b) => new Date(b.last_message_time) - new Date(a.last_message_time));
+      
+      setConversations(convos);
+      
+      if (!silent) {
+        console.log('✅ Loaded', convos.length, 'conversations');
+      }
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    }
+  };
+
+  // Load messages for selected conversation
   useEffect(() => {
     if (selectedConversation && currentUser) {
-      loadMessages(selectedConversation.id);
-      // Small delay to ensure messages are loaded before marking as read
+      loadMessages(selectedConversation.other_user.id);
       setTimeout(() => {
-        markAsRead(selectedConversation.id);
+        markAsRead(selectedConversation.other_user.id);
       }, 500);
     }
   }, [selectedConversation, currentUser]);
+
+  const loadMessages = async (otherUserId) => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(from_user_id.eq.${currentUser.id},to_user_id.eq.${otherUserId}),and(from_user_id.eq.${otherUserId},to_user_id.eq.${currentUser.id})`)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading messages:', error);
+        return;
+      }
+
+      setMessages(data || []);
+      setTimeout(scrollToBottom, 100);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  // ✅ REAL-TIME: Mark messages as read immediately
+  const markAsRead = async (otherUserId) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('to_user_id', currentUser.id)
+        .eq('from_user_id', otherUserId)
+        .is('read_at', null);
+
+      if (error) {
+        console.error('Error marking as read:', error);
+      } else {
+        console.log('✅ Marked messages as read');
+        // Update local state immediately
+        setConversations(prev => prev.map(c => 
+          c.id === otherUserId ? { ...c, unread_count: 0 } : c
+        ));
+      }
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  // ✅ REAL-TIME: Send message with instant update
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedConversation || sending) return;
+
+    const messageText = newMessage.trim();
+    setSending(true);
+
+    try {
+      // Optimistically add message to UI
+      const optimisticMessage = {
+        id: `temp-${Date.now()}`,
+        content: messageText,
+        from_user_id: currentUser.id,
+        to_user_id: selectedConversation.other_user.id,
+        created_at: new Date().toISOString(),
+        read_at: null,
+        sending: true
+      };
+
+      setMessages(prev => [...prev, optimisticMessage]);
+      setNewMessage('');
+      setTimeout(scrollToBottom, 50);
+
+      // Send to database
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          from_user_id: currentUser.id,
+          to_user_id: selectedConversation.other_user.id,
+          content: messageText
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message');
+        // Remove optimistic message
+        setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id));
+      } else {
+        // Replace optimistic with real message
+        setMessages(prev => prev.map(m => 
+          m.id === optimisticMessage.id ? data : m
+        ));
+        
+        // Update conversation list
+        loadConversations(currentUser.id, true);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Handle URL parameters
   useEffect(() => {
-    // Check if there's a 'to' parameter in URL (from profile page)
     const toUserId = searchParams.get('to');
     if (toUserId && conversations.length > 0) {
       const conv = conversations.find(c => c.other_user.id === toUserId);
@@ -105,581 +376,313 @@ function MessagesContent() {
     }
   }, [searchParams, conversations]);
 
-  const checkAuthAndLoadData = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error || !session) {
-        router.push('/login');
-        return;
-      }
-
-      setCurrentUser(session.user);
-      await loadConversations(session.user.id);
-      
-      // Mark ALL unread messages as read when visiting messages page
-      await markAllMessagesAsRead(session.user.id);
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Auth check error:', error);
-      router.push('/login');
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
+    return name[0].toUpperCase();
   };
-
-  const loadConversations = async (userId) => {
-    try {
-      // Get all messages involving the user
-      const { data: userMessages, error } = await supabase
-        .from('messages')
-        .select('*, from_user:profiles!messages_from_user_id_fkey(*), to_user:profiles!messages_to_user_id_fkey(*)')
-        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Group messages by conversation (thread_id or other user)
-      const conversationsMap = new Map();
-
-      userMessages.forEach(msg => {
-        const otherUserId = msg.from_user_id === userId ? msg.to_user_id : msg.from_user_id;
-        const otherUser = msg.from_user_id === userId ? msg.to_user : msg.from_user;
-        
-        if (!conversationsMap.has(otherUserId)) {
-          conversationsMap.set(otherUserId, {
-            id: otherUserId,
-            other_user: otherUser,
-            last_message: msg,
-            unread_count: 0,
-            messages: []
-          });
-        }
-
-        const conv = conversationsMap.get(otherUserId);
-        conv.messages.push(msg);
-        
-        // Count unread messages
-        if (msg.to_user_id === userId && !msg.read_at) {
-          conv.unread_count++;
-        }
-      });
-
-      const conversationsList = Array.from(conversationsMap.values())
-        .sort((a, b) => new Date(b.last_message.created_at) - new Date(a.last_message.created_at));
-
-      setConversations(conversationsList);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    }
-  };
-
-  const loadMessages = async (otherUserId) => {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*, from_user:profiles!messages_from_user_id_fkey(*), to_user:profiles!messages_to_user_id_fkey(*)')
-        .or(`and(from_user_id.eq.${currentUser.id},to_user_id.eq.${otherUserId}),and(from_user_id.eq.${otherUserId},to_user_id.eq.${currentUser.id})`)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      
-      // Load attachments for each message
-      const messagesWithAttachments = await Promise.all(
-        (data || []).map(async (msg) => {
-          const attachments = await getMessageAttachments(msg.id);
-          return { ...msg, attachments };
-        })
-      );
-      
-      setMessages(messagesWithAttachments);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  };
-
-  // Mark ALL unread messages as read when visiting messages page
-  const markAllMessagesAsRead = async (userId) => {
-    try {
-      // Get ALL unread messages for this user
-      const { data: unreadMessages, error: fetchError } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('to_user_id', userId)
-        .is('read_at', null);
-
-      if (fetchError || !unreadMessages || unreadMessages.length === 0) return;
-
-      const messageIds = unreadMessages.map(msg => msg.id);
-
-      const response = await fetch('/api/messages/mark-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageIds })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to mark messages as read');
-      }
-
-      // Update conversations to show 0 unread
-      setConversations(prevConvs => 
-        prevConvs.map(conv => ({ ...conv, unread_count: 0 }))
-      );
-    } catch (error) {
-      console.error('Error marking all messages as read:', error);
-    }
-  };
-
-  // FIXED VERSION - properly marks messages as read and updates UI
-  const markAsRead = async (otherUserId) => {
-    if (!currentUser?.id) return;
-    
-    try {
-      // Get unread messages in this conversation
-      const { data: unreadMessages, error: fetchError } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('to_user_id', currentUser.id)
-        .eq('from_user_id', otherUserId)
-        .is('read_at', null);
-
-      if (fetchError || !unreadMessages || unreadMessages.length === 0) return;
-
-      const messageIds = unreadMessages.map(msg => msg.id);
-
-      const response = await fetch('/api/messages/mark-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageIds })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to mark messages as read');
-      }
-
-      // Update local messages state immediately
-      setMessages(prevMessages => 
-        prevMessages.map(msg => 
-          messageIds.includes(msg.id) 
-            ? { ...msg, read_at: new Date().toISOString() }
-            : msg
-        )
-      );
-
-      // Update conversations list immediately
-      setConversations(prevConvs => 
-        prevConvs.map(conv => 
-          conv.id === otherUserId 
-            ? { ...conv, unread_count: 0 }
-            : conv
-        )
-      );
-      
-      // Reload conversations in background to ensure sync
-      setTimeout(() => {
-        loadConversations(currentUser.id);
-      }, 1000);
-    } catch (error) {
-      console.error('Error marking as read:', error);
-    }
-  };
-
-  // FIXED VERSION - properly handles new messages with user data
-  const handleNewMessage = async (payload) => {
-    const newMsg = payload.new;
-    
-    // Fetch user data for the new message
-    const { data: fromUser } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', newMsg.from_user_id)
-      .single();
-    
-    const { data: toUser } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', newMsg.to_user_id)
-      .single();
-    
-    const fullMsg = {
-      ...newMsg,
-      from_user: fromUser,
-      to_user: toUser
-    };
-    
-    // Determine the other user in this message
-    const otherUserId = newMsg.from_user_id === currentUser.id ? newMsg.to_user_id : newMsg.from_user_id;
-    
-    // If message is in current conversation, add it immediately
-    if (selectedConversation && 
-        (newMsg.from_user_id === selectedConversation.id || newMsg.to_user_id === selectedConversation.id)) {
-      const attachments = await getMessageAttachments(newMsg.id);
-      setMessages(prev => [...prev, { ...fullMsg, attachments }]);
-      if (newMsg.to_user_id === currentUser.id) {
-        markAsRead(newMsg.from_user_id);
-      }
-    }
-    
-    // ALWAYS reload conversations list to update badge counts
-    loadConversations(currentUser.id);
-  };
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversation || !currentUser) return;
-
-    setSending(true);
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          from_user_id: currentUser.id,
-          to_user_id: selectedConversation.id,
-          content: newMessage.trim(),
-          thread_id: selectedConversation.thread_id || null
-        })
-        .select('*, from_user:profiles!messages_from_user_id_fkey(*), to_user:profiles!messages_to_user_id_fkey(*)')
-        .single();
-
-      if (error) throw error;
-
-      // Send email notification to recipient (fire-and-forget)
-      fetch('/api/notifications/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'new_message',
-          recipientEmail: data.to_user.email,
-          recipientName: data.to_user.full_name,
-          senderName: data.from_user.full_name,
-          messagePreview: data.content
-        })
-      }).catch(emailError => {
-        console.error('Failed to send email notification:', emailError);
-      });
-
-      // Upload file if selected
-      if (selectedFile) {
-        try {
-          await uploadMessageAttachment(selectedFile, data.id, currentUser.id);
-          setSelectedFile(null);
-          // Reload messages to show attachment immediately
-          await loadMessages(selectedConversation.id);
-        } catch (uploadError) {
-          console.error('File upload error:', uploadError);
-          alert('Message sent but file upload failed');
-        }
-      } else {
-        // Add message to state only if no file upload (reload already done above)
-        setMessages(prev => [...prev, data]);
-      }
-      setNewMessage('');
-      loadConversations(currentUser.id);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const filteredConversations = conversations.filter(conv => 
-    conv.other_user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conv.last_message.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInHours = (now - date) / (1000 * 60 * 60);
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
     
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    } else if (diffInHours < 168) {
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const isUserActive = (lastActiveAt) => {
+    if (!lastActiveAt) return false;
+    const fiveMinutesAgo = new Date();
+    fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+    return new Date(lastActiveAt) > fiveMinutesAgo;
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
       </div>
     );
   }
 
+  // Check if feature is locked
+  if (!featureStatus?.unlocked && !featureStatus?.adminBypass) {
+    return (
+      <LockedFeature
+        featureName="messaging"
+        featureTitle="Direct Messaging"
+        featureDescription="Private, real-time conversations with any Circle member. Send messages, share files, and build meaningful connections."
+        unlockDate="November 10, 2025"
+        currentUser={currentUser}
+      >
+        {/* This won't render until unlocked */}
+      </LockedFeature>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#0A0F1E]">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-white/10 bg-[#0A0F1E]/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-zinc-950 border-b border-zinc-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span>Dashboard</span>
               </button>
-              <h1 className="text-2xl font-bold text-white">Messages</h1>
+              <MessageSquare className="w-6 h-6 text-amber-400" />
+              <div>
+                <h1 className="text-xl font-bold">Messages</h1>
+                <p className="text-xs text-zinc-500">
+                  {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-            
-            <nav className="flex items-center gap-4">
-              <GlobalSearch />
-              <button
-                onClick={() => router.push('/members')}
-                className="text-white/60 hover:text-white transition-colors text-sm"
-              >
-                Directory
-              </button>
-            </nav>
+            <GlobalSearch />
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-          {/* Conversations List */}
-          <div className="lg:col-span-1 bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col">
-            {/* Search */}
-            <div className="p-4 border-b border-white/10">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-                <input
-                  type="text"
-                  placeholder="Search conversations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
+      {/* Main content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Conversations list */}
+        <div className={`w-full md:w-80 lg:w-96 border-r border-zinc-800 flex flex-col bg-zinc-950 ${selectedConversation ? 'hidden md:flex' : 'flex'}`}>
+          {/* Search */}
+          <div className="p-4 border-b border-zinc-800">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+              />
             </div>
+          </div>
 
-            {/* Conversation List */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredConversations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                  <MessageSquare className="w-12 h-12 text-white/20 mb-4" />
-                  <p className="text-white/60">No conversations yet</p>
-                  <button
-                    onClick={() => router.push('/members')}
-                    className="mt-4 text-emerald-400 hover:text-emerald-300 text-sm"
-                  >
-                    Browse members to start chatting
-                  </button>
-                </div>
-              ) : (
-                filteredConversations.map(conv => (
+          {/* Conversation list */}
+          <div className="flex-1 overflow-y-auto">
+            {conversations.length === 0 ? (
+              <div className="p-8 text-center">
+                <MessageSquare className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                <p className="text-zinc-500">No conversations yet</p>
+                <p className="text-sm text-zinc-600 mt-2">
+                  Start a conversation from the member directory
+                </p>
+              </div>
+            ) : (
+              conversations
+                .filter(c => {
+                  if (!searchQuery) return true;
+                  const query = searchQuery.toLowerCase();
+                  return c.other_user.full_name.toLowerCase().includes(query) ||
+                         c.other_user.company?.toLowerCase().includes(query);
+                })
+                .map(conv => (
                   <button
                     key={conv.id}
                     onClick={() => setSelectedConversation(conv)}
-                    className={`w-full p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left ${
-                      selectedConversation?.id === conv.id ? 'bg-white/10' : ''
+                    className={`w-full p-4 flex items-start gap-3 hover:bg-zinc-900 transition-colors border-b border-zinc-800 ${
+                      selectedConversation?.id === conv.id ? 'bg-zinc-900' : ''
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="w-6 h-6 text-white" />
+                    <div className="relative flex-shrink-0">
+                      {conv.other_user.avatar_url ? (
+                        <img 
+                          src={conv.other_user.avatar_url} 
+                          alt={conv.other_user.full_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-bold">
+                          {getInitials(conv.other_user.full_name)}
+                        </div>
+                      )}
+                      {isUserActive(conv.other_user.last_active_at) && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-zinc-950 rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-sm truncate">
+                          {conv.other_user.full_name}
+                        </span>
+                        <span className="text-xs text-zinc-500 flex-shrink-0 ml-2">
+                          {formatTime(conv.last_message_time)}
+                        </span>
                       </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-white truncate">
-                            {conv.other_user.full_name}
-                          </h3>
-                          <span className="text-xs text-white/40 ml-2 flex-shrink-0">
-                            {formatTime(conv.last_message.created_at)}
+                      {conv.other_user.title && (
+                        <p className="text-xs text-zinc-500 truncate mb-1">
+                          {conv.other_user.title}
+                          {conv.other_user.company && ` at ${conv.other_user.company}`}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-zinc-400 truncate">
+                          {conv.last_message}
+                        </p>
+                        {conv.unread_count > 0 && (
+                          <span className="ml-2 bg-amber-500 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+                            {conv.unread_count}
                           </span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-white/60 truncate">
-                            {conv.last_message.from_user_id === currentUser.id && 'You: '}
-                            {conv.last_message.content}
-                          </p>
-                          {conv.unread_count > 0 && (
-                            <span className="ml-2 px-2 py-0.5 bg-emerald-500 text-white text-xs rounded-full flex-shrink-0">
-                              {conv.unread_count}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </button>
                 ))
-              )}
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Messages Area */}
-          <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col">
-            {!selectedConversation ? (
-              <div className="flex-1 flex items-center justify-center p-8">
-                <div className="text-center">
-                  <MessageSquare className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/60 text-lg">Select a conversation to start messaging</p>
+        {/* Messages area */}
+        <div className={`flex-1 flex flex-col ${selectedConversation ? 'flex' : 'hidden md:flex'}`}>
+          {selectedConversation ? (
+            <>
+              {/* Conversation header */}
+              <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedConversation(null)}
+                    className="md:hidden p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div className="relative">
+                    {selectedConversation.other_user.avatar_url ? (
+                      <img 
+                        src={selectedConversation.other_user.avatar_url} 
+                        alt={selectedConversation.other_user.full_name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-bold text-sm">
+                        {getInitials(selectedConversation.other_user.full_name)}
+                      </div>
+                    )}
+                    {isUserActive(selectedConversation.other_user.last_active_at) && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-zinc-950 rounded-full" />
+                    )}
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">{selectedConversation.other_user.full_name}</h2>
+                    <p className="text-xs text-zinc-500">
+                      {isUserActive(selectedConversation.other_user.last_active_at) ? (
+                        <span className="text-emerald-400">● Active now</span>
+                      ) : (
+                        selectedConversation.other_user.title || 'Member'
+                      )}
+                    </p>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <>
-                {/* Conversation Header */}
-                <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white">
-                        {selectedConversation.other_user.full_name}
-                      </h3>
-                      <p className="text-xs text-white/60">
-                        {selectedConversation.other_user.title} at {selectedConversation.other_user.company}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => router.push(`/members/${selectedConversation.id}`)}
-                    className="text-emerald-400 hover:text-emerald-300 text-sm"
-                  >
-                    View Profile
-                  </button>
-                </div>
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map(msg => {
-                    const isMe = msg.from_user_id === currentUser.id;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`max-w-[70%] ${isMe ? 'order-2' : 'order-1'}`}>
-                          <div
-                            className={`px-4 py-2 rounded-2xl ${
-                              isMe
-                                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white'
-                                : 'bg-white/10 text-white'
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                            {msg.attachments && msg.attachments.length > 0 && (
-                              <div className="mt-2 space-y-2">
-                                {msg.attachments.map(att => (
-                                  att.file_type?.startsWith('image/') ? (
-                                    <img
-                                      key={att.id}
-                                      src={att.file_url}
-                                      alt={att.file_name}
-                                      className="rounded-lg max-w-xs"
-                                    />
-                                  ) : (
-                                    <a
-                                      key={att.id}
-                                      href={att.file_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm underline opacity-80 hover:opacity-100"
-                                    >
-                                      📎 {att.file_name}
-                                    </a>
-                                  )
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className={`flex items-center gap-1 mt-1 text-xs text-white/40 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            <span>{formatTime(msg.created_at)}</span>
-                            {isMe && (
-                              msg.read_at ? 
-                                <CheckCheck className="w-3 h-3 text-emerald-400" /> :
-                                <Check className="w-3 h-3" />
-                            )}
-                          </div>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={messageContainerRef}>
+                {messages.map((msg, idx) => {
+                  const isFromMe = msg.from_user_id === currentUser.id;
+                  const showAvatar = idx === 0 || messages[idx - 1].from_user_id !== msg.from_user_id;
+
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex gap-3 ${isFromMe ? 'flex-row-reverse' : 'flex-row'}`}
+                    >
+                      {showAvatar ? (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-bold text-xs flex-shrink-0">
+                          {isFromMe ? getInitials(currentUser.full_name || 'You') : getInitials(selectedConversation.other_user.full_name)}
+                        </div>
+                      ) : (
+                        <div className="w-8" />
+                      )}
+                      <div className={`flex flex-col ${isFromMe ? 'items-end' : 'items-start'} max-w-[70%]`}>
+                        <div
+                          className={`px-4 py-2 rounded-2xl ${
+                            isFromMe
+                              ? 'bg-amber-500 text-black rounded-tr-sm'
+                              : 'bg-zinc-800 text-white rounded-tl-sm'
+                          } ${msg.sending ? 'opacity-50' : ''}`}
+                        >
+                          <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 px-1">
+                          <span className="text-xs text-zinc-500">
+                            {formatTime(msg.created_at)}
+                          </span>
+                          {isFromMe && (
+                            msg.read_at ? (
+                              <CheckCheck className="w-3 h-3 text-emerald-400" />
+                            ) : (
+                              <Check className="w-3 h-3 text-zinc-500" />
+                            )
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Message Input */}
-                <div className="p-4 border-t border-white/10">
-                  {selectedFile && (
-                    <div className="mb-3 p-3 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-white">
-                        <Paperclip className="w-4 h-4" />
-                        <span>{selectedFile.name}</span>
-                        <span className="text-white/40">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
-                      </div>
-                      <button
-                        onClick={() => setSelectedFile(null)}
-                        className="text-white/60 hover:text-white transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
                     </div>
-                  )}
-                  <div className="flex items-end gap-2">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          if (file.size > 5 * 1024 * 1024) {
-                            alert('File size must be less than 5MB');
-                            return;
-                          }
-                          setSelectedFile(file);
-                        }
-                      }}
-                      className="hidden"
-                      accept="image/*,.pdf,.doc,.docx"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-white/60 hover:text-white"
-                      title="Attach file or image"
-                    >
-                      <Paperclip className="w-5 h-5" />
-                    </button>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Message input */}
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-800 bg-zinc-950">
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 relative">
                     <textarea
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
-                          sendMessage();
+                          handleSendMessage(e);
                         }
                       }}
-                      placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
-                      className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                      rows="3"
+                      placeholder="Type a message..."
+                      rows={1}
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 resize-none text-sm"
+                      style={{ minHeight: '44px', maxHeight: '120px' }}
                     />
-                    <button
-                      onClick={sendMessage}
-                      disabled={(!newMessage.trim() && !selectedFile) || sending}
-                      className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                    >
-                      {sending ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Send className="w-5 h-5" />
-                      )}
-                    </button>
                   </div>
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim() || sending}
+                    className="px-4 py-3 bg-amber-500 text-black rounded-xl hover:bg-amber-400 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
+                  >
+                    {sending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
-              </>
-            )}
-          </div>
+                <p className="text-xs text-zinc-600 mt-2">
+                  Press Enter to send, Shift+Enter for new line
+                </p>
+              </form>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-8 text-center">
+              <div>
+                <MessageSquare className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-zinc-400 mb-2">No conversation selected</h3>
+                <p className="text-zinc-600">
+                  Choose a conversation from the list to start messaging
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -689,8 +692,8 @@ function MessagesContent() {
 export default function MessagesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
       </div>
     }>
       <MessagesContent />
