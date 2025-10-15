@@ -1,168 +1,105 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Lock, Clock, Sparkles } from 'lucide-react';
-import { getTimeUntilLaunch, getLaunchDate } from '@/lib/feature-flags';
+import { Calendar, Lock, Crown } from 'lucide-react';
+import Link from 'next/link';
 
-/**
- * LockedFeature Component
- * Displays elegant locked state for features before launch date
- */
-import LaunchCountdown from './LaunchCountdown';
+// Admin user IDs who can bypass feature locks
+const ADMIN_USER_IDS = ['9f305857-cf9b-47bd-aca1-75263d22973d'];
 
 export default function LockedFeature({ 
   featureName, 
-  featureDescription, 
-  featureValue,
-  children,
-  className = ''
+  featureTitle,
+  featureDescription,
+  unlockDate = 'November 10, 2025',
+  currentUser,
+  children 
 }) {
-  const [timeRemaining, setTimeRemaining] = useState(getTimeUntilLaunch());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining(getTimeUntilLaunch());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const launchDate = getLaunchDate();
-  const formattedDate = launchDate.toLocaleDateString('en-US', { 
-    month: 'long', 
-    day: 'numeric', 
-    year: 'numeric' 
-  });
-
-  return (
-    <div className={`relative ${className}`}>
-      {/* Content (blurred) */}
-      <div className="blur-sm opacity-30 pointer-events-none select-none">
-        {children}
-      </div>
-
-      {/* Locked Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="bg-[#0A0E27]/95 backdrop-blur-xl border border-[#E5C77E]/20 rounded-2xl p-8 max-w-lg mx-4 text-center">
-          {/* Lock Icon */}
-          <div className="w-16 h-16 bg-[#E5C77E]/10 border border-[#E5C77E]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="w-8 h-8 text-[#E5C77E]" />
+  // Admin bypass - you can always access
+  const isAdmin = currentUser && ADMIN_USER_IDS.includes(currentUser.id);
+  
+  // Check if feature should be unlocked (November 10, 2025 at 12:00 AM ET)
+  const launchDate = new Date('2025-11-10T00:00:00-05:00');
+  const isUnlocked = Date.now() >= launchDate.getTime();
+  
+  // Show unlocked content if admin or past launch date
+  if (isAdmin || isUnlocked) {
+    return (
+      <>
+        {isAdmin && !isUnlocked && (
+          <div className="mb-4 px-4 py-3 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/30 rounded-xl flex items-center gap-3 animate-pulse">
+            <Crown className="w-5 h-5 text-amber-400" />
+            <div className="flex-1">
+              <span className="text-sm text-amber-400 font-semibold block">
+                👑 Admin Preview Mode
+              </span>
+              <span className="text-xs text-amber-400/70">
+                This feature is locked for members until {unlockDate}
+              </span>
+            </div>
           </div>
+        )}
+        {children}
+      </>
+    );
+  }
 
-          {/* Feature Name */}
-          <h3 className="text-2xl font-light text-white mb-2 tracking-wide">
-            {featureName}
-          </h3>
-
-          {/* Description */}
-          <p className="text-white/60 mb-4 font-light">
-            {featureDescription}
-          </p>
-
-          {/* Value Proposition */}
-          <div className="bg-[#E5C77E]/5 border border-[#E5C77E]/10 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-[#E5C77E] flex-shrink-0 mt-0.5" />
-              <p className="text-white/80 text-sm font-light text-left">
-                {featureValue}
+  // Show locked state for regular members
+  return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <div className="max-w-2xl w-full">
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5 animate-pulse" />
+          
+          <div className="relative p-12 text-center">
+            {/* Lock icon with glow */}
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-500/20 to-emerald-500/20 flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-ping" />
+              <Lock className="w-12 h-12 text-amber-400 relative z-10" />
+            </div>
+            
+            <h1 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white via-amber-200 to-white bg-clip-text text-transparent">
+              {featureTitle || 'Feature Coming Soon'}
+            </h1>
+            
+            <p className="text-lg text-zinc-400 mb-8 max-w-md mx-auto leading-relaxed">
+              {featureDescription || 'This premium feature will be available after the full platform launch.'}
+            </p>
+            
+            {/* Countdown display */}
+            <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500/10 to-emerald-500/10 border border-amber-500/20 rounded-xl mb-8 shadow-lg">
+              <Calendar className="w-6 h-6 text-amber-400" />
+              <div className="text-left">
+                <div className="text-xs text-amber-400/70 font-medium uppercase tracking-wider">Unlocks On</div>
+                <div className="text-lg text-amber-400 font-bold">{unlockDate}</div>
+                <div className="text-xs text-emerald-400/70 mt-0.5">12:00 AM Eastern Time</div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <Link 
+                href="/dashboard"
+                className="inline-block px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg hover:shadow-amber-500/20"
+              >
+                Return to Dashboard
+              </Link>
+              
+              <p className="text-sm text-zinc-500">
+                ✨ You'll receive an email notification when this feature launches
               </p>
             </div>
           </div>
-
-          {/* Countdown Timer */}
-          {!timeRemaining.isLaunched && (
-            <div className="mb-6">
-              <div className="flex items-center justify-center gap-2 text-[#E5C77E]/70 text-sm mb-3">
-                <Clock className="w-4 h-4" />
-                <span className="tracking-wide font-light">Unlocks in:</span>
-              </div>
-              <div className="flex justify-center gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-light text-[#E5C77E] tabular-nums">
-                    {timeRemaining.days}
-                  </div>
-                  <div className="text-xs text-white/40 tracking-widest mt-1">DAYS</div>
-                </div>
-                <div className="self-center text-[#E5C77E]/30 text-2xl">:</div>
-                <div className="text-center">
-                  <div className="text-3xl font-light text-[#E5C77E] tabular-nums">
-                    {String(timeRemaining.hours).padStart(2, '0')}
-                  </div>
-                  <div className="text-xs text-white/40 tracking-widest mt-1">HRS</div>
-                </div>
-                <div className="self-center text-[#E5C77E]/30 text-2xl">:</div>
-                <div className="text-center">
-                  <div className="text-3xl font-light text-[#E5C77E] tabular-nums">
-                    {String(timeRemaining.minutes).padStart(2, '0')}
-                  </div>
-                  <div className="text-xs text-white/40 tracking-widest mt-1">MIN</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Launch Date */}
-          <div className="pt-6 border-t border-[#E5C77E]/10">
-            <p className="text-white/40 text-sm font-light">
-              Available to all founding members on{' '}
-              <span className="text-[#E5C77E]">{formattedDate}</span>
-            </p>
-          </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Inline Locked Feature Badge
- * Smaller version for navigation items
- */
-export function LockedBadge({ timeRemaining }) {
-  if (timeRemaining?.isLaunched) return null;
-  
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#E5C77E]/10 border border-[#E5C77E]/30 text-[#E5C77E] text-xs rounded-full ml-2">
-      <Lock className="w-3 h-3" />
-      <span className="font-light">{timeRemaining?.days}d</span>
-    </span>
-  );
-}
-
-/**
- * Feature Unlock Notification
- * Shows when a feature becomes available
- */
-export function FeatureUnlockedNotification({ featureName, onDismiss }) {
-  return (
-    <div className="fixed bottom-8 right-8 bg-[#0A0E27] border border-[#E5C77E]/30 rounded-xl p-6 max-w-sm shadow-2xl animate-fadeIn z-50">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-[#E5C77E]/10 rounded-full flex items-center justify-center flex-shrink-0">
-          <Sparkles className="w-6 h-6 text-[#E5C77E]" />
-        </div>
-        <div className="flex-1">
-          <h4 className="text-white font-light text-lg mb-1">Feature Unlocked!</h4>
-          <p className="text-white/60 text-sm font-light">
-            <span className="text-[#E5C77E]">{featureName}</span> is now available to you.
+        
+        {/* Info footer */}
+        <div className="mt-8 text-center space-y-2">
+          <p className="text-sm text-zinc-600">
+            <span className="text-amber-400 font-semibold">🎉 Founding Member Benefit:</span> Early platform access
+          </p>
+          <p className="text-xs text-zinc-700">
+            All premium features unlock automatically on launch day • No action needed
           </p>
         </div>
-        <button
-          onClick={onDismiss}
-          className="text-white/40 hover:text-white transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
     </div>
   );
-}
-
-
-/** Countdown adornment */
-export function LockedCountdownBadge() {
-  if (typeof window === 'undefined') return null;
-  const target = process.env.NEXT_PUBLIC_LAUNCH_DATE;
-  if (!target) return null;
-  return <div className="mt-4"><LaunchCountdown target={target} /></div>;
 }
