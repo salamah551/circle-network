@@ -51,7 +51,8 @@ export default function PreLaunchBanner() {
   const launchDateFormatted = LAUNCH_DATE.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'America/New_York'
   });
 
   return (
