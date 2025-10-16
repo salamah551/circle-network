@@ -213,9 +213,9 @@ export default function MembersPage() {
                 {/* Member Header */}
                 <div className="flex items-start gap-4 mb-4">
                   <div className="relative flex-shrink-0">
-                    {member.avatar_url ? (
-                      <img
-                        src={member.avatar_url}
+                   {member.photo_url ? (
+  <img
+    src={member.photo_url}
                         alt={member.full_name}
                         className="w-16 h-16 rounded-full object-cover"
                       />
@@ -307,3 +307,4 @@ export default function MembersPage() {
     </div>
   );
 }
+
