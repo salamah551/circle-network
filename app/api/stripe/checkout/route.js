@@ -1,4 +1,5 @@
 // app/api/stripe/checkout/route.js
+// Updated with new pricing: $2,497/$4,997/$9,997
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
@@ -6,12 +7,12 @@ import { createClient } from '@supabase/supabase-js';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { priceId } = body;
-  // Initialize at runtime
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2023-10-16',
-  });
+    const { priceId, tier } = body;
 
+    // Initialize Stripe
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+    });
 
     // Get the authorization token from the header
     const authHeader = request.headers.get('authorization');
@@ -24,7 +25,7 @@ export async function POST(request) {
 
     const token = authHeader.replace('Bearer ', '');
 
-    // Create Supabase client WITHOUT global headers
+    // Create Supabase client
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -41,8 +42,21 @@ export async function POST(request) {
       );
     }
 
+    // Map tier to correct Price ID (your new IDs)
+    let finalPriceId = priceId;
+    
+    if (tier && !priceId) {
+      const tierToPriceId = {
+        'founding': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING || 'price_1SCpCXEGtn4MWvFPzApRs8E4',
+        'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM || 'price_1SIc5xEGtn4MWvFP6GlsbEwh',
+        'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE || 'price_1SIc6fEGtn4MWvFPjISz9nNZ'
+      };
+      
+      finalPriceId = tierToPriceId[tier.toLowerCase()];
+    }
+
     // Validate price ID
-    if (!priceId) {
+    if (!finalPriceId) {
       return NextResponse.json(
         { error: 'Price ID is required' },
         { status: 400 }
@@ -66,30 +80,36 @@ export async function POST(request) {
       );
     }
 
-    console.log('Creating checkout session for user:', user.id);
+    console.log('Creating checkout session for user:', user.id, 'Tier:', tier || 'direct');
+
+    // Determine tier name for metadata
+    const tierName = tier || 'founding';
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer_email: user.email,
       line_items: [
         { 
-          price: priceId, 
+          price: finalPriceId, 
           quantity: 1 
         }
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?welcome=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?welcome=true&tier=${tierName}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe?canceled=true&email=${encodeURIComponent(user.email)}`,
       metadata: { 
         userId: user.id, 
-        isFoundingMember: 'true'
+        isFoundingMember: 'true',
+        membershipTier: tierName
       },
       subscription_data: {
         metadata: { 
           userId: user.id, 
-          isFoundingMember: 'true'
+          isFoundingMember: 'true',
+          membershipTier: tierName
         },
       },
+      allow_promotion_codes: true, // Allow discount codes
     });
 
     console.log('Checkout session created:', session.id);
@@ -107,7 +127,7 @@ export async function POST(request) {
     }
     
     return NextResponse.json(
-      { error: error.message || 'Unable to process payment. Please try again or contact support.' },
+      { error: error.message || 'Payment processing error. Please try again.' },
       { status: 500 }
     );
   }
