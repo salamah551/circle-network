@@ -69,43 +69,44 @@ export default function StrategicIntrosPage() {
     }
   };
 
-  const loadIntros = async (userId) => {
-    try {
-      setError(null);
-      const { data, error: loadError } = await supabase
-        .from('strategic_intros')
-        .select(`
-          *,
-          suggested_member:profiles!strategic_intros_suggested_member_id_fkey(
-            id,
-            full_name,
-            first_name,
-            last_name,
-            title,
-            company,
-            bio,
-            expertise,
-            location,
-            avatar_url,
-            is_founding_member
-          )
-        `)
-        .eq('user_id', userId)
-        .eq('status', 'pending')
-        .order('confidence_score', { ascending: false })
-        .limit(3);
+const loadIntros = async (userId) => {
+  try {
+    setError(null);
+    const { data, error: loadError } = await supabase
+      .from('strategic_intros')
+      .select(`
+        *,
+        partner:profiles!strategic_intros_partner_id_fkey(
+          id,
+          full_name,
+          first_name,
+          last_name,
+          title,
+          company,
+          bio,
+          expertise,
+          location,
+          photo_url,
+          is_founding_member,
+          membership_tier
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'proposed')
+      .order('confidence_score', { ascending: false })
+      .limit(3);
 
-      if (loadError) {
-        console.error('Error loading intros:', loadError);
-        throw new Error('Failed to load introductions');
-      }
-
-      setIntros(data || []);
-    } catch (error) {
-      console.error('Error loading intros:', error);
-      setError('Failed to load introductions. Please try refreshing.');
+    if (loadError) {
+      console.error('Error loading intros:', loadError);
+      throw new Error('Failed to load introductions');
     }
-  };
+
+    setIntros(data || []);
+  } catch (error) {
+    console.error('Error loading intros:', error);
+    setError('Failed to load introductions. Please try refreshing.');
+  }
+};
 
   const handleAccept = async (introId, suggestedMemberId) => {
     if (isProcessing) return;
