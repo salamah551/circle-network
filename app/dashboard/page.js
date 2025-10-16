@@ -307,11 +307,11 @@ function Notifications({ userId }) {
       }
 
       // Get pending intro requests
-      const { data: intros, error: introError } = await supabase
-        .from('intro_requests')
-        .select('*, requester:profiles!intro_requests_requester_id_fkey(full_name)')
-        .eq('target_member_id', userId)
-        .eq('status', 'pending')
+    const { data: intros, error: introError } = await supabase
+  .from('strategic_intros')
+  .select('*, partner:profiles!strategic_intros_partner_id_fkey(full_name)')
+  .eq('user_id', userId)
+  .eq('status', 'proposed')
         .order('created_at', { ascending: false })
         .limit(10);
 
