@@ -57,9 +57,9 @@ export default function MemberSpotlight() {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Profile Image/Avatar */}
         <div className="flex-shrink-0">
-          {spotlight.avatar_url ? (
-            <img
-              src={spotlight.avatar_url}
+         {spotlight.photo_url ? (
+  <img
+    src={spotlight.photo_url}
               alt={spotlight.full_name}
               className="w-24 h-24 md:w-32 md:h-32 rounded-2xl object-cover border-2 border-amber-500/30"
             />
