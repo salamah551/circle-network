@@ -345,32 +345,48 @@ export default function StrategicIntrosPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {intros.map((intro, index) => {
-              const member = intro.partner;
-              if (!member) return null;
+        {intros.map((intro, index) => {
+  const member = intro.partner; // ✅ FIXED
+  if (!member) return null;
 
-              return (
-                <div
-                  key={intro.id}
-                  className="p-6 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 hover:border-amber-500/30 transition-all"
-                >
-                  {/* Match Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-zinc-500 font-medium">
-                        Match #{index + 1}
-                      </span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getConfidenceColor(intro.confidence_score)}`}>
-                        {getConfidenceLabel(intro.confidence_score)} • {intro.confidence_score}%
-                      </span>
-                    </div>
-                    {member.is_founding_member && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400">
-                        <Crown className="w-3 h-3" />
-                        Founder
-                      </span>
-                    )}
-                  </div>
+  return (
+    <div
+      key={intro.id}
+      className="p-6 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 hover:border-amber-500/30 transition-all"
+    >
+      {/* Match Badge */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-zinc-500 font-medium">
+            Match #{index + 1}
+          </span>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getConfidenceColor(intro.confidence_score)}`}>
+            {getConfidenceLabel(intro.confidence_score)} • {intro.confidence_score}%
+          </span>
+        </div>
+        {member.is_founding_member && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400">
+            <Crown className="w-3 h-3" />
+            Founder
+          </span>
+        )}
+      </div>
+
+      {/* Member Info */}
+      <div className="flex items-start gap-4 mb-4">
+        <div className="relative flex-shrink-0">
+          {member.photo_url ? ( {/* ✅ FIXED - was avatar_url */}
+            <img
+              src={member.photo_url}
+              alt={member.full_name}
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-bold text-2xl">
+              {getInitials(member.full_name)}
+            </div>
+          )}
+        </div>
 
                   {/* Member Info */}
                   <div className="flex items-start gap-4 mb-4">
