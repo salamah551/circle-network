@@ -500,9 +500,9 @@ function MessagesContent() {
                     }`}
                   >
                     <div className="relative flex-shrink-0">
-                      {conv.other_user.avatar_url ? (
-                        <img 
-                          src={conv.other_user.avatar_url} 
+                     {conv.other_user.photo_url ? (
+  <img 
+    src={conv.other_user.photo_url}
                           alt={conv.other_user.full_name}
                           className="w-12 h-12 rounded-full object-cover"
                         />
@@ -561,9 +561,9 @@ function MessagesContent() {
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                   <div className="relative">
-                    {selectedConversation.other_user.avatar_url ? (
-                      <img 
-                        src={selectedConversation.other_user.avatar_url} 
+                   {selectedConversation.other_user.photo_url ? (
+  <img 
+    src={selectedConversation.other_user.photo_url}
                         alt={selectedConversation.other_user.full_name}
                         className="w-10 h-10 rounded-full object-cover"
                       />
