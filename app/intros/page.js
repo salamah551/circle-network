@@ -346,7 +346,7 @@ const loadIntros = async (userId) => {
         ) : (
           <div className="space-y-6">
             {intros.map((intro, index) => {
-              const member = intro.suggested_member;
+              const member = intro.partner;
               if (!member) return null;
 
               return (
