@@ -388,21 +388,7 @@ export default function StrategicIntrosPage() {
           )}
         </div>
 
-                  {/* Member Info */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="relative flex-shrink-0">
-                      {member.photo_url ? (
-                        <img
-                          src={member.photo_url}
-                          alt={member.full_name}
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-black font-bold text-2xl">
-                          {getInitials(member.full_name)}
-                        </div>
-                      )}
-                    </div>
+                 
 
                     <div className="flex-1 min-w-0">
                       <h3 className="text-xl font-bold mb-1">{member.full_name}</h3>
