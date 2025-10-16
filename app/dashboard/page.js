@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getRecommendations } from '@/lib/recommendations';
+import TierBadge from '@/components/TierBadge';
+import AIServicesTeaser from '@/components/AIServicesTeaser';
 import PreLaunchBanner from '@/components/PreLaunchBanner';
 import SuccessDashboard from '@/components/SuccessDashboard';
 import FeatureLockedCard from '@/components/FeatureLockedCard';
@@ -890,6 +892,15 @@ export default function DashboardPage() {
             </Link>
           ))}
         </div>
+{/* AI Services Teaser - Elite members only OR hint for others */}
+{user && (
+  <div className="mb-10">
+    <AIServicesTeaser 
+      userTier={profile?.membership_tier || 'founding'}
+      isElite={profile?.membership_tier === 'elite'}
+    />
+  </div>
+)}
 
 {/* Success Dashboard */}
 <div className="mb-10">
