@@ -54,18 +54,18 @@ export async function GET(request) {
       .from('expert_sessions')
       .select(`
         *,
-        expert:profiles!expert_sessions_expert_id_fkey(
-          id,
-          full_name,
-          title,
-          company,
-          avatar_url
-        ),
-        attendee:profiles!expert_sessions_attendee_id_fkey(
-          id,
-          full_name,
-          avatar_url
-        )
+      expert:profiles!expert_sessions_expert_id_fkey(
+  id,
+  full_name,
+  title,
+  company,
+  photo_url  // ✅ Line 58
+),
+attendee:profiles!expert_sessions_attendee_id_fkey(
+  id,
+  full_name,
+  photo_url  // ✅ Line 63
+)
       `)
       .or(`expert_id.eq.${user.id},attendee_id.eq.${user.id}`)
       .eq('status', status)
