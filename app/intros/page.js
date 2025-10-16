@@ -69,46 +69,46 @@ export default function StrategicIntrosPage() {
     }
   };
 
-const loadIntros = async (userId) => {
-  try {
-    setError(null);
-    const { data, error: loadError } = await supabase
-      .from('strategic_intros')
-      .select(`
-        *,
-        partner:profiles!strategic_intros_partner_id_fkey(
-          id,
-          full_name,
-          first_name,
-          last_name,
-          title,
-          company,
-          bio,
-          expertise,
-          location,
-          photo_url,
-          is_founding_member,
-          membership_tier
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'proposed')
-      .order('confidence_score', { ascending: false })
-      .limit(3);
+  const loadIntros = async (userId) => {
+    try {
+      setError(null);
+      const { data, error: loadError } = await supabase
+        .from('strategic_intros')
+        .select(`
+          *,
+          partner:profiles!strategic_intros_partner_id_fkey(
+            id,
+            full_name,
+            first_name,
+            last_name,
+            title,
+            company,
+            bio,
+            expertise,
+            location,
+            photo_url,
+            is_founding_member,
+            membership_tier
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'proposed')
+        .order('confidence_score', { ascending: false })
+        .limit(3);
 
-    if (loadError) {
-      console.error('Error loading intros:', loadError);
-      throw new Error('Failed to load introductions');
+      if (loadError) {
+        console.error('Error loading intros:', loadError);
+        throw new Error('Failed to load introductions');
+      }
+
+      setIntros(data || []);
+    } catch (error) {
+      console.error('Error loading intros:', error);
+      setError('Failed to load introductions. Please try refreshing.');
     }
+  };
 
-    setIntros(data || []);
-  } catch (error) {
-    console.error('Error loading intros:', error);
-    setError('Failed to load introductions. Please try refreshing.');
-  }
-};
-
-  const handleAccept = async (introId, suggestedMemberId) => {
+  const handleAccept = async (introId, partnerId) => {
     if (isProcessing) return;
     
     try {
@@ -133,7 +133,7 @@ const loadIntros = async (userId) => {
         .from('intro_requests')
         .insert({
           requester_id: currentUser.id,
-          target_member_id: suggestedMemberId,
+          target_member_id: partnerId,
           status: 'accepted',
           message: 'Accepted via Strategic Intros'
         });
@@ -297,7 +297,7 @@ const loadIntros = async (userId) => {
                 </div>
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-emerald-400" />
-                  <span>92% success rate</span>
+                  <span>High success rate</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-3 h-3 text-blue-400" />
@@ -375,9 +375,9 @@ const loadIntros = async (userId) => {
                   {/* Member Info */}
                   <div className="flex items-start gap-4 mb-4">
                     <div className="relative flex-shrink-0">
-                      {member.avatar_url ? (
+                      {member.photo_url ? (
                         <img
-                          src={member.avatar_url}
+                          src={member.photo_url}
                           alt={member.full_name}
                           className="w-20 h-20 rounded-full object-cover"
                         />
@@ -431,13 +431,13 @@ const loadIntros = async (userId) => {
                   )}
 
                   {/* Match Reason */}
-                  {intro.match_reason && (
+                  {intro.reason && (
                     <div className="mb-6 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
                       <p className="text-xs text-emerald-400 uppercase tracking-wider mb-1 font-semibold">
                         Why this match?
                       </p>
                       <p className="text-sm text-zinc-300 leading-relaxed">
-                        {intro.match_reason}
+                        {intro.reason}
                       </p>
                     </div>
                   )}
