@@ -10,34 +10,156 @@ if (!process.env.SENDGRID_API_KEY) {
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'invite@thecirclenetwork.org';
-const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'The Circle Network';
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org';
+const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Shehab Salamah';
 
 function htmlForInvite({ invite, appUrl }) {
   const link = `${appUrl}/?invite=${invite.code || ''}&iid=${invite.id}`;
+  const firstName = invite.full_name ? invite.full_name.split(' ')[0] : 'there';
+  
   return `
-  <!doctype html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;">
-  <div style="background:black;color:white;padding:28px;border-radius:12px">
-    <div style="color:#D4AF37;font-weight:600;font-size:20px;margin-bottom:4px">The Circle Network</div>
-    <div style="opacity:.7;font-size:13px;">Invitation-only • Manual approval • Privacy-first</div>
-  </div>
-  <div style="background:white;padding:28px;border-radius:12px;margin-top:16px;border:1px solid #eee">
-    <h1 style="margin:0 0 8px 0;font-weight:600;">You're invited, ${invite.full_name || ''}</h1>
-    <p style="margin:0 0 12px 0;opacity:.8">A private operating network for elite founders & investors.</p>
-    <p style="margin:0 0 10px 0;"><b>What you get:</b> 3 strategic introductions weekly, a high-signal value exchange, and a reputation system that rewards contribution.</p>
-    <div style="background:#0b0b0b;color:white;padding:14px;border-radius:8px;margin:16px 0;">
-      <div style="opacity:.8;font-size:12px;margin-bottom:6px;">Member-Only Intelligence Suite (coming soon · optional, billed separately):</div>
-      <ul style="margin:0 0 0 18px;padding:0;">
-        <li><b>AI Competitive Intelligence</b> — daily briefs & predictive alerts <i>(from $8,000/mo)</i></li>
-        <li><b>AI Reputation Guardian</b> — real-time monitoring & takedowns <i>(from $5,000/mo)</i></li>
-        <li><b>Deal Flow Alerts</b> — curated, pre‑public opportunities <i>(from $2,000/mo)</i></li>
-      </ul>
-      <div style="opacity:.7;font-size:12px;margin-top:6px">Not available yet; founding members get priority access as capacity opens.</div>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:32px 28px;text-align:center;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#E5C77E,#D4AF37);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">
+        👑
+      </div>
+      <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Circle Network</h1>
+      <p style="margin:0;opacity:0.8;font-size:14px;">Invitation-only • 250 Founding Members • Launching Dec 1, 2025</p>
     </div>
-    <a href="${link}" style="display:inline-block;background:linear-gradient(90deg,#E5C77E,#D4AF37);color:black;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:600">Request Access</a>
-    <div style="opacity:.6;font-size:12px;margin-top:10px">Founding cohort capped. Price lock for approved founders.</div>
+
+    <!-- Main Content -->
+    <div style="padding:32px 28px;">
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">Hi ${firstName},</p>
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You've been personally selected to join <strong>Circle Network</strong>—an invitation-only community of 250 accomplished professionals who are transforming how high-achievers connect and do business.
+      </p>
+
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You're receiving this because you're among a highly selective group being invited to join during our <strong>founding member phase</strong>.
+      </p>
+
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
+        This isn't another LinkedIn group or networking event. This is something different.
+      </p>
+
+      <!-- What is Circle Network -->
+      <div style="background:#f8f9fa;border-left:4px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:4px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">WHAT IS CIRCLE NETWORK?</h2>
+        <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#333;">
+          Circle Network is a private platform where accomplished professionals leverage AI-powered tools to:
+        </p>
+        <ul style="margin:0;padding:0 0 0 20px;">
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Get matched with <strong>3 high-value connections every week</strong></li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Receive <strong>real-time deal flow alerts</strong> tailored to your investment criteria</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Protect your reputation with <strong>AI-powered monitoring</strong> and threat detection</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Gain <strong>competitive intelligence</strong> on market trends and opportunities</li>
+        </ul>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-style:italic;">
+          Think of it as your personal intelligence network—powered by AI, curated by humans.
+        </p>
+      </div>
+
+      <!-- Core Features -->
+      <div style="margin:0 0 24px 0;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">CORE FEATURES</h2>
+        
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">🤝 AI-Powered Strategic Introductions</p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Our algorithm analyzes your goals, expertise, and needs to recommend 3 high-value connections every week. Accept an intro, and we facilitate the email introduction automatically. No cold outreach. No awkward asks. Just warm, curated connections.
+          </p>
+        </div>
+
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">💼 AI Deal Flow Alerts <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:3px;font-weight:600;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Set your investment criteria—industry, deal size, stage, geography—and our AI monitors the network and external sources to surface opportunities that match. Get notified the moment a relevant deal emerges, before it hits the broader market.
+          </p>
+        </div>
+
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">🛡️ Reputation Guardian <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:3px;font-weight:600;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Your reputation is your most valuable asset. Our AI continuously monitors mentions of you and your company across social media, news, and forums. Get instant alerts about potential threats, negative sentiment, or emerging issues—so you can respond before they escalate.
+          </p>
+        </div>
+
+        <div style="margin:0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">📊 AI Competitive Intelligence <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:3px;font-weight:600;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Stay ahead of your competition. Our AI tracks market trends, competitor moves, funding announcements, and strategic shifts in your industry. Receive weekly intelligence reports with actionable insights you won't find anywhere else.
+          </p>
+        </div>
+      </div>
+
+      <!-- Founding Member Benefits -->
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:24px;margin:0 0 24px 0;border-radius:8px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#D4AF37;">WHAT YOU GET AS A FOUNDING MEMBER</h2>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+          You're being invited during our founding member phase, which means:
+        </p>
+        <ul style="margin:0 0 16px 0;padding:0 0 0 20px;">
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Lifetime Founding Member Status</strong><br/>Lock in $2,497/year forever (regular pricing will be $4,997+ after January 15, 2026)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ ALL Elite AI Features INCLUDED—Forever</strong><br/>While future Premium members must pay $4,997-$8,994 to access AI features, you get them all at no additional cost:<br/>• AI Deal Flow Alerts (Value: $1,997/year)<br/>• Reputation Guardian (Value: $1,497/year)<br/>• AI Competitive Intelligence (Value: $1,497/year)<br/><span style="color:#D4AF37;">Total AI Features Value: $4,991/year—INCLUDED in your $2,497 membership</span></li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original 250</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
+          <li style="margin:0;font-size:15px;line-height:1.5;"><strong>✓ Unlimited Access to All Core Features</strong><br/>Strategic Intros, Member Directory, Private Messaging, and more—no paywalls, no limits</li>
+        </ul>
+      </div>
+
+      <!-- Invitation Code -->
+      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${invite.code || 'CN-XXXX-XXXX'}</p>
+        <a href="${link}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;box-shadow:0 4px 12px rgba(212,175,55,0.3);">Request Your Invitation →</a>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">This code is unique to you and expires in 14 days.</p>
+      </div>
+
+      <!-- Timeline -->
+      <div style="margin:0 0 24px 0;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">THE TIMELINE</h2>
+        <div style="font-size:14px;line-height:1.8;color:#333;">
+          <p style="margin:0 0 8px 0;"><strong>📅 November 10, 2025:</strong> Soft Launch (Invitation-Only Early Access)<br/><span style="color:#666;">Platform goes live for founding members. Core features available immediately.</span></p>
+          <p style="margin:0 0 8px 0;"><strong>📅 December 1, 2025:</strong> Official Public Launch<br/><span style="color:#666;">Full platform launch with all features. Founding member pricing still available.</span></p>
+          <p style="margin:0;"><strong>📅 January 15, 2026:</strong> Founding Member Window Closes<br/><span style="color:#666;">Pricing increases to $4,997/year (Premium) or $9,997/year (Elite)</span></p>
+        </div>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-style:italic;">
+          Founding member pricing ends when we reach 250 members OR January 15, 2026—whichever comes first.
+        </p>
+      </div>
+
+      <!-- CTA -->
+      <div style="background:#f8f9fa;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 16px 0;font-size:16px;font-weight:600;color:#1a1a1a;">Ready to Transform Your Network?</p>
+        <p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#666;">Early access gives you first choice of connections, influence on features, locked-in pricing, and founding member status that lasts forever.</p>
+        <a href="${link}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Apply Now →</a>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Questions? Just reply to this email—I read every message personally.</p>
+        <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#1a1a1a;">Shehab Salamah</p>
+        <p style="margin:0;font-size:13px;color:#999;">Founder, Circle Network</p>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#999;">© 2025 Circle Network. All rights reserved.</p>
+      </div>
+
+    </div>
   </div>
-  </body></html>`;
+
+</body>
+</html>`;
 }
 
 export async function POST(req) {
@@ -173,7 +295,7 @@ export async function POST(req) {
         const msg = {
           to: inv.email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
-          subject: `${inv.full_name || 'Founder'}, your invitation to The Circle Network`,
+          subject: `You've been selected for Circle Network`,
           html: htmlForInvite({ invite: inv, appUrl }),
           mailSettings: { bypassListManagement: { enable: true } },
           customArgs: {
