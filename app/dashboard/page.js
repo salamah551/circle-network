@@ -9,7 +9,7 @@ import {
   TrendingUp, Shield, BarChart3, Crown, Lock, ChevronRight,
   UserCheck, Calendar, Award, Target, Zap, Eye, DollarSign,
   Clock, AlertCircle, CheckCircle, Menu, X, LogOut, Plus,
-  Search, Filter, ArrowUpRight, Activity, Briefcase, Mail
+  Search, Filter, ArrowUpRight, Activity, Briefcase, Mail, Loader2
 } from 'lucide-react';
 
 const supabase = createClient(
