@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Target } from 'lucide-react'; // Add Target to existing imports
+
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import {
