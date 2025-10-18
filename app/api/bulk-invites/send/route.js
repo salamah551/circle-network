@@ -12,6 +12,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org';
 const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Shehab Salamah';
+const REPLY_TO_EMAIL = process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclenetwork.org';
 
 function htmlForInvite({ invite, appUrl }) {
   const link = `${appUrl}/?invite=${invite.code || ''}&iid=${invite.id}`;
@@ -295,6 +296,7 @@ export async function POST(req) {
         const msg = {
           to: inv.email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
+          replyTo: REPLY_TO_EMAIL,
           subject: `You've been selected for Circle Network`,
           html: htmlForInvite({ invite: inv, appUrl }),
           mailSettings: { bypassListManagement: { enable: true } },

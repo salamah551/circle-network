@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -17,12 +19,16 @@ export async function GET(request) {
           set(name, value, options) {
             try {
               cookieStore.set(name, value, options);
-            } catch (error) {}
+            } catch (error) {
+              // Cookie setting might fail in some contexts
+            }
           },
           remove(name, options) {
             try {
               cookieStore.set(name, '', { ...options, maxAge: 0 });
-            } catch (error) {}
+            } catch (error) {
+              // Cookie removal might fail in some contexts
+            }
           }
         }
       }
@@ -68,6 +74,6 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Error in member-spotlight API:', error);
-    return NextResponse.json(null);
+    return NextResponse.json(null, { status: 500 });
   }
 }

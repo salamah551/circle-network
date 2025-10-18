@@ -4,17 +4,18 @@ import { NextResponse } from 'next/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY // Need service role for background jobs
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org';
 const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'Shehab Salamah';
+const REPLY_TO_EMAIL = process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclenetwork.org';
 
 export async function GET(request) {
   try {
-    // Security: Verify this is being called by cron job (optional but recommended)
+    // Security: Verify this is being called by cron job
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'your-secret-key-here';
     
@@ -80,9 +81,10 @@ export async function GET(request) {
         const msg = {
           to: email.recipient_email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
+          replyTo: REPLY_TO_EMAIL,
           subject: subject,
           text: body,
-          html: body.replace(/\n/g, '<br>'), // Convert newlines to HTML
+          html: body.replace(/\n/g, '<br>'),
           mailSettings: { 
             bypassListManagement: { enable: true } 
           },
@@ -120,7 +122,7 @@ export async function GET(request) {
           .update({ 
             status: 'failed', 
             error_message: sendError.message || String(sendError),
-            sent_at: new Date().toISOString() // Track when failure occurred
+            sent_at: new Date().toISOString()
           })
           .eq('id', email.id);
 
