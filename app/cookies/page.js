@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Cookie, Settings, Eye, BarChart } from 'lucide-react';
-
+import { ArrowLeft, Cookie, Settings, Eye, BarChart, Shield } from 'lucide-react';
 export const metadata = {
   title: 'Cookie Policy - Circle Network',
   description: 'How Circle Network uses cookies and similar technologies'
