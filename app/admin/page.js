@@ -262,17 +262,7 @@ export default function AdminDashboard() {
             <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
           </button>
 
-          <button
-            onClick={() => router.push('/admin/invites')}
-            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
-          >
-            <Mail className="w-8 h-8 text-amber-400 mb-3" />
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
-              Invites
-            </h3>
-            <p className="text-zinc-500 text-sm mb-3">Create and track invites</p>
-            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
-          </button>
+          
 
           <button
             onClick={() => router.push('/admin/bulk-invites')}

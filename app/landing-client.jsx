@@ -426,7 +426,7 @@ export default function LandingClient() {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-8 max-w-3xl mx-auto leading-relaxed">
-            An exclusive community of {foundersCap} accomplished professionals across all industries. 
+            An exclusive community of accomplished professionals across all industries. 
             Get the right introductions, close meaningful deals, and accelerate your success.
           </p>
 
@@ -568,6 +568,146 @@ export default function LandingClient() {
           </div>
         </div>
       </section>
+
+      {/* ===== MISSION & PURPOSE ===== */}
+<section className="py-20 relative overflow-hidden">
+  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent -z-10" />
+  
+  <div className="max-w-6xl mx-auto px-6">
+    <div className="text-center mb-16">
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+        <Sparkles className="w-4 h-4 text-amber-400" />
+        <span className="text-sm text-amber-400 font-medium">Our Mission</span>
+      </div>
+      <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        Why Circle Network <span className="text-amber-400">Exists</span>
+      </h2>
+      <p className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+        Professional networking is broken. Circle Network is here to fix it.
+      </p>
+    </div>
+
+    {/* The Problem */}
+    <div className="grid md:grid-cols-2 gap-8 mb-16">
+      <div className="p-8 rounded-2xl bg-gradient-to-br from-red-500/10 to-zinc-950 border border-red-500/20">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
+            <X className="w-6 h-6 text-red-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-red-400">The Problem</h3>
+        </div>
+        <ul className="space-y-3 text-zinc-300">
+          <li className="flex items-start gap-3">
+            <span className="text-red-400 mt-1">•</span>
+            <span>Traditional networking events waste your time with random conversations</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-red-400 mt-1">•</span>
+            <span>LinkedIn is flooded with spam, sales pitches, and low-quality connections</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-red-400 mt-1">•</span>
+            <span>Finding the RIGHT person at the RIGHT time feels impossible</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-red-400 mt-1">•</span>
+            <span>Valuable opportunities slip through the cracks due to poor timing or visibility</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-red-400 mt-1">•</span>
+            <span>No way to protect your reputation or track what people say about you</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="p-8 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-zinc-950 border border-emerald-500/20">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+            <CheckCircle className="w-6 h-6 text-emerald-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-emerald-400">Our Solution</h3>
+        </div>
+        <ul className="space-y-3 text-zinc-300">
+          <li className="flex items-start gap-3">
+            <span className="text-emerald-400 mt-1">•</span>
+            <span><strong className="text-white">AI-matched introductions</strong> to people who can actually help you</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-emerald-400 mt-1">•</span>
+            <span><strong className="text-white">Curated, invitation-only</strong> community of accomplished professionals</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-emerald-400 mt-1">•</span>
+            <span><strong className="text-white">Real-time deal flow alerts</strong> so you never miss an opportunity</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-emerald-400 mt-1">•</span>
+            <span><strong className="text-white">24/7 reputation monitoring</strong> to protect your personal brand</span>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="text-emerald-400 mt-1">•</span>
+            <span><strong className="text-white">Competitive intelligence</strong> to stay ahead of market trends</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {/* Value Proposition */}
+    <div className="bg-gradient-to-br from-zinc-900 to-black border-2 border-amber-500/30 rounded-2xl p-8 md:p-12">
+      <div className="text-center mb-8">
+        <h3 className="text-3xl md:text-4xl font-bold mb-4">
+          This Isn't <span className="text-amber-400">Another</span> Networking Group
+        </h3>
+        <p className="text-xl text-zinc-400 max-w-3xl mx-auto">
+          Circle Network combines the intimacy of a private community with the power of AI to deliver 
+          what traditional networking can't: the right connections at the right time.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="text-center">
+          <div className="text-5xl font-bold text-amber-400 mb-2">10x</div>
+          <div className="text-sm text-zinc-400">More Valuable Than</div>
+          <div className="text-white font-semibold">Random Networking</div>
+        </div>
+        <div className="text-center">
+          <div className="text-5xl font-bold text-amber-400 mb-2">85%+</div>
+          <div className="text-sm text-zinc-400">AI Match Accuracy</div>
+          <div className="text-white font-semibold">Better Than Cold Outreach</div>
+        </div>
+        <div className="text-center">
+          <div className="text-5xl font-bold text-amber-400 mb-2">24/7</div>
+          <div className="text-sm text-zinc-400">Working For You</div>
+          <div className="text-white font-semibold">Even While You Sleep</div>
+        </div>
+      </div>
+    </div>
+
+    {/* Urgency */}
+    <div className="mt-12 text-center">
+      <div className="inline-block p-8 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-red-500/10 border border-red-500/20 rounded-2xl">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <AlertCircle className="w-6 h-6 text-red-400" />
+          <h3 className="text-2xl font-bold">Don't Miss This Opportunity</h3>
+        </div>
+        <p className="text-lg text-zinc-300 mb-6 max-w-2xl">
+          Founding member pricing ends <strong className="text-white">January 15, 2026</strong> or when we reach capacity—whichever comes first. 
+          After that, pricing increases to <strong className="text-white">$4,997-$9,997/year</strong> and Elite AI features cost extra.
+        </p>
+        <div className="flex items-center justify-center gap-6 text-sm text-zinc-400">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-amber-400" />
+            <span>Limited time offer</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-amber-400" />
+            <span>{spotsRemaining} spots remaining</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ===== AI FEATURES TABS - NEW SECTION ===== */}
       <section className="py-20 bg-gradient-to-b from-transparent to-zinc-950/50">

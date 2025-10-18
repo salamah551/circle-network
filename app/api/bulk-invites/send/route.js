@@ -3,6 +3,21 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
 
+// Helper function to check for duplicate emails
+async function checkDuplicateEmails(emails, campaignId, supabase) {
+  const { data: existingInvites, error } = await supabase
+    .from('bulk_invites')
+    .select('email')
+    .in('email', emails);
+
+  if (error) {
+    console.error('Error checking duplicates:', error);
+    return [];
+  }
+
+  return existingInvites?.map(inv => inv.email.toLowerCase()) || [];
+}
+
 // Validate API key exists
 if (!process.env.SENDGRID_API_KEY) {
   console.error('❌ SENDGRID_API_KEY is not set in environment variables');
@@ -205,6 +220,17 @@ export async function POST(req) {
         { status: 401 }
       );
     }
+
+    // Before inserting, check for duplicates
+const emailsToInsert = rows.map(r => r.email.toLowerCase());
+const duplicates = await checkDuplicateEmails(emailsToInsert, campaign.id, supabase);
+
+if (duplicates.length > 0) {
+  return NextResponse.json({
+    error: `Found ${duplicates.length} duplicate email(s): ${duplicates.slice(0, 5).join(', ')}${duplicates.length > 5 ? '...' : ''}`,
+    duplicates
+  }, { status: 400 });
+}
 
     // Verify user is admin
     const { data: profile, error: profileError } = await authClient
