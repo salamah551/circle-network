@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Target } from 'lucide-react'; // Add Target to existing imports
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import {
@@ -15,6 +16,182 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
+
+// Real-time Activity Feed Component
+function ActivityFeed({ userId }) {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadActivities();
+  }, [userId]);
+
+  const loadActivities = async () => {
+    try {
+      // Get recent activities from multiple sources
+      const [
+        { data: recentIntros },
+        { data: recentMessages },
+        { data: recentRequests },
+        { data: recentPosts }
+      ] = await Promise.all([
+        // Strategic intros
+        supabase
+          .from('strategic_intros')
+          .select('*, member:profiles!strategic_intros_member_id_fkey(full_name)')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(3),
+        
+        // Messages
+        supabase
+          .from('messages')
+          .select('*, sender:profiles!messages_from_user_id_fkey(full_name)')
+          .eq('to_user_id', userId)
+          .eq('read', false)
+          .order('created_at', { ascending: false })
+          .limit(3),
+        
+        // Request replies
+        supabase
+          .from('request_replies')
+          .select(`
+            *,
+            request:requests!request_replies_request_id_fkey(
+              title,
+              user_id
+            ),
+            replier:profiles!request_replies_user_id_fkey(full_name)
+          `)
+          .eq('request.user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(3),
+        
+        // Feed post likes/comments on user's posts
+        supabase
+          .from('feed_post_likes')
+          .select(`
+            *,
+            post:feed_posts!feed_post_likes_post_id_fkey(user_id),
+            liker:profiles!feed_post_likes_user_id_fkey(full_name)
+          `)
+          .eq('post.user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(3)
+      ]);
+
+      // Combine and sort by created_at
+      const combined = [];
+
+      // Add intros
+      recentIntros?.forEach(intro => {
+        combined.push({
+          type: 'intro',
+          icon: Sparkles,
+          iconBg: 'bg-amber-500/20',
+          iconColor: 'text-amber-400',
+          title: 'New intro available',
+          description: `${intro.member?.full_name || 'Someone'} (${intro.match_score}% match)`,
+          time: intro.created_at
+        });
+      });
+
+      // Add messages
+      recentMessages?.forEach(msg => {
+        combined.push({
+          type: 'message',
+          icon: MessageSquare,
+          iconBg: 'bg-blue-500/20',
+          iconColor: 'text-blue-400',
+          title: 'New message',
+          description: `${msg.sender?.full_name || 'Someone'} sent you a message`,
+          time: msg.created_at
+        });
+      });
+
+      // Add request replies
+      recentRequests?.forEach(reply => {
+        combined.push({
+          type: 'reply',
+          icon: UserCheck,
+          iconBg: 'bg-emerald-500/20',
+          iconColor: 'text-emerald-400',
+          title: 'New reply to your request',
+          description: `${reply.replier?.full_name || 'Someone'} replied to "${reply.request?.title}"`,
+          time: reply.created_at
+        });
+      });
+
+      // Add post likes
+      recentPosts?.forEach(like => {
+        combined.push({
+          type: 'like',
+          icon: UserCheck,
+          iconBg: 'bg-pink-500/20',
+          iconColor: 'text-pink-400',
+          title: 'Post liked',
+          description: `${like.liker?.full_name || 'Someone'} liked your post`,
+          time: like.created_at
+        });
+      });
+
+      // Sort by time and take top 5
+      combined.sort((a, b) => new Date(b.time) - new Date(a.time));
+      setActivities(combined.slice(0, 5));
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading activities:', error);
+      setLoading(false);
+    }
+  };
+
+  const getTimeAgo = (timestamp) => {
+    const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} ${Math.floor(seconds / 60) === 1 ? 'minute' : 'minutes'} ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} ${Math.floor(seconds / 3600) === 1 ? 'hour' : 'hours'} ago`;
+    return `${Math.floor(seconds / 86400)} ${Math.floor(seconds / 86400) === 1 ? 'day' : 'days'} ago`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (activities.length === 0) {
+    return (
+      <div className="text-center py-8 text-zinc-500">
+        <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+        <p>No recent activity yet</p>
+        <p className="text-sm mt-1">Start connecting with members to see activity here</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity, index) => {
+        const Icon = activity.icon;
+        return (
+          <div key={index} className="flex items-start gap-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
+            <div className={`w-10 h-10 ${activity.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+              <Icon className={`w-5 h-5 ${activity.iconColor}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm mb-1">
+                <strong className="text-white">{activity.title}:</strong> {activity.description}
+              </p>
+              <p className="text-xs text-zinc-500">{getTimeAgo(activity.time)}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -136,6 +313,21 @@ export default function DashboardPage() {
             <Users className="w-5 h-5" />
             <span>Members</span>
           </Link>
+          <Link
+  href="/requests"
+  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+>
+  <Target className="w-5 h-5" />
+  <span>Requests</span>
+</Link>
+
+<Link
+  href="/feed"
+  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+>
+  <Sparkles className="w-5 h-5" />
+  <span>Feed</span>
+</Link>
 
           <Link
             href="/messages"
@@ -510,50 +702,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Recent Activity (Placeholder) */}
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl p-6 md:p-8 border border-zinc-800">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Activity className="w-6 h-6 text-zinc-400" />
-              Recent Activity
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <UserCheck className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm mb-1">
-                    <strong className="text-white">New connection:</strong> You connected with Sarah Martinez
-                  </p>
-                  <p className="text-xs text-zinc-500">2 hours ago</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-amber-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm mb-1">
-                    <strong className="text-white">New intro available:</strong> Michael Torres (94% match)
-                  </p>
-                  <p className="text-xs text-zinc-500">1 day ago</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-5 h-5 text-blue-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm mb-1">
-                    <strong className="text-white">New message:</strong> David Chen sent you a message
-                  </p>
-                  <p className="text-xs text-zinc-500">3 days ago</p>
-                </div>
-              </div>
-            </div>
-          </div>
+         {/* Recent Activity */}
+<div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl p-6 md:p-8 border border-zinc-800">
+  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+    <Activity className="w-6 h-6 text-zinc-400" />
+    Recent Activity
+  </h2>
+  <ActivityFeed userId={user.id} />
+</div>
         </div>
       </main>
     </div>

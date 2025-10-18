@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { 
-  ArrowLeft, Plus, Search, MessageSquare, 
-  CheckCircle, Clock, User, Send, X, TrendingUp,
-  Lightbulb, Target, Briefcase, Users, Loader2
+  ArrowLeft, Plus, Search, MessageSquare, CheckCircle, Clock, 
+  User, Send, X, TrendingUp, Lightbulb, Target, Briefcase, 
+  Users, Loader2, ThumbsUp, ExternalLink, Filter, Crown
 } from 'lucide-react';
-import GlobalSearch from '@/components/GlobalSearch';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -15,13 +15,13 @@ const supabase = createClient(
 );
 
 const CATEGORIES = [
-  { value: 'all', label: 'All Requests', icon: TrendingUp },
-  { value: 'fundraising', label: 'Fundraising', icon: TrendingUp },
-  { value: 'hiring', label: 'Hiring', icon: Users },
-  { value: 'partnerships', label: 'Partnerships', icon: Briefcase },
-  { value: 'advice', label: 'Advice', icon: Lightbulb },
-  { value: 'intros', label: 'Introductions', icon: Users },
-  { value: 'other', label: 'Other', icon: Target },
+  { value: 'all', label: 'All Requests', icon: TrendingUp, color: 'zinc' },
+  { value: 'fundraising', label: 'Fundraising', icon: TrendingUp, color: 'emerald' },
+  { value: 'hiring', label: 'Hiring', icon: Users, color: 'blue' },
+  { value: 'partnerships', label: 'Partnerships', icon: Briefcase, color: 'purple' },
+  { value: 'advice', label: 'Advice', icon: Lightbulb, color: 'amber' },
+  { value: 'intros', label: 'Introductions', icon: Users, color: 'pink' },
+  { value: 'other', label: 'Other', icon: Target, color: 'zinc' },
 ];
 
 export default function RequestsPage() {
@@ -87,78 +87,52 @@ export default function RequestsPage() {
         .from('requests')
         .select(`
           *,
-          profile:profiles!requests_user_id_fkey(*)
+          profile:profiles!requests_user_id_fkey(
+            id, 
+            full_name, 
+            title, 
+            company, 
+            photo_url,
+            is_founding_member
+          ),
+          replies:request_replies(count)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error loading requests:', error);
-        setRequests([]);
-        return;
-      }
-
-      const requestsWithReplies = await Promise.all(
-        (data || []).map(async (request) => {
-          const { count } = await supabase
-            .from('request_replies')
-            .select('*', { count: 'exact', head: true })
-            .eq('request_id', request.id);
-          
-          return {
-            ...request,
-            reply_count: count || 0
-          };
-        })
-      );
-
-      setRequests(requestsWithReplies);
+      if (error) throw error;
+      setRequests(data || []);
     } catch (error) {
       console.error('Error loading requests:', error);
-      setRequests([]);
-    }
-  };
-
-  const loadReplies = async (requestId) => {
-    try {
-      const { data, error } = await supabase
-        .from('request_replies')
-        .select(`
-          *,
-          profile:profiles!request_replies_user_id_fkey(*)
-        `)
-        .eq('request_id', requestId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setReplies(data || []);
-    } catch (error) {
-      console.error('Error loading replies:', error);
-      setReplies([]);
     }
   };
 
   const filterRequests = () => {
-    let filtered = [...requests];
+    let filtered = requests;
 
+    // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(req => req.category === selectedCategory);
+      filtered = filtered.filter(r => r.category === selectedCategory);
     }
 
-    filtered = filtered.filter(req => req.status === selectedStatus);
+    // Filter by status
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(r => r.status === selectedStatus);
+    }
 
+    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(req =>
-        req.title?.toLowerCase().includes(query) ||
-        req.description?.toLowerCase().includes(query) ||
-        req.profile?.full_name?.toLowerCase().includes(query)
+      filtered = filtered.filter(r => 
+        r.title?.toLowerCase().includes(query) ||
+        r.description?.toLowerCase().includes(query) ||
+        r.profile?.full_name?.toLowerCase().includes(query)
       );
     }
 
     setFilteredRequests(filtered);
   };
 
-  const createRequest = async () => {
+  const submitNewRequest = async () => {
     if (!newRequest.title.trim() || !newRequest.description.trim()) {
       alert('Please fill in all fields');
       return;
@@ -170,8 +144,8 @@ export default function RequestsPage() {
         .from('requests')
         .insert({
           user_id: currentUser.id,
-          title: newRequest.title,
-          description: newRequest.description,
+          title: newRequest.title.trim(),
+          description: newRequest.description.trim(),
           category: newRequest.category,
           status: 'open'
         });
@@ -183,14 +157,48 @@ export default function RequestsPage() {
       await loadRequests();
     } catch (error) {
       console.error('Error creating request:', error);
-      alert(`Failed to create request: ${error.message}`);
+      alert('Failed to create request');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const openReplyModal = async (request) => {
+    setSelectedRequest(request);
+    setShowReplyModal(true);
+    await loadReplies(request.id);
+  };
+
+  const loadReplies = async (requestId) => {
+    try {
+      const { data, error } = await supabase
+        .from('request_replies')
+        .select(`
+          *,
+          profile:profiles!request_replies_user_id_fkey(
+            id,
+            full_name,
+            title,
+            company,
+            photo_url,
+            is_founding_member
+          )
+        `)
+        .eq('request_id', requestId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setReplies(data || []);
+    } catch (error) {
+      console.error('Error loading replies:', error);
+    }
+  };
+
   const submitReply = async () => {
-    if (!replyContent.trim() || !selectedRequest) return;
+    if (!replyContent.trim()) {
+      alert('Please enter a reply');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -199,32 +207,14 @@ export default function RequestsPage() {
         .insert({
           request_id: selectedRequest.id,
           user_id: currentUser.id,
-          content: replyContent
+          content: replyContent.trim()
         });
 
       if (error) throw error;
 
-      // Send email notification to request owner (fire-and-forget)
-      if (selectedRequest.user_id !== currentUser.id) {
-        fetch('/api/notifications/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'request_reply',
-            recipientEmail: selectedRequest.profile?.email,
-            recipientName: selectedRequest.profile?.full_name,
-            senderName: currentUserProfile?.full_name || 'A member',
-            requestTitle: selectedRequest.title,
-            replyPreview: replyContent
-          })
-        }).catch(emailError => {
-          console.error('Email notification failed:', emailError);
-        });
-      }
-
       setReplyContent('');
       await loadReplies(selectedRequest.id);
-      await loadRequests();
+      await loadRequests(); // Refresh to update reply count
     } catch (error) {
       console.error('Error submitting reply:', error);
       alert('Failed to submit reply');
@@ -237,34 +227,21 @@ export default function RequestsPage() {
     try {
       const { error } = await supabase
         .from('requests')
-        .update({ 
-          status: 'resolved',
-          resolved_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
+        .update({ status: 'resolved' })
+        .eq('id', requestId)
+        .eq('user_id', currentUser.id); // Only owner can resolve
 
       if (error) throw error;
       await loadRequests();
+      setShowReplyModal(false);
     } catch (error) {
-      console.error('Error marking as resolved:', error);
+      console.error('Error resolving request:', error);
+      alert('Failed to mark as resolved');
     }
   };
 
-  const openRequestModal = async (request) => {
-    setSelectedRequest(request);
-    await loadReplies(request.id);
-    setShowReplyModal(true);
-  };
-
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const getCategoryInfo = (categoryValue) => {
+    return CATEGORIES.find(c => c.value === categoryValue) || CATEGORIES[0];
   };
 
   if (isLoading) {
@@ -278,59 +255,60 @@ export default function RequestsPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-zinc-950 border-b border-zinc-800 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="border-b border-zinc-800 bg-zinc-950 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+                className="p-2 hover:bg-zinc-900 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span>Dashboard</span>
               </button>
-              <h1 className="text-2xl font-bold">Requests Board</h1>
+              <div>
+                <h1 className="text-2xl font-bold">Member Requests</h1>
+                <p className="text-sm text-zinc-400">Ask for help, share opportunities, get advice</p>
+              </div>
             </div>
-            <GlobalSearch />
-            
             <button
               onClick={() => setShowNewRequestModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-xl transition-all"
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              New Request
+              <span className="hidden sm:inline">New Request</span>
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         {/* Filters */}
         <div className="mb-8 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
             <input
               type="text"
               placeholder="Search requests..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-amber-500 text-white placeholder-zinc-500"
             />
           </div>
 
           {/* Category Filters */}
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(cat => {
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
+              const isActive = selectedCategory === cat.value;
               return (
                 <button
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    selectedCategory === cat.value
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-amber-500 text-black font-semibold'
+                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -340,186 +318,226 @@ export default function RequestsPage() {
             })}
           </div>
 
-          {/* Status Toggle */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setSelectedStatus('open')}
-              className={`flex-1 px-4 py-2 rounded-lg transition-all ${
-                selectedStatus === 'open'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
-              }`}
-            >
-              <Clock className="w-4 h-4 inline mr-2" />
-              Open ({requests.filter(r => r.status === 'open').length})
-            </button>
-            <button
-              onClick={() => setSelectedStatus('resolved')}
-              className={`flex-1 px-4 py-2 rounded-lg transition-all ${
-                selectedStatus === 'resolved'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
-              }`}
-            >
-              <CheckCircle className="w-4 h-4 inline mr-2" />
-              Resolved ({requests.filter(r => r.status === 'resolved').length})
-            </button>
+          {/* Status Filters */}
+          <div className="flex items-center gap-2">
+            {['all', 'open', 'resolved'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+                className={`px-4 py-2 rounded-lg capitalize transition-all ${
+                  selectedStatus === status
+                    ? 'bg-zinc-800 text-white font-semibold'
+                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-4 text-sm text-zinc-500">
+          Showing {filteredRequests.length} {filteredRequests.length === 1 ? 'request' : 'requests'}
         </div>
 
         {/* Requests List */}
         <div className="space-y-4">
           {filteredRequests.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-12 text-center">
-              <Lightbulb className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No requests found</h3>
-              <p className="text-zinc-500 mb-6">
-                {selectedStatus === 'open' 
-                  ? 'Be the first to post a request!'
-                  : 'No resolved requests yet.'
-                }
+            <div className="text-center py-12">
+              <Target className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No requests found</h3>
+              <p className="text-zinc-400 mb-6">
+                {searchQuery || selectedCategory !== 'all' || selectedStatus !== 'all'
+                  ? 'Try adjusting your filters'
+                  : 'Be the first to post a request!'}
               </p>
-              {selectedStatus === 'open' && (
+              {!searchQuery && selectedCategory === 'all' && selectedStatus === 'all' && (
                 <button
                   onClick={() => setShowNewRequestModal(true)}
-                  className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-medium rounded-xl transition-all"
+                  className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-lg transition-colors inline-flex items-center gap-2"
                 >
-                  Post Your First Request
+                  <Plus className="w-5 h-5" />
+                  Post a Request
                 </button>
               )}
             </div>
           ) : (
-            filteredRequests.map(request => (
-              <div
-                key={request.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:bg-zinc-850 transition-all"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-black" />
+            filteredRequests.map((request) => {
+              const categoryInfo = getCategoryInfo(request.category);
+              const CategoryIcon = categoryInfo.icon;
+              const replyCount = request.replies?.[0]?.count || 0;
+
+              return (
+                <div
+                  key={request.id}
+                  className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl p-6 border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
+                  onClick={() => openReplyModal(request)}
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-4 flex-1">
+                      {/* Avatar */}
+                      <div className="relative flex-shrink-0">
+                        {request.profile?.photo_url ? (
+                          <img
+                            src={request.profile.photo_url}
+                            alt={request.profile.full_name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                            <span className="text-lg font-bold text-black">
+                              {request.profile?.full_name?.[0] || '?'}
+                            </span>
+                          </div>
+                        )}
+                        {request.profile?.is_founding_member && (
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 rounded-full border-2 border-zinc-900 flex items-center justify-center">
+                            <Crown className="w-3 h-3 text-black" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-white">
+                            {request.profile?.full_name || 'Unknown User'}
+                          </h3>
+                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                            request.status === 'open'
+                              ? 'bg-emerald-500/20 text-emerald-400'
+                              : 'bg-zinc-700 text-zinc-400'
+                          }`}>
+                            {request.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-zinc-400 mb-3">
+                          {request.profile?.title} at {request.profile?.company}
+                        </p>
+                        <h4 className="text-lg font-semibold mb-2">{request.title}</h4>
+                        <p className="text-zinc-400 line-clamp-2">{request.description}</p>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-bold">{request.title}</h3>
-                        <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs rounded-full">
-                          {request.category}
-                        </span>
-                      </div>
-                      
-                      <p className="text-zinc-400 text-sm mb-2">
-                        by {request.profile?.full_name || 'Unknown'} • {request.profile?.title || ''} {request.profile?.company ? `at ${request.profile.company}` : ''}
-                      </p>
-                      
-                      <p className="text-zinc-300 mb-4">{request.description}</p>
-                      
-                      <div className="flex items-center gap-4 text-sm text-zinc-500">
-                        <span>{formatDate(request.created_at)}</span>
-                        <button
-                          onClick={() => openRequestModal(request)}
-                          className="flex items-center gap-1 hover:text-amber-400 transition-colors"
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                          {request.reply_count || 0} replies
-                        </button>
-                      </div>
+
+                    {/* Category Badge */}
+                    <div className={`flex items-center gap-1 px-3 py-1 rounded-full bg-${categoryInfo.color}-500/10 border border-${categoryInfo.color}-500/20`}>
+                      <CategoryIcon className={`w-4 h-4 text-${categoryInfo.color}-400`} />
+                      <span className={`text-xs font-semibold text-${categoryInfo.color}-400`}>
+                        {categoryInfo.label}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                    <div className="flex items-center gap-4 text-sm text-zinc-500">
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="w-4 h-4" />
+                        <span>{replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{new Date(request.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
                     <button
-                      onClick={() => openRequestModal(request)}
-                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-lg transition-all text-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openReplyModal(request);
+                      }}
+                      className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
                     >
-                      View & Reply
+                      <MessageSquare className="w-4 h-4" />
+                      Reply
                     </button>
-                    
-                    {request.user_id === currentUser?.id && request.status === 'open' && (
-                      <button
-                        onClick={() => markAsResolved(request.id)}
-                        className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 rounded-lg transition-all text-sm"
-                      >
-                        Mark Resolved
-                      </button>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
-      </div>
+      </main>
 
       {/* New Request Modal */}
       {showNewRequestModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">Post a Request</h3>
-              <button
-                onClick={() => setShowNewRequestModal(false)}
-                className="text-zinc-400 hover:text-white"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button
+              onClick={() => setShowNewRequestModal(false)}
+              className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <h2 className="text-3xl font-bold mb-6">Post a Request</h2>
+
+            <div className="space-y-6">
+              {/* Category Select */}
               <div>
-                <label className="block text-sm mb-2">Category</label>
+                <label className="block text-sm font-medium mb-2">Category</label>
                 <select
                   value={newRequest.category}
                   onChange={(e) => setNewRequest({ ...newRequest, category: e.target.value })}
-                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white"
                 >
-                  {CATEGORIES.filter(c => c.value !== 'all').map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  {CATEGORIES.filter(c => c.value !== 'all').map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
+              {/* Title */}
               <div>
-                <label className="block text-sm mb-2">Title</label>
+                <label className="block text-sm font-medium mb-2">Title</label>
                 <input
                   type="text"
                   value={newRequest.title}
                   onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
-                  placeholder="What do you need help with?"
-                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="e.g., Looking for a technical co-founder"
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white placeholder-zinc-500"
+                  maxLength={100}
                 />
+                <p className="text-xs text-zinc-500 mt-1">
+                  {newRequest.title.length}/100 characters
+                </p>
               </div>
 
+              {/* Description */}
               <div>
-                <label className="block text-sm mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">Description</label>
                 <textarea
                   value={newRequest.description}
                   onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
-                  placeholder="Provide more details..."
-                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[150px]"
+                  placeholder="Describe what you need help with..."
+                  rows={6}
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white placeholder-zinc-500 resize-none"
+                  maxLength={1000}
                 />
+                <p className="text-xs text-zinc-500 mt-1">
+                  {newRequest.description.length}/1000 characters
+                </p>
               </div>
-            </div>
 
-            <div className="flex gap-3 mt-6">
+              {/* Submit Button */}
               <button
-                onClick={() => setShowNewRequestModal(false)}
-                className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-xl transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createRequest}
-                disabled={!newRequest.title.trim() || !newRequest.description.trim() || submitting}
-                className="flex-1 px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+                onClick={submitNewRequest}
+                disabled={submitting || !newRequest.title.trim() || !newRequest.description.trim()}
+                className="w-full px-6 py-3 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating...
+                    Posting...
                   </>
                 ) : (
-                  'Post Request'
+                  <>
+                    <Send className="w-5 h-5" />
+                    Post Request
+                  </>
                 )}
               </button>
             </div>
@@ -527,90 +545,161 @@ export default function RequestsPage() {
         </div>
       )}
 
-      {/* Request Detail & Reply Modal */}
+      {/* Reply Modal */}
       {showReplyModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="p-6 border-b border-zinc-800">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-2xl font-bold">{selectedRequest.title}</h3>
-                    <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs rounded-full">
-                      {selectedRequest.category}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button
+              onClick={() => setShowReplyModal(false)}
+              className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Request Details */}
+            <div className="mb-8">
+              <div className="flex items-start gap-4 mb-4">
+                {selectedRequest.profile?.photo_url ? (
+                  <img
+                    src={selectedRequest.profile.photo_url}
+                    alt={selectedRequest.profile.full_name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                    <span className="text-lg font-bold text-black">
+                      {selectedRequest.profile?.full_name?.[0] || '?'}
                     </span>
                   </div>
-                  <p className="text-zinc-400 text-sm">
-                    by {selectedRequest.profile?.full_name || 'Unknown'} • {formatDate(selectedRequest.created_at)}
+                )}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold">
+                      {selectedRequest.profile?.full_name || 'Unknown User'}
+                    </h3>
+                    {selectedRequest.profile?.is_founding_member && (
+                      <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded">
+                        Founding Member
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-zinc-400">
+                    {selectedRequest.profile?.title} at {selectedRequest.profile?.company}
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowReplyModal(false)}
-                  className="text-zinc-400 hover:text-white"
-                >
-                  <X className="w-6 h-6" />
-                </button>
               </div>
-              <p className="text-zinc-300">{selectedRequest.description}</p>
+              <h2 className="text-2xl font-bold mb-3">{selectedRequest.title}</h2>
+              <p className="text-zinc-300 leading-relaxed">{selectedRequest.description}</p>
             </div>
 
             {/* Replies */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="space-y-4 mb-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                {replies.length} {replies.length === 1 ? 'Reply' : 'Replies'}
+              </h3>
+
               {replies.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                  <p className="text-zinc-500">No replies yet. Be the first to help!</p>
+                <div className="text-center py-8 text-zinc-500">
+                  No replies yet. Be the first to help!
                 </div>
               ) : (
-                replies.map(reply => (
-                  <div key={reply.id} className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="w-5 h-5 text-black" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">{reply.profile?.full_name || 'Unknown'}</p>
-                        <p className="text-xs text-zinc-500">
-                          {reply.profile?.title || ''} {reply.profile?.company ? `at ${reply.profile.company}` : ''}
+                replies.map((reply) => (
+                  <div key={reply.id} className="bg-zinc-800 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      {reply.profile?.photo_url ? (
+                        <img
+                          src={reply.profile.photo_url}
+                          alt={reply.profile.full_name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                          <span className="text-sm font-bold text-white">
+                            {reply.profile?.full_name?.[0] || '?'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm">
+                            {reply.profile?.full_name || 'Unknown User'}
+                          </span>
+                          {reply.profile?.is_founding_member && (
+                            <Crown className="w-4 h-4 text-amber-400" />
+                          )}
+                          <span className="text-xs text-zinc-500">
+                            {new Date(reply.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-zinc-400 mb-2">
+                          {reply.profile?.title} at {reply.profile?.company}
                         </p>
+                        <p className="text-zinc-200 leading-relaxed">{reply.content}</p>
                       </div>
-                      <span className="ml-auto text-xs text-zinc-500">
-                        {formatDate(reply.created_at)}
-                      </span>
                     </div>
-                    <p className="text-zinc-300 whitespace-pre-wrap">{reply.content}</p>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Reply Input */}
-            <div className="p-6 border-t border-zinc-800">
-              <textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Share your thoughts or offer help..."
-                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500 mb-3 min-h-[100px]"
-              />
-              <button
-                onClick={submitReply}
-                disabled={!replyContent.trim() || submitting}
-                className="w-full px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-medium rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Post Reply
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Reply Form */}
+            {selectedRequest.status === 'open' && (
+              <div className="border-t border-zinc-800 pt-6">
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder="Share your advice, offer help, or make an introduction..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-amber-500 text-white placeholder-zinc-500 resize-none mb-4"
+                  maxLength={500}
+                />
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-zinc-500">
+                    {replyContent.length}/500 characters
+                  </p>
+                  <div className="flex items-center gap-3">
+                    {selectedRequest.user_id === currentUser.id && (
+                      <button
+                        onClick={() => markAsResolved(selectedRequest.id)}
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Mark as Resolved
+                      </button>
+                    )}
+                    <button
+                      onClick={submitReply}
+                      disabled={submitting || !replyContent.trim()}
+                      className="px-6 py-2 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Reply
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedRequest.status === 'resolved' && (
+              <div className="border-t border-zinc-800 pt-6">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <span className="text-emerald-400 font-semibold">
+                    This request has been marked as resolved
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

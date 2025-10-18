@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import {
   Shield, Lock, Crown, ArrowRight, Star, Sparkles, CheckCircle, Users, 
   Briefcase, Handshake, TrendingUp, Zap, Globe, Target, Award,
-  Lightbulb, Rocket, BarChart, DollarSign, X
+  Lightbulb, Rocket, BarChart, DollarSign, X, BarChart3, Clock,
+  AlertCircle, TrendingDown, Flame, Gift, Infinity, Timer
 } from 'lucide-react';
 
 // Launch configuration - November 10, 2025, 12:00 AM ET
@@ -43,6 +44,172 @@ function Countdown() {
     <span className="font-mono text-sm text-amber-300 font-semibold">
       {d}d {h}h {m}m {sec}s
     </span>
+  );
+}
+
+// AI Features Tabs Component
+function AIFeaturesTabs() {
+  const [activeTab, setActiveTab] = useState('intros');
+
+  const features = {
+    intros: {
+      icon: Sparkles,
+      title: 'AI-Powered Strategic Introductions',
+      tagline: 'Available Now',
+      description: 'Stop wasting time on random networking. Our AI analyzes your goals, expertise, and needs to match you with exactly the right people every week.',
+      benefits: [
+        'Get 3 high-quality introductions every Monday',
+        '85%+ match accuracy based on your professional goals',
+        'Detailed reasoning for why each connection matters',
+        'One-click accept with automated email intro',
+        'No awkward cold outreach—just warm connections'
+      ],
+      example: 'Example: You are raising a Series A. Our AI identifies an investor who backed 3 companies in your space, checks if they are actively investing, and sees they mentioned your problem space in a recent podcast. That is a 94% match.',
+      color: 'amber'
+    },
+    dealflow: {
+      icon: TrendingUp,
+      title: 'AI Deal Flow Alerts',
+      tagline: 'Elite • Q1 2026',
+      description: 'Never miss a high-value opportunity again. Set your investment criteria and our AI monitors the entire network plus external sources to surface deals before they go wide.',
+      benefits: [
+        'Real-time alerts when deals match your criteria',
+        'See opportunities before they hit the broader market',
+        'AI scores each deal based on your preferences',
+        'Direct connection to the founder or deal owner',
+        'Weekly digest of trending opportunities in your space'
+      ],
+      example: 'Example: You invest in B2B SaaS at Series A ($2M-5M checks). Our AI spots a company hitting $3M ARR with 150% YoY growth, checks that the founder is in the network, and alerts you 48 hours before their fundraise announcement.',
+      color: 'emerald'
+    },
+    reputation: {
+      icon: Shield,
+      title: 'Reputation Guardian',
+      tagline: 'Elite • Q1 2026',
+      description: 'Your reputation is your most valuable asset. Our AI monitors mentions of you and your company across the internet 24/7, alerting you to potential threats before they escalate.',
+      benefits: [
+        '24/7 monitoring of news, social media, and forums',
+        'Instant alerts for negative sentiment or threats',
+        'Track what people are saying about you and your company',
+        'Early warning system for PR crises',
+        'Competitive intelligence on how you are perceived vs competitors'
+      ],
+      example: 'Example: Someone posts a negative review of your company on Reddit at 2 AM. Our AI detects it, analyzes the sentiment, assesses the threat level, and sends you an alert by 6 AM so you can respond before it spreads.',
+      color: 'red'
+    },
+    intelligence: {
+      icon: BarChart3,
+      title: 'AI Competitive Intelligence',
+      tagline: 'Elite • Q1 2026',
+      description: 'Stay ahead of the competition with weekly intelligence reports. Our AI tracks your competitors, market trends, funding announcements, and strategic moves—all in one digestible report.',
+      benefits: [
+        'Weekly intelligence digest delivered every Monday',
+        'Track up to 10 competitors automatically',
+        'Funding announcements and key hires in your space',
+        'Emerging trends and market shifts',
+        'Strategic opportunities you\'re uniquely positioned for'
+      ],
+      example: 'Example: Your competitor just hired a VP of Enterprise Sales from Salesforce. Our AI spots it on LinkedIn, cross-references their background, identifies 3 enterprise accounts they likely brought with them, and suggests you accelerate your enterprise strategy.',
+      color: 'blue'
+    }
+  };
+
+  const current = features[activeTab];
+  const Icon = current.icon;
+
+  const colorClasses = {
+    amber: 'from-amber-500/20 to-amber-500/5 border-amber-500/30 text-amber-400',
+    emerald: 'from-emerald-500/20 to-emerald-500/5 border-emerald-500/30 text-emerald-400',
+    red: 'from-red-500/20 to-red-500/5 border-red-500/30 text-red-400',
+    blue: 'from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-400'
+  };
+
+  return (
+    <div>
+      {/* Tabs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {Object.entries(features).map(([key, feature]) => {
+          const FeatureIcon = feature.icon;
+          const isActive = activeTab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`p-4 rounded-xl border-2 transition-all text-left ${
+                isActive
+                  ? `bg-gradient-to-br ${colorClasses[feature.color]} border-current`
+                  : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700'
+              }`}
+            >
+              <FeatureIcon className={`w-6 h-6 mb-2 ${isActive ? 'text-current' : 'text-zinc-500'}`} />
+              <div className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-zinc-400'}`}>
+                {feature.title.replace('AI-Powered ', '').replace('AI ', '')}
+              </div>
+              <div className={`text-xs mt-1 ${isActive ? 'text-current' : 'text-zinc-600'}`}>
+                {feature.tagline}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content */}
+      <div className={`bg-gradient-to-br ${colorClasses[current.color]} rounded-2xl p-8 md:p-10 border-2`}>
+        <div className="flex items-start gap-4 mb-6">
+          <div className={`w-16 h-16 bg-gradient-to-br ${colorClasses[current.color]} rounded-xl flex items-center justify-center border-2 border-current`}>
+            <Icon className="w-8 h-8 text-current" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">{current.title}</h3>
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs font-semibold text-current">
+              {current.tagline}
+            </span>
+          </div>
+        </div>
+
+        <p className="text-lg text-white/90 mb-6 leading-relaxed">
+          {current.description}
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-current" />
+              What You Get:
+            </h4>
+            <ul className="space-y-2">
+              {current.benefits.map((benefit, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-white/80">
+                  <span className="text-current mt-0.5">•</span>
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-black/30 rounded-xl p-5 border border-white/10">
+            <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-current" />
+              Real Example:
+            </h4>
+            <p className="text-sm text-white/80 leading-relaxed">
+              {current.example}
+            </p>
+          </div>
+        </div>
+
+        {activeTab !== 'intros' && (
+          <div className="bg-black/40 border border-current/30 rounded-lg p-4 flex items-start gap-3">
+            <Crown className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-white/90">
+                <strong className="text-amber-400">Founding Members:</strong> This feature is included in your membership at no additional cost. Elite members launching Q1 2026 will pay $9,997/year. You get it for $2,497/year—forever.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -100,7 +267,7 @@ function ROICalculator() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-400 hover:to-emerald-500 transition-all shadow-lg"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-400 hover:to-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20"
       >
         <BarChart className="w-5 h-5" />
         Calculate Your ROI
@@ -109,16 +276,17 @@ function ROICalculator() {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full p-8 relative">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
         <button
           onClick={() => setIsOpen(false)}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
+          className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors z-10 bg-zinc-800 rounded-full p-2 hover:bg-zinc-700"
+          aria-label="Close calculator"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-3xl font-bold mb-4">What's One Connection Worth?</h2>
+        <h2 className="text-3xl font-bold mb-4 pr-12">What's One Connection Worth?</h2>
         <p className="text-zinc-400 mb-6">
           Calculate the potential return on your Circle Network membership
         </p>
@@ -248,7 +416,7 @@ export default function LandingClient() {
             </span>
           </div>
 
-          {/* Main headline - Outcome focused, industry agnostic */}
+          {/* Main headline */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             Where High-Achievers
             <br />
@@ -279,7 +447,7 @@ export default function LandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/apply"
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg hover:shadow-amber-500/20 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl hover:shadow-amber-500/20 flex items-center justify-center gap-2"
             >
               Request Invitation
               <ArrowRight className="w-5 h-5" />
@@ -297,7 +465,7 @@ export default function LandingClient() {
             <ROICalculator />
           </div>
 
-          {/* Safe credibility indicators - vague but ethical */}
+          {/* Credibility indicators */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-white/60">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-amber-400" />
@@ -368,7 +536,7 @@ export default function LandingClient() {
             ))}
           </div>
 
-          {/* Vague but premium qualifying criteria */}
+          {/* Qualifying criteria */}
           <div className="mt-12 p-8 rounded-2xl bg-gradient-to-br from-amber-500/5 via-transparent to-emerald-500/5 border border-amber-500/20">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold mb-2">Are You a Good Fit?</h3>
@@ -401,108 +569,221 @@ export default function LandingClient() {
         </div>
       </section>
 
-      {/* ===== OUTCOME-FOCUSED BENEFITS ===== */}
-      <section id="benefits" className="py-20">
+      {/* ===== AI FEATURES TABS - NEW SECTION ===== */}
+      <section className="py-20 bg-gradient-to-b from-transparent to-zinc-950/50">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Real Results, Not Just Features
+              Powered by <span className="text-purple-400">Advanced AI</span>
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Circle Network helps you achieve what matters: close deals, find partners, 
-              solve problems, and accelerate your professional growth.
+              Four intelligent systems working 24/7 to give you an unfair advantage in business
             </p>
           </div>
 
+          <AIFeaturesTabs />
+        </div>
+      </section>
+
+      {/* ===== WHY BECOME A FOUNDING MEMBER - NEW SECTION ===== */}
+      <section id="founding-member" className="py-20 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span className="text-sm text-amber-400 font-medium">Limited Time Opportunity</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+              Why Become a <span className="text-amber-400">Founding Member?</span>
+            </h2>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+              Being first isn't just about timing. It's about locking in advantages that compound forever.
+            </p>
+          </div>
+
+          {/* Main Value Props Grid */}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {[
-              {
-                icon: Handshake,
-                title: 'Close Your Next Big Deal',
-                description: 'Connect directly with decision-makers who can say yes. Skip the gatekeepers and cold outreach.',
-                outcome: 'Strategic partnerships, client acquisitions, and business opportunities'
-              },
-              {
-                icon: Sparkles,
-                title: 'Find the Perfect Match',
-                description: 'AI-powered introductions to the right people at the right time. Quality over quantity, every week.',
-                outcome: 'Co-founders, investors, advisors, and strategic partners'
-              },
-              {
-                icon: Target,
-                title: 'Solve Problems Fast',
-                description: 'Tap into collective expertise. Post your challenge and get actionable insights from experienced professionals.',
-                outcome: 'Expert advice, strategic guidance, and problem-solving support'
-              },
-              {
-                icon: Users,
-                title: 'Build Your Inner Circle',
-                description: 'Access a curated directory of accomplished professionals. Message anyone, anytime, no introductions needed.',
-                outcome: 'Trusted relationships that compound in value over time'
-              },
-              {
-                icon: Rocket,
-                title: 'Accelerate Your Growth',
-                description: 'Learn from peers who\'ve been there. Exclusive events, roundtables, and knowledge sharing.',
-                outcome: 'Avoid costly mistakes and capitalize on proven strategies'
-              },
-              {
-                icon: Award,
-                title: 'Elevate Your Network',
-                description: 'Surround yourself with ambitious, accomplished professionals who push you to level up.',
-                outcome: 'Access to opportunities you won\'t find anywhere else'
-              }
-            ].map((feature, i) => (
-              <div
-                key={i}
-                className="p-6 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 hover:border-amber-500/20 transition-all group"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-all">
-                    <feature.icon className="w-6 h-6 text-amber-400" />
+            {/* Locked-In Pricing */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-zinc-900 to-zinc-950 border-2 border-emerald-500/30 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-6">
+                  <Infinity className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">Locked-In Pricing Forever</h3>
+                <p className="text-lg text-white/80 mb-6 leading-relaxed">
+                  Pay $2,497/year <strong className="text-white">for life</strong>. When prices increase to $4,997 (Premium) or $9,997 (Elite) after January 15, 2026, you're protected.
+                </p>
+                <div className="bg-black/40 border border-emerald-500/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-zinc-400">Your Price:</span>
+                    <span className="text-xl font-bold text-emerald-400">$2,497/year</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                    <p className="text-white/60 mb-3 text-sm">{feature.description}</p>
-                    <div className="text-sm text-emerald-400 font-semibold flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <span>{feature.outcome}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-zinc-400">Regular Price (2026):</span>
+                    <span className="text-xl font-bold text-zinc-500 line-through">$4,997/year</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-emerald-500/20">
+                    <span className="text-sm font-semibold text-white">Lifetime Savings:</span>
+                    <span className="text-2xl font-bold text-emerald-400">$2,500/year</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* All Elite Features Included */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-purple-500/10 via-zinc-900 to-zinc-950 border-2 border-purple-500/30 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                  <Gift className="w-7 h-7 text-purple-400" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">All Elite AI Features—FREE</h3>
+                <p className="text-lg text-white/80 mb-6 leading-relaxed">
+                  While future members pay up to $9,997/year for Elite AI features, you get them all included at <strong className="text-white">no extra cost</strong>.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-black/40 rounded-lg border border-purple-500/20">
+                    <TrendingUp className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold text-white text-sm">AI Deal Flow Alerts</div>
+                      <div className="text-xs text-zinc-400">Value: $1,997/year • <span className="text-purple-400">FREE for you</span></div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-black/40 rounded-lg border border-purple-500/20">
+                    <Shield className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold text-white text-sm">Reputation Guardian</div>
+                      <div className="text-xs text-zinc-400">Value: $1,497/year • <span className="text-purple-400">FREE for you</span></div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-black/40 rounded-lg border border-purple-500/20">
+                    <BarChart3 className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold text-white text-sm">Competitive Intelligence</div>
+                      <div className="text-xs text-zinc-400">Value: $1,497/year • <span className="text-purple-400">FREE for you</span></div>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-purple-500/20">
+                    <div className="text-center">
+                      <div className="text-xs text-zinc-500">Total AI Features Value</div>
+                      <div className="text-2xl font-bold text-purple-400">$4,991/year</div>
+                      <div className="text-xs text-emerald-400 font-semibold">INCLUDED IN YOUR MEMBERSHIP</div>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Founding Member Status */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-amber-500/10 via-zinc-900 to-zinc-950 border-2 border-amber-500/30">
+              <div className="w-14 h-14 bg-amber-500/20 rounded-xl flex items-center justify-center mb-6">
+                <Award className="w-7 h-7 text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Lifetime Founding Member Status</h3>
+              <p className="text-white/80 mb-6 leading-relaxed">
+                Your profile will forever display the Founding Member badge—a signal to the network that you were part of the original 250.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Displayed on your profile permanently</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Priority in strategic intro matching</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Recognized as a founding pillar of the community</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Access to exclusive founder events and roundtables</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Shape the Platform */}
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-blue-500/10 via-zinc-900 to-zinc-950 border-2 border-blue-500/30">
+              <div className="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6">
+                <Target className="w-7 h-7 text-blue-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Shape the Future Platform</h3>
+              <p className="text-white/80 mb-6 leading-relaxed">
+                As a founding member, you'll have direct input on features, priorities, and the direction of Circle Network.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Monthly founder feedback sessions</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Early access to test new features before public launch</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Vote on feature priorities and community rules</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">Direct line to the founder and product team</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {/* Coming Soon - hint at future features */}
-          <div className="p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 to-blue-500/5 border border-purple-500/20">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-6 h-6 text-purple-400" />
+          {/* Urgency Section */}
+          <div className="p-8 rounded-2xl bg-gradient-to-br from-red-500/10 to-zinc-950 border-2 border-red-500/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-red-500/10 rounded-full blur-3xl" />
+            <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="w-16 h-16 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Timer className="w-8 h-8 text-red-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2 text-purple-400">Coming Soon: Premium Features</h3>
-                <p className="text-white/60 mb-4">
-                  We're building even more powerful tools to help you succeed:
+                <h3 className="text-2xl md:text-3xl font-bold mb-3 text-white">This Window Closes Soon</h3>
+                <p className="text-lg text-white/80 mb-4 leading-relaxed">
+                  Founding member pricing ends when we hit <strong className="text-white">250 members</strong> OR on <strong className="text-white">January 15, 2026</strong>—whichever comes first.
                 </p>
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div className="text-sm text-zinc-400">• Personal success dashboard & impact tracking</div>
-                  <div className="text-sm text-zinc-400">• Expert 1-on-1 consultation sessions</div>
-                  <div className="text-sm text-zinc-400">• Industry-specific sub-communities</div>
-                  <div className="text-sm text-zinc-400">• Mobile apps for iOS & Android</div>
-                  <div className="text-sm text-zinc-400">• Advanced AI matching algorithms</div>
-                  <div className="text-sm text-zinc-400">• Deal flow & partnership marketplace</div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1 p-4 bg-black/40 border border-red-500/30 rounded-lg">
+                    <div className="text-sm text-zinc-400 mb-1">Spots Remaining</div>
+                    <div className="text-3xl font-bold text-red-400">{spotsRemaining}/250</div>
+                  </div>
+                  <div className="flex-1 p-4 bg-black/40 border border-red-500/30 rounded-lg">
+                    <div className="text-sm text-zinc-400 mb-1">Time Until Price Increase</div>
+                    <div className="text-2xl font-bold text-red-400">58 days</div>
+                  </div>
                 </div>
-                <p className="text-xs text-zinc-500 mt-4">
-                  Founding members get early access to all new features at no additional cost
-                </p>
               </div>
+            </div>
+          </div>
+
+          {/* Final Value Statement */}
+          <div className="mt-12 text-center max-w-3xl mx-auto">
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-zinc-900 to-black border border-amber-500/20">
+              <h3 className="text-2xl font-bold mb-4 text-amber-400">The Math is Simple</h3>
+              <p className="text-lg text-white/80 leading-relaxed mb-6">
+                Over 10 years, founding members save <strong className="text-emerald-400">$25,000</strong> compared to regular pricing. Plus, you get <strong className="text-purple-400">$49,910 worth</strong> of Elite AI features included at no extra cost.
+              </p>
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <div className="text-sm text-zinc-400">Total Value Over 10 Years:</div>
+                <div className="text-3xl font-bold text-emerald-400">$74,910</div>
+              </div>
+              <p className="text-sm text-zinc-500 mt-4">
+                And that's not even counting the deals, partnerships, and opportunities you'll close through the network.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== PRICING - UPDATED ===== */}
+      {/* ===== PRICING ===== */}
       <section className="py-20 bg-gradient-to-b from-zinc-950/50 to-transparent">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
@@ -536,7 +817,7 @@ export default function LandingClient() {
                   'Request board & knowledge sharing',
                   'Exclusive events & roundtables',
                   'Founding member badge & priority',
-                  'All future features included'
+                  'All future Elite features included'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -553,12 +834,13 @@ export default function LandingClient() {
             </div>
 
             {/* Premium Tier */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800">
-              <h3 className="text-2xl font-bold mb-2">Premium</h3>
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 opacity-75">
+              <h3 className="text-2xl font-bold mb-2 text-zinc-400">Premium</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold">${premiumPrice}</span>
-                <span className="text-white/60">/year</span>
+                <span className="text-4xl font-bold text-zinc-500">${premiumPrice}</span>
+                <span className="text-white/40">/year</span>
               </div>
+              <p className="text-sm text-zinc-500 mb-6">Available after Jan 15, 2026</p>
               <ul className="space-y-3 mb-8">
                 {[
                   'Everything in Founding, plus:',
@@ -566,52 +848,45 @@ export default function LandingClient() {
                   'Featured profile listing',
                   'Priority event registration',
                   'Advanced search & filters',
-                  'Quarterly 1-on-1 with founder',
-                  'Early access to new features'
+                  'Quarterly 1-on-1 with founder'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-white/80 text-sm">{item}</span>
+                    <CheckCircle className="w-5 h-5 text-zinc-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-zinc-500 text-sm">{item}</span>
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/apply"
-                className="block w-full py-3 bg-white/10 border border-white/20 text-white font-semibold text-center rounded-lg hover:bg-white/20 transition-all"
-              >
-                Request Invitation
-              </Link>
+              <div className="w-full py-3 bg-zinc-800 text-zinc-600 font-semibold text-center rounded-lg cursor-not-allowed">
+                Coming Soon
+              </div>
             </div>
 
             {/* Elite Tier */}
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800">
-              <h3 className="text-2xl font-bold mb-2">Elite</h3>
+            <div className="p-8 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 opacity-75">
+              <h3 className="text-2xl font-bold mb-2 text-zinc-400">Elite</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold">${elitePrice}</span>
-                <span className="text-white/60">/year</span>
+                <span className="text-4xl font-bold text-zinc-500">${elitePrice}</span>
+                <span className="text-white/40">/year</span>
               </div>
+              <p className="text-sm text-zinc-500 mb-6">Available after Jan 15, 2026</p>
               <ul className="space-y-3 mb-8">
                 {[
                   'Everything in Premium, plus:',
-                  'Unlimited AI introductions',
+                  'All AI features included',
                   'VIP event access & hosting',
                   'Concierge introduction service',
-                  'Advisory council participation',
                   'Monthly 1-on-1 with founder',
                   'White-glove onboarding'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-white/80 text-sm">{item}</span>
+                    <CheckCircle className="w-5 h-5 text-zinc-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-zinc-500 text-sm">{item}</span>
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/apply"
-                className="block w-full py-3 bg-white/10 border border-white/20 text-white font-semibold text-center rounded-lg hover:bg-white/20 transition-all"
-              >
-                Request Invitation
-              </Link>
+              <div className="w-full py-3 bg-zinc-800 text-zinc-600 font-semibold text-center rounded-lg cursor-not-allowed">
+                Coming Soon
+              </div>
             </div>
           </div>
         </div>
@@ -692,12 +967,12 @@ export default function LandingClient() {
           </p>
           <Link
             href="/apply"
-            className="inline-block px-12 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg hover:shadow-amber-500/20 mb-6"
+            className="inline-block px-12 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg hover:shadow-amber-500/20 mb-4"
           >
             Request Your Invitation
           </Link>
-          <p className="text-sm text-zinc-500">
-            Applications personally reviewed by the founder and our team • 30-day money-back guarantee
+          <p className="text-sm text-zinc-500 mt-4">
+            Applications personally reviewed by the founder • 30-day money-back guarantee
           </p>
         </div>
       </section>
