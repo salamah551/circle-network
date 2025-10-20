@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import OnboardingWizard from '../OnboardingWizard';
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 async function checkAccess() {
   const cookieStore = cookies();
-  const supabase = createClient(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
