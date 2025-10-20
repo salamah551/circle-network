@@ -48,7 +48,7 @@ export async function POST(req) {
       
       console.log('✅ SendGrid webhook signature verified');
     } else {
-      console.warn('⚠️  SENDGRID_EVENT_PUBLIC_KEY not configured - skipping signature verification');
+      console.warn('WARN: SENDGRID_EVENT_PUBLIC_KEY is not set. Skipping webhook signature verification. This should not happen in production.');
     }
 
     // Parse events
