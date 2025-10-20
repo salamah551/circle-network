@@ -1086,6 +1086,30 @@ export default function LandingClient() {
               </div>
             </div>
           </div>
+
+          {/* Performance Guarantee */}
+          <div className="mt-8 p-8 rounded-2xl bg-gradient-to-br from-purple-500/10 to-transparent border-2 border-purple-500/30">
+            <div className="flex items-start gap-6">
+              <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                <Award className="w-8 h-8 text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold mb-4">3 Wins in 90 Days — Or +3 Months Free</h2>
+                <p className="text-lg text-zinc-300 mb-6 leading-relaxed">
+                  We don't just promise value—we guarantee it. If you don't achieve at least 3 meaningful wins 
+                  (valuable introductions, partnerships, or opportunities) within your first 90 days of active 
+                  membership, we'll extend your membership by 3 months at no additional charge.
+                </p>
+                <div className="bg-black/30 rounded-lg p-4 border border-purple-500/20">
+                  <p className="text-sm text-zinc-400">
+                    <strong className="text-purple-400">How it works:</strong> After 90 days, if you haven't 
+                    seen tangible results, simply email us within 100 days to claim your 3-month extension. 
+                    We stand behind our platform's ability to create real value.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

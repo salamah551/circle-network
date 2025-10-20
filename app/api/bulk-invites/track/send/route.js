@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 /**
  * Email Template Generator - All 4 Sequences Using Your Exact Format
  */
@@ -125,7 +120,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
         <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
         <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
-        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Apply Now →</a>
+        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Unlock Your 3 Strategic Introductions →</a>
         <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">This code is unique to you and expires in 14 days.</p>
       </div>
 
@@ -409,6 +404,11 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
  */
 export async function POST(request) {
   try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
     const { campaignId } = await request.json();
 
     if (!campaignId) {
@@ -667,11 +667,20 @@ export async function POST(request) {
  */
 export async function GET(request) {
   try {
-    // Security: Verify cron secret
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // Security: Verify cron secret OR x-vercel-cron header
     const authHeader = request.headers.get('authorization');
+    const vercelCron = request.headers.get('x-vercel-cron');
     const cronSecret = process.env.CRON_SECRET;
     
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    // Accept either CRON_SECRET or x-vercel-cron header
+    const isAuthorized = (authHeader === `Bearer ${cronSecret}`) || (vercelCron === '1');
+    
+    if (!isAuthorized) {
       console.error('❌ Unauthorized cron access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

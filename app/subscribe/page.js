@@ -424,16 +424,40 @@ function SubscribePage() {
 
           <div className="flex items-center justify-center gap-2 mt-4 text-zinc-500 text-xs">
             <Shield className="w-4 h-4" />
-            <span>Secure payment powered by Stripe • 30-day money-back guarantee</span>
+            <span>Secure payment powered by Stripe • 30-day money-back guarantee • 3 wins in 90 days or +3 months free</span>
           </div>
         </div>
 
-        {/* Value Guarantee */}
-        <div className="max-w-2xl mx-auto mt-12 bg-amber-500/10 border border-amber-500/30 rounded-xl p-6 text-center">
-          <h3 className="text-lg font-bold text-amber-400 mb-2">$10,000 Value Guarantee</h3>
-          <p className="text-sm text-zinc-400">
-            If The Circle doesn't provide at least $10,000 in value to you in your first year, we'll refund your full membership fee.
-          </p>
+        {/* Guarantees Section */}
+        <div className="max-w-2xl mx-auto mt-12 space-y-4">
+          {/* 30-Day Money-Back */}
+          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <Shield className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-bold text-emerald-400 mb-2">30-Day Money-Back Guarantee</h3>
+                <p className="text-sm text-zinc-300">
+                  If Circle Network doesn't deliver meaningful value in your first 30 days, we'll refund 
+                  your membership fee in full. No questions asked. Simple email request.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Performance Guarantee */}
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <Zap className="w-8 h-8 text-purple-400 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-bold text-purple-400 mb-2">3 Wins in 90 Days — Or +3 Months Free</h3>
+                <p className="text-sm text-zinc-300">
+                  If you don't achieve at least 3 meaningful wins (valuable introductions, partnerships, or 
+                  opportunities) within your first 90 days, we'll extend your membership by 3 months at no charge. 
+                  Email us within 100 days to claim.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -26,26 +26,83 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
+  // IDEMPOTENCY: Check if event already processed
+  const { data: existingEvent } = await supabaseAdmin
+    .from('webhook_events')
+    .select('id')
+    .eq('event_id', event.id)
+    .single();
+
+  if (existingEvent) {
+    console.log(`Event ${event.id} already processed, skipping`);
+    return NextResponse.json({ received: true, status: 'duplicate' });
+  }
+
+  // Record event to ensure idempotency
+  const { error: eventInsertError } = await supabaseAdmin
+    .from('webhook_events')
+    .insert({
+      event_id: event.id,
+      event_type: event.type,
+      processed_at: new Date().toISOString()
+    });
+
+  if (eventInsertError) {
+    console.error('Error recording webhook event:', eventInsertError);
+    // If insert fails due to unique constraint, another request already processed it
+    if (eventInsertError.code === '23505') {
+      console.log(`Event ${event.id} already processed by another request`);
+      return NextResponse.json({ received: true, status: 'duplicate' });
+    }
+  }
+
   // Handle the event
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
-      const userId = session.metadata.userId;
-      const isFoundingMember = session.metadata.isFoundingMember === 'true';
+      let userId = session.metadata?.userId;
+      const isFoundingMember = session.metadata?.isFoundingMember === 'true';
+      const customerId = session.customer;
+
+      // Guard: If userId missing, attempt to map via customer_email
+      if (!userId && session.customer_email) {
+        console.log(`Missing userId in metadata, attempting lookup via email: ${session.customer_email}`);
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .eq('email', session.customer_email.toLowerCase())
+          .single();
+        
+        if (profile) {
+          userId = profile.id;
+          console.log(`Mapped email ${session.customer_email} to userId: ${userId}`);
+        } else {
+          console.error(`Could not find user with email: ${session.customer_email}`);
+        }
+      }
 
       if (userId) {
-        // Update profile status to active
+        // Expand customer if needed to get the customer ID
+        let stripeCustomerId = customerId;
+        if (typeof customerId === 'string' && customerId.startsWith('cus_')) {
+          stripeCustomerId = customerId;
+        }
+
+        // Update profile: persist stripe_customer_id and set status to active
         const { error: profileError } = await supabaseAdmin
           .from('profiles')
           .update({ 
             status: 'active',
             subscription_status: 'active',
-            is_founding_member: isFoundingMember
+            is_founding_member: isFoundingMember,
+            stripe_customer_id: stripeCustomerId
           })
           .eq('id', userId);
 
         if (profileError) {
           console.error('Error updating profile:', profileError);
+        } else {
+          console.log(`User ${userId} activated with Stripe customer ${stripeCustomerId}`);
         }
 
         // Update application status
@@ -57,14 +114,14 @@ export async function POST(request) {
         if (appError) {
           console.error('Error updating application:', appError);
         }
-
-        console.log(`User ${userId} activated after payment`);
+      } else {
+        console.error('checkout.session.completed: No userId found in metadata or by email lookup');
       }
       break;
 
     case 'customer.subscription.deleted':
       const deletedSub = event.data.object;
-      const deletedUserId = deletedSub.metadata.userId;
+      const deletedUserId = deletedSub.metadata?.userId;
 
       if (deletedUserId) {
         await supabaseAdmin
