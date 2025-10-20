@@ -42,17 +42,26 @@ export async function POST(request) {
       );
     }
 
-    // Map tier to correct Price ID (your new IDs)
+    // Map tier to correct Price ID (must be set via env vars in production)
     let finalPriceId = priceId;
     
     if (tier && !priceId) {
       const tierToPriceId = {
-        'founding': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING || 'price_1SCpCXEGtn4MWvFPzApRs8E4',
-        'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM || 'price_1SIc5xEGtn4MWvFP6GlsbEwh',
-        'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE || 'price_1SIc6fEGtn4MWvFPjISz9nNZ'
+        'founding': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING,
+        'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
+        'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE
       };
       
       finalPriceId = tierToPriceId[tier.toLowerCase()];
+      
+      // In production, fail fast if price IDs are not configured
+      if (!finalPriceId && process.env.NODE_ENV === 'production') {
+        console.error(`Price ID not configured for tier: ${tier}`);
+        return NextResponse.json(
+          { error: 'Payment configuration error. Please contact support.' },
+          { status: 500 }
+        );
+      }
     }
 
     // Validate price ID
@@ -80,6 +89,7 @@ export async function POST(request) {
       );
     }
 
+    // Server-side logging only (no client-side price IDs in logs)
     console.log('Creating checkout session for user:', user.id, 'Tier:', tier || 'direct');
 
     // Determine tier name for metadata
