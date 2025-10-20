@@ -89,8 +89,9 @@ export async function GET(request) {
           subject: subject,
           text: body,
           html: body.replace(/\n/g, '<br>'),
-          mailSettings: { 
-            bypassListManagement: { enable: true } 
+          trackingSettings: {
+            clickTracking: { enable: true },
+            openTracking: { enable: true }
           },
           customArgs: {
             email_sequence_id: String(email.id),
