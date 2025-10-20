@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
 import { Loader2 } from 'lucide-react';
+import { identifyUser, trackEvent } from '@/lib/posthog';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -23,6 +24,18 @@ export default function AuthCallback() {
         }
 
         const email = data.session.user.email?.toLowerCase().trim();
+        const userId = data.session.user.id;
+        
+        // Track user sign-in with PostHog
+        identifyUser(userId, {
+          email: email,
+          signed_in_at: new Date().toISOString()
+        });
+        
+        trackEvent('user_signed_in', {
+          email: email,
+          user_id: userId
+        });
         
         if (email === 'nahdasheh@gmail.com' || email === 'invite@thecirclenetwork.org') {
           router.push('/admin');

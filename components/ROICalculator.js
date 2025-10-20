@@ -8,33 +8,33 @@ export default function ROICalculator() {
   const scenarios = {
     intro: {
       title: 'One warm intro to investor',
-      cost: 199,
-      value: 25000,
+      cost: 2497,
+      value: 250000,
       description: 'Skip 6 months of cold outreach. Get a warm intro that actually gets answered.',
       icon: Users,
       color: 'emerald'
     },
     hire: {
       title: 'One quality hire referral',
-      cost: 199,
-      value: 15000,
-      description: 'Save $15K+ in recruiter fees. Get pre-vetted candidates from trusted members.',
+      cost: 2497,
+      value: 50000,
+      description: 'Save $50K+ in recruiter fees. Get pre-vetted candidates from trusted members.',
       icon: TrendingUp,
       color: 'blue'
     },
     deal: {
       title: 'One partnership closed',
-      cost: 199,
-      value: 50000,
+      cost: 2497,
+      value: 500000,
       description: 'Average first-year value of partnerships formed through Circle.',
       icon: Zap,
       color: 'purple'
     },
     advice: {
-      title: 'Expert advice on pricing',
-      cost: 199,
-      value: 10000,
-      description: 'Avoid costly pricing mistakes. Get insights from founders who\'ve optimized pricing.',
+      title: 'Expert advice or deal insight',
+      cost: 2497,
+      value: 100000,
+      description: 'Avoid costly mistakes. Get insights from founders who\'ve been there.',
       icon: DollarSign,
       color: 'amber'
     }
@@ -86,8 +86,8 @@ export default function ROICalculator() {
 
         <div className="border-t border-zinc-800 pt-4 mt-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-zinc-400">Monthly Cost:</span>
-            <span className="text-xl font-bold">${current.cost}</span>
+            <span className="text-zinc-400">Annual Investment:</span>
+            <span className="text-xl font-bold">${current.cost.toLocaleString()}</span>
           </div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-zinc-400">Estimated Value:</span>

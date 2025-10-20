@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { sendFoundingMemberWelcomeEmail } from '@/lib/sendgrid';
+
+// PostHog server-side tracking helper
+async function trackServerEvent(eventName, properties = {}) {
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
+  
+  if (!posthogKey) return;
+  
+  try {
+    await fetch(`${posthogHost}/capture/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        api_key: posthogKey,
+        event: eventName,
+        properties: {
+          ...properties,
+          timestamp: new Date().toISOString(),
+        },
+        distinct_id: properties.user_id || properties.distinct_id || 'server',
+      }),
+    });
+  } catch (error) {
+    console.error('PostHog tracking error:', error);
+  }
+}
 
 export async function POST(request) {
   // Initialize at runtime
@@ -103,6 +132,37 @@ export async function POST(request) {
           console.error('Error updating profile:', profileError);
         } else {
           console.log(`User ${userId} activated with Stripe customer ${stripeCustomerId}`);
+          
+          // Track successful payment conversion with PostHog
+          await trackServerEvent('payment_successful', {
+            user_id: userId,
+            customer_email: session.customer_email,
+            stripe_customer_id: stripeCustomerId,
+            is_founding_member: isFoundingMember,
+            membership_tier: session.metadata?.membershipTier || 'founding',
+            amount: session.amount_total,
+            currency: session.currency,
+          });
+          
+          // Send welcome email
+          try {
+            // Get user profile for name
+            const { data: userProfile } = await supabaseAdmin
+              .from('profiles')
+              .select('full_name')
+              .eq('id', userId)
+              .single();
+            
+            await sendFoundingMemberWelcomeEmail({
+              to: session.customer_email,
+              name: userProfile?.full_name || 'there',
+              isFoundingMember: isFoundingMember
+            });
+            console.log(`Welcome email sent to ${session.customer_email}`);
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError);
+            // Don't fail the webhook if email fails
+          }
         }
 
         // Update application status
