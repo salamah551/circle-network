@@ -1,5 +1,6 @@
 import './globals.css'
 import ToastContainer from '@/components/Toast'
+import PostHogProvider from '@/components/PostHogProvider'
 
 export const metadata = {
   title: 'The Circle Network - Invite-Only',
@@ -22,8 +23,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        {children}
-        <ToastContainer />
+        <PostHogProvider>
+          {children}
+          <ToastContainer />
+        </PostHogProvider>
       </body>
     </html>
   )

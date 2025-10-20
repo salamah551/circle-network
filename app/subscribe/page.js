@@ -5,6 +5,7 @@ import { Check, Loader2, Shield, Lock, Crown, Zap } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 import ROICalculator from '@/components/ROICalculator';
 import MoneyBackGuarantee from '@/components/MoneyBackGuarantee';
+import { trackEvent } from '@/lib/posthog';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,6 +25,12 @@ function SubscribePage() {
   const [session, setSession] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [countdown, setCountdown] = useState(30);
+  const [foundingMemberStatus, setFoundingMemberStatus] = useState({
+    isFull: false,
+    spotsAvailable: 50,
+    count: 0,
+    loading: true
+  });
 
   const isLaunched = new Date().getTime() >= LAUNCH_DATE;
   const [selectedPlan, setSelectedPlan] = useState(isLaunched ? 'monthly' : 'founding');
@@ -37,6 +44,34 @@ function SubscribePage() {
       return () => clearInterval(timer);
     }
   }, [countdown, isLaunched]);
+
+  // Fetch founding member availability
+  useEffect(() => {
+    async function fetchFoundingMemberStatus() {
+      try {
+        const response = await fetch('/api/founding-members/count');
+        if (response.ok) {
+          const data = await response.json();
+          setFoundingMemberStatus({
+            isFull: data.isFull,
+            spotsAvailable: data.spotsAvailable,
+            count: data.count,
+            loading: false
+          });
+          
+          // If founding member slots are full, automatically switch to premium
+          if (data.isFull && selectedPlan === 'founding') {
+            setSelectedPlan('premium');
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching founding member status:', err);
+        setFoundingMemberStatus(prev => ({ ...prev, loading: false }));
+      }
+    }
+    
+    fetchFoundingMemberStatus();
+  }, []);
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -78,11 +113,21 @@ function SubscribePage() {
       let priceId;
       let planName;
       
-      if (selectedPlan === 'founding' && !isLaunched) {
-        // Founding member price (only before launch)
-        priceId = process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID;
+      if (selectedPlan === 'founding') {
+        // Founding member price
+        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING || process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID;
         planName = 'Founding Member';
         console.log('Using founding price ID:', priceId);
+      } else if (selectedPlan === 'premium') {
+        // Premium price
+        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM;
+        planName = 'Premium';
+        console.log('Using premium price ID:', priceId);
+      } else if (selectedPlan === 'elite') {
+        // Elite price
+        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE;
+        planName = 'Elite';
+        console.log('Using elite price ID:', priceId);
       } else if (selectedPlan === 'monthly') {
         // Regular monthly price
         priceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
@@ -107,6 +152,14 @@ function SubscribePage() {
 
       console.log('Creating checkout session for:', planName);
 
+      // Track checkout initiation with PostHog
+      trackEvent('checkout_initiated', {
+        plan: planName,
+        plan_type: selectedPlan,
+        user_email: session.user.email,
+        user_id: session.user.id
+      });
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 
@@ -115,6 +168,7 @@ function SubscribePage() {
         },
         body: JSON.stringify({
           priceId: priceId,
+          tier: selectedPlan,
         }),
       });
 
@@ -195,6 +249,23 @@ function SubscribePage() {
           </p>
         </div>
 
+        {/* Founding Member Availability Banner */}
+        {!isLaunched && !foundingMemberStatus.loading && !foundingMemberStatus.isFull && (
+          <div className="max-w-md mx-auto mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
+            <p className="text-amber-400 font-bold mb-2">🔥 Founding 50 - Limited Availability</p>
+            <div className="text-3xl font-bold text-white">{foundingMemberStatus.spotsAvailable}</div>
+            <p className="text-zinc-400 text-sm mt-2">spots remaining at $2,497/year (save $2,500)</p>
+          </div>
+        )}
+
+        {/* Founding Member Full Banner */}
+        {!isLaunched && !foundingMemberStatus.loading && foundingMemberStatus.isFull && (
+          <div className="max-w-md mx-auto mb-8 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
+            <p className="text-red-400 font-bold mb-2">❌ Founding 50 - SOLD OUT</p>
+            <p className="text-zinc-400 text-sm mt-2">All founding member spots claimed. Premium and Elite tiers available below.</p>
+          </div>
+        )}
+
         {/* Countdown Timer - Only show before launch */}
         {!isLaunched && countdown > 0 && (
           <div className="max-w-md mx-auto mb-8 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
@@ -231,40 +302,170 @@ function SubscribePage() {
                   </div>
                   
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-emerald-400">$199</span>
-                    <span className="text-zinc-400 text-lg">/month</span>
+                    <span className="text-5xl font-bold text-emerald-400">$2,497</span>
+                    <span className="text-zinc-400 text-lg">/year</span>
                     <div className="text-zinc-500 text-sm mt-1">
-                      <span className="line-through">$249/month</span> • Save $600/year
+                      <span className="line-through">$4,997/year</span> • Save $2,500
                     </div>
                     <div className="text-amber-400 font-semibold text-sm mt-2">
-                      LOCKED FOREVER
+                      FOUNDING 50 EXCLUSIVE
                     </div>
+                    {!foundingMemberStatus.loading && (
+                      <div className="text-emerald-400 font-semibold text-xs mt-1">
+                        {foundingMemberStatus.spotsAvailable} of 50 spots left
+                      </div>
+                    )}
                   </div>
 
                   <ul className="space-y-3 text-sm">
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Lifetime price lock at $199/mo</span>
+                      <span><strong>Lifetime price lock</strong> at $2,497/year (50% off forever)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>5 priority invites for peers</span>
+                      <span>Exclusive founding member badge & recognition</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Founding member badge</span>
+                      <span>Priority access to all new features</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>All platform features</span>
+                      <span>5 priority invites to bring your network</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Early access to new features</span>
+                      <span>Founding member strategy sessions</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Founder's inner circle events</span>
+                      <span>All platform features + AI tools</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Premium Plan - Show when founding is full or after launch */}
+          {(foundingMemberStatus.isFull || isLaunched) && (
+            <div 
+              onClick={() => setSelectedPlan('premium')}
+              className={`cursor-pointer transition-all ${
+                selectedPlan === 'premium' 
+                  ? 'ring-2 ring-blue-500 scale-105' 
+                  : 'hover:scale-102'
+              }`}
+            >
+              <div className="bg-zinc-900 border border-blue-500/50 rounded-2xl p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <Zap className="w-8 h-8 text-blue-400" />
+                  {selectedPlan === 'premium' && (
+                    <Check className="w-6 h-6 text-blue-400" />
+                  )}
+                </div>
+                
+                <div className="inline-block bg-blue-500/10 border border-blue-500/30 rounded-full px-3 py-1 mb-4">
+                  <span className="text-blue-400 text-xs font-bold uppercase">Premium</span>
+                </div>
+                
+                <div className="mb-6">
+                  <span className="text-5xl font-bold text-blue-400">$4,997</span>
+                  <span className="text-zinc-400 text-lg">/year</span>
+                  <div className="text-zinc-500 text-sm mt-1">
+                    Full platform access
+                  </div>
+                </div>
+
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>Complete platform access</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>AI-powered strategic introductions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>Member directory & messaging</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>Events and expert sessions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>Deal flow marketplace</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span>30-day money-back guarantee</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Elite Plan - Show when founding is full or after launch */}
+          {(foundingMemberStatus.isFull || isLaunched) && (
+            <div 
+              onClick={() => setSelectedPlan('elite')}
+              className={`cursor-pointer transition-all ${
+                selectedPlan === 'elite' 
+                  ? 'ring-2 ring-purple-500 scale-105' 
+                  : 'hover:scale-102'
+              }`}
+            >
+              <div className="relative">
+                <div className="absolute top-4 right-4 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  BEST VALUE
+                </div>
+                <div className="bg-zinc-900 border border-purple-500/50 rounded-2xl p-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <Crown className="w-8 h-8 text-purple-400" />
+                    {selectedPlan === 'elite' && (
+                      <Check className="w-6 h-6 text-purple-400" />
+                    )}
+                  </div>
+                  
+                  <div className="inline-block bg-purple-500/10 border border-purple-500/30 rounded-full px-3 py-1 mb-4">
+                    <span className="text-purple-400 text-xs font-bold uppercase">Elite</span>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <span className="text-5xl font-bold text-purple-400">$9,997</span>
+                    <span className="text-zinc-400 text-lg">/year</span>
+                    <div className="text-purple-400 text-sm mt-1 font-semibold">
+                      VIP access + AI tools
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span><strong>Everything in Premium</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span>AI Deal Flow Alerts (Q1 2026)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span>AI Reputation Guardian (Q1 2026)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span>AI Competitive Intelligence (Q1 2026)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span>Priority support & concierge service</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                      <span>Elite member badge & status</span>
                     </li>
                   </ul>
                 </div>

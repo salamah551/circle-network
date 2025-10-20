@@ -30,6 +30,12 @@ export async function POST(request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
+    
+    // Create Supabase admin client for secure queries
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
     // Get user with the token
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
@@ -42,21 +48,44 @@ export async function POST(request) {
       );
     }
 
+    // Check founding member count before determining pricing
+    let actualTier = tier;
+    
+    // If requesting founding tier, check if spots are still available
+    if (tier && tier.toLowerCase() === 'founding') {
+      const { count: foundingCount, error: countError } = await supabaseAdmin
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_founding_member', true);
+      
+      if (countError) {
+        console.error('Error checking founding member count:', countError);
+      } else {
+        console.log(`Current founding members: ${foundingCount || 0}`);
+        
+        // If 50 or more founding members exist, default to premium
+        if ((foundingCount || 0) >= 50) {
+          console.log('Founding member slots full, defaulting to premium tier');
+          actualTier = 'premium';
+        }
+      }
+    }
+    
     // Map tier to correct Price ID (must be set via env vars in production)
     let finalPriceId = priceId;
     
-    if (tier && !priceId) {
+    if (actualTier && !priceId) {
       const tierToPriceId = {
         'founding': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING,
         'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
         'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE
       };
       
-      finalPriceId = tierToPriceId[tier.toLowerCase()];
+      finalPriceId = tierToPriceId[actualTier.toLowerCase()];
       
       // In production, fail fast if price IDs are not configured
       if (!finalPriceId && process.env.NODE_ENV === 'production') {
-        console.error(`Price ID not configured for tier: ${tier}`);
+        console.error(`Price ID not configured for tier: ${actualTier}`);
         return NextResponse.json(
           { error: 'Payment configuration error. Please contact support.' },
           { status: 500 }
@@ -92,8 +121,9 @@ export async function POST(request) {
     // Server-side logging only (no client-side price IDs in logs)
     console.log('Creating checkout session for user:', user.id, 'Tier:', tier || 'direct');
 
-    // Determine tier name for metadata
-    const tierName = tier || 'founding';
+    // Determine tier name for metadata (use actualTier which may have been adjusted)
+    const tierName = actualTier || tier || 'founding';
+    const isFoundingMemberTier = tierName.toLowerCase() === 'founding';
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -109,13 +139,13 @@ export async function POST(request) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe?canceled=true&email=${encodeURIComponent(user.email)}`,
       metadata: { 
         userId: user.id, 
-        isFoundingMember: 'true',
+        isFoundingMember: isFoundingMemberTier ? 'true' : 'false',
         membershipTier: tierName
       },
       subscription_data: {
         metadata: { 
           userId: user.id, 
-          isFoundingMember: 'true',
+          isFoundingMember: isFoundingMemberTier ? 'true' : 'false',
           membershipTier: tierName
         },
       },

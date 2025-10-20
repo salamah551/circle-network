@@ -2,6 +2,34 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
+// PostHog server-side tracking helper
+async function trackServerEvent(eventName, properties = {}) {
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
+  
+  if (!posthogKey) return;
+  
+  try {
+    await fetch(`${posthogHost}/capture/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        api_key: posthogKey,
+        event: eventName,
+        properties: {
+          ...properties,
+          timestamp: new Date().toISOString(),
+        },
+        distinct_id: properties.user_id || properties.distinct_id || 'server',
+      }),
+    });
+  } catch (error) {
+    console.error('PostHog tracking error:', error);
+  }
+}
+
 export async function POST(request) {
   // Initialize at runtime
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -103,6 +131,17 @@ export async function POST(request) {
           console.error('Error updating profile:', profileError);
         } else {
           console.log(`User ${userId} activated with Stripe customer ${stripeCustomerId}`);
+          
+          // Track successful payment conversion with PostHog
+          await trackServerEvent('payment_successful', {
+            user_id: userId,
+            customer_email: session.customer_email,
+            stripe_customer_id: stripeCustomerId,
+            is_founding_member: isFoundingMember,
+            membership_tier: session.metadata?.membershipTier || 'founding',
+            amount: session.amount_total,
+            currency: session.currency,
+          });
         }
 
         // Update application status
