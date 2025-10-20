@@ -667,11 +667,15 @@ export async function POST(request) {
  */
 export async function GET(request) {
   try {
-    // Security: Verify cron secret
+    // Security: Verify cron secret OR x-vercel-cron header
     const authHeader = request.headers.get('authorization');
+    const vercelCron = request.headers.get('x-vercel-cron');
     const cronSecret = process.env.CRON_SECRET;
     
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    // Accept either CRON_SECRET or x-vercel-cron header
+    const isAuthorized = (authHeader === `Bearer ${cronSecret}`) || (vercelCron === '1');
+    
+    if (!isAuthorized) {
       console.error('❌ Unauthorized cron access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
