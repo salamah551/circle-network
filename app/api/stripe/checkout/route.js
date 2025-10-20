@@ -88,6 +88,7 @@ export async function POST(request) {
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer_email: user.email,
+      client_reference_id: user.id, // Add client_reference_id for webhook handler
       line_items: [
         { 
           price: finalPriceId, 

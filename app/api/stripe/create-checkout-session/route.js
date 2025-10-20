@@ -57,6 +57,7 @@ export async function POST(req) {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
+      client_reference_id: profile.id, // Add client_reference_id for webhook handler
       line_items: [{ price, quantity: 1 }],
       allow_promotion_codes: false,
       success_url: `${appUrl}/billing?status=success&session_id={CHECKOUT_SESSION_ID}`,
