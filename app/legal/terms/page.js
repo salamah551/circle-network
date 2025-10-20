@@ -23,7 +23,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using The Circle Reserve ("Service"), you accept and agree to be bound by the terms and provisions of this agreement. 
+              By accessing and using Circle Network ("Service"), you accept and agree to be bound by the terms and provisions of this agreement. 
               If you do not agree to these Terms of Service, please do not use the Service.
             </p>
           </section>
@@ -31,7 +31,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">2. Service Description</h2>
             <p>
-              The Circle Reserve is an invitation-only professional networking platform limited to 500 founding members across finance, technology, 
+              Circle Network is an invitation-only professional networking platform limited to 500 founding members across finance, technology, 
               consulting, and commerce industries. The Service provides:
             </p>
             <ul className="list-disc list-inside mt-4 space-y-2 ml-4">
@@ -49,7 +49,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-light text-white mb-4">3. Membership and Account</h2>
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">3.1 Invitation-Only Access</h3>
             <p>
-              Membership to The Circle Reserve is by invitation only. You must receive a valid invitation code to create an account. 
+              Membership to Circle Network is by invitation only. You must receive a valid invitation code to create an account. 
               All applications are subject to review and approval.
             </p>
 
@@ -70,13 +70,13 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-light text-white mb-4">4. Payment Terms</h2>
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.1 Subscription Fees</h3>
             <p>
-              Founding members pay $199/month with a lifetime rate lock guarantee. Regular members (after November 1, 2025) pay $249/month. 
-              Annual plans are available at $2,400/year (equivalent to 20% savings).
+              Founding members (joining before January 15, 2026) pay $2,497/year with a lifetime rate lock guarantee. After the founding member window closes, 
+              pricing increases to $4,997/year (Premium) or $9,997/year (Elite, including advanced AI features). Annual billing only.
             </p>
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.2 Billing</h3>
             <p>
-              Subscriptions are billed monthly or annually in advance. Payment is processed securely through Stripe. By subscribing, you authorize 
+              Subscriptions are billed annually in advance. Payment is processed securely through Stripe. By subscribing, you authorize 
               us to charge your payment method for the subscription fee and any applicable taxes.
             </p>
 
@@ -89,8 +89,16 @@ export default function TermsOfService() {
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.4 Founding Member Rate Lock</h3>
             <p>
-              Founding members who join before November 1, 2025, receive a guaranteed lifetime rate of $199/month. This rate will not increase, 
-              even if you pause and later resume your membership, provided your account remains in good standing.
+              Founding members who join before January 15, 2026, receive a guaranteed lifetime rate of $2,497/year. This rate will not increase, 
+              even if you pause and later resume your membership, provided your account remains in good standing. Founding members also receive 
+              access to all Elite AI features at no additional cost (a $4,991/year value).
+            </p>
+
+            <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.5 Performance Guarantee</h3>
+            <p>
+              We stand behind our platform. If you don't achieve at least 3 meaningful wins within your first 90 days of active membership 
+              (defined as valuable introductions, partnerships, or opportunities), we'll extend your membership by 3 months at no additional charge. 
+              Contact support within 100 days to claim this guarantee.
             </p>
           </section>
 
@@ -115,7 +123,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">6. Intellectual Property</h2>
             <p>
-              The Service and its original content, features, and functionality are owned by The Circle Reserve and are protected by international 
+              The Service and its original content, features, and functionality are owned by Circle Network and are protected by international 
               copyright, trademark, and other intellectual property laws. You retain ownership of content you post, but grant us a license to use, 
               display, and distribute such content within the Service.
             </p>
@@ -145,7 +153,7 @@ export default function TermsOfService() {
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">8.3 Limitation of Liability</h3>
             <p>
-              To the maximum extent permitted by law, The Circle Reserve shall not be liable for any indirect, incidental, special, consequential, 
+              To the maximum extent permitted by law, Circle Network shall not be liable for any indirect, incidental, special, consequential, 
               or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, 
               or other intangible losses resulting from your use of the Service.
             </p>
@@ -203,15 +211,15 @@ export default function TermsOfService() {
               If you have questions about these Terms, please contact us at:
             </p>
             <div className="mt-4 p-6 bg-white/[0.02] border border-[#E5C77E]/10 rounded-xl">
-              <p className="text-white/90">The Circle Reserve</p>
-              <p className="text-white/60 mt-2">Email: legal@thecirclereserve.com</p>
-              <p className="text-white/60">Support: support@thecirclereserve.com</p>
+              <p className="text-white/90">Circle Network</p>
+              <p className="text-white/60 mt-2">Email: legal@thecirclenetwork.org</p>
+              <p className="text-white/60">Support: support@thecirclenetwork.org</p>
             </div>
           </section>
 
           <section className="pt-8 border-t border-white/10">
             <p className="text-white/50 text-sm">
-              By using The Circle Reserve, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+              By using Circle Network, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
             </p>
           </section>
         </div>

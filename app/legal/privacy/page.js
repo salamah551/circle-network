@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
           <section className="bg-[#E5C77E]/5 border border-[#E5C77E]/20 rounded-xl p-6">
             <h3 className="text-lg font-light text-white mb-3">Our Commitment to Your Privacy</h3>
             <p>
-              At The Circle Reserve, we take your privacy seriously. This Privacy Policy explains how we collect, use, protect, and share your 
+              At Circle Network, we take your privacy seriously. This Privacy Policy explains how we collect, use, protect, and share your 
               personal information. We do not sell your data to third parties, and we maintain strict confidentiality standards befitting our 
               exclusive membership.
             </p>
@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">3. How We Share Your Information</h2>
             
-            <h3 className="text-xl font-light text-white/90 mb-3 mt-6">3.1 Within The Circle Reserve</h3>
+            <h3 className="text-xl font-light text-white/90 mb-3 mt-6">3.1 Within Circle Network</h3>
             <p>
               Your profile information is visible to other members to facilitate connections. You control what information appears in your profile. 
               Private messages, deal room content, and certain activities are only visible to intended recipients.
@@ -110,7 +110,7 @@ export default function PrivacyPolicy() {
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">3.4 Legal Requirements</h3>
             <p>
-              We may disclose information if required by law, court order, or to protect the rights, property, or safety of The Circle Reserve, 
+              We may disclose information if required by law, court order, or to protect the rights, property, or safety of Circle Network, 
               our members, or others.
             </p>
           </section>
@@ -203,7 +203,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">8. Children's Privacy</h2>
             <p>
-              The Circle Reserve is not intended for individuals under 18 years of age. We do not knowingly collect information from children. 
+              Circle Network is not intended for individuals under 18 years of age. We do not knowingly collect information from children. 
               If we discover we have collected information from a child, we will delete it immediately.
             </p>
           </section>
@@ -211,7 +211,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-light text-white mb-4">9. International Data Transfers</h2>
             <p>
-              The Circle Reserve operates globally. Your information may be transferred to and processed in countries other than your own, 
+              Circle Network operates globally. Your information may be transferred to and processed in countries other than your own, 
               including the United States. We ensure appropriate safeguards are in place for international transfers, including Standard 
               Contractual Clauses where applicable.
             </p>
@@ -240,7 +240,7 @@ export default function PrivacyPolicy() {
 
           <section className="pt-8 border-t border-white/10">
             <p className="text-white/50 text-sm">
-              By using The Circle Reserve, you acknowledge that you have read and understood this Privacy Policy and consent to the collection, 
+              By using Circle Network, you acknowledge that you have read and understood this Privacy Policy and consent to the collection, 
               use, and sharing of your information as described herein.
             </p>
           </section>
