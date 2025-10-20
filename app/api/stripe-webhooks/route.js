@@ -1,3 +1,9 @@
+// Secure Stripe webhook handler using client_reference_id for user identification.
+// This webhook uses client_reference_id from the checkout session to identify users,
+// which provides a more secure alternative to using metadata.userId.
+// Note: There is also a webhook at /api/stripe/webhook/route.js that uses metadata.userId.
+// Both webhooks can coexist - use this one for new implementations requiring client_reference_id.
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
@@ -76,12 +82,19 @@ export async function POST(request) {
     }
 
     try {
+      // Extract membership tier from session metadata, default to 'founding'
+      const membershipTier = session.metadata?.membershipTier || 'founding';
+      const isFoundingMember = session.metadata?.isFoundingMember === 'true';
+
       // Update the user's record in the profiles table
       const { error: updateError } = await supabaseAdmin
         .from('profiles')
         .update({
           is_subscribed: true,
-          membership_tier: 'founding'
+          membership_tier: membershipTier,
+          subscription_status: 'active',
+          status: 'active',
+          is_founding_member: isFoundingMember
         })
         .eq('id', userId);
 
@@ -93,7 +106,7 @@ export async function POST(request) {
         );
       }
 
-      console.log(`User ${userId} subscription activated successfully`);
+      console.log(`User ${userId} subscription activated successfully with tier: ${membershipTier}`);
     } catch (error) {
       console.error('Error processing webhook:', error);
       return NextResponse.json(
