@@ -3,6 +3,31 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
 export async function POST(request) {
+  // Validate required environment variables
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('STRIPE_SECRET_KEY is not configured');
+    return NextResponse.json(
+      { error: 'Stripe not configured' },
+      { status: 500 }
+    );
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured');
+    return NextResponse.json(
+      { error: 'Webhook secret not configured' },
+      { status: 500 }
+    );
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Supabase environment variables are not configured');
+    return NextResponse.json(
+      { error: 'Database not configured' },
+      { status: 500 }
+    );
+  }
+
   // Initialize Stripe
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   
