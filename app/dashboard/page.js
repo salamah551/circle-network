@@ -9,7 +9,8 @@ import {
   TrendingUp, Shield, BarChart3, Crown, Lock, ChevronRight,
   UserCheck, Calendar, Award, Target, Zap, Eye, DollarSign,
   Clock, AlertCircle, CheckCircle, Menu, X, LogOut, Plus,
-  Search, Filter, ArrowUpRight, Activity, Briefcase, Mail, Loader2
+  Search, Filter, ArrowUpRight, Activity, Briefcase, Mail, Loader2,
+  Rss
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -274,8 +275,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-zinc-950 border-r border-zinc-800 flex-col">
-        <div className="p-6 border-b border-zinc-800">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-zinc-950 border-r border-zinc-800 flex-col overflow-y-auto">
+        <div className="p-6 border-b border-zinc-800 flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
               <Crown className="w-6 h-6 text-black" />
@@ -284,7 +285,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <Link
             href="/dashboard"
             className="flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-900 text-white font-medium transition-colors"
@@ -313,21 +314,22 @@ export default function DashboardPage() {
             <Users className="w-5 h-5" />
             <span>Members</span>
           </Link>
-          <Link
-  href="/requests"
-  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
->
-  <Target className="w-5 h-5" />
-  <span>Requests</span>
-</Link>
 
-<Link
-  href="/feed"
-  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
->
-  <Sparkles className="w-5 h-5" />
-  <span>Feed</span>
-</Link>
+          <Link
+            href="/requests"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+          >
+            <Target className="w-5 h-5" />
+            <span>Requests</span>
+          </Link>
+
+          <Link
+            href="/feed"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+          >
+            <Rss className="w-5 h-5" />
+            <span>Feed</span>
+          </Link>
 
           <Link
             href="/messages"
@@ -408,6 +410,14 @@ export default function DashboardPage() {
           <div className="my-4 border-t border-zinc-800"></div>
 
           <Link
+            href="/contact"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+          >
+            <Mail className="w-5 h-5" />
+            <span>Contact Us</span>
+          </Link>
+
+          <Link
             href="/settings"
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
           >
@@ -416,7 +426,7 @@ export default function DashboardPage() {
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-zinc-800 flex-shrink-0">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-red-400 transition-colors w-full"
@@ -446,10 +456,11 @@ export default function DashboardPage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="border-t border-zinc-800 p-4 space-y-1">
+          <div className="border-t border-zinc-800 p-4 space-y-1 max-h-[80vh] overflow-y-auto">
             <Link
               href="/dashboard"
               className="flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-900 text-white font-medium"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <Activity className="w-5 h-5" />
               <span>Dashboard</span>
@@ -457,6 +468,7 @@ export default function DashboardPage() {
             <Link
               href="/intros"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <Sparkles className="w-5 h-5" />
               <span>Strategic Intros</span>
@@ -469,13 +481,31 @@ export default function DashboardPage() {
             <Link
               href="/members"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <Users className="w-5 h-5" />
               <span>Members</span>
             </Link>
             <Link
+              href="/requests"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Target className="w-5 h-5" />
+              <span>Requests</span>
+            </Link>
+            <Link
+              href="/feed"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Rss className="w-5 h-5" />
+              <span>Feed</span>
+            </Link>
+            <Link
               href="/messages"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <MessageSquare className="w-5 h-5" />
               <span>Messages</span>
@@ -487,8 +517,17 @@ export default function DashboardPage() {
             </Link>
             <div className="my-2 border-t border-zinc-800"></div>
             <Link
+              href="/contact"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Mail className="w-5 h-5" />
+              <span>Contact Us</span>
+            </Link>
+            <Link
               href="/settings"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>

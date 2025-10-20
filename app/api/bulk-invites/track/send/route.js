@@ -1,201 +1,400 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
-// Email template functions
-function getEmailTemplate(sequenceStage, recipient, trackingPixel, unsubscribeUrl) {
-  const templates = [
-    getEmail1Template,
-    getEmail2Template,
-    getEmail3Template,
-    getEmail4Template
-  ];
-  
-  return templates[sequenceStage](recipient, trackingPixel, unsubscribeUrl);
-}
+/**
+ * Email Template Generator - All 4 Sequences Using Your Exact Format
+ */
+function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
+  const inviteLink = `${appUrl}/?invite=${recipient.invite_code}&iid=${recipient.id}`;
+  const firstName = recipient.first_name || recipient.name?.split(' ')[0] || 'there';
+  const inviteCode = recipient.invite_code || 'CN-XXXX-XXXX';
 
-function getEmail1Template(recipient, trackingPixel, unsubscribeUrl) {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(recipient.email)}&code=${recipient.invite_code}`;
-  
-  return {
-    subject: `${recipient.first_name}, you're invited to join The Circle`,
-    html: `
-<!DOCTYPE html>
+  // EMAIL 1: Initial Invitation (Stage 0)
+  if (stage === 0) {
+    return {
+      subject: "You've been selected for Circle Network",
+      html: `
+<!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #000000; color: #ffffff;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
-          
-          <!-- Header -->
-          <tr>
-            <td style="text-align: center; padding-bottom: 40px;">
-              <div style="width: 60px; height: 60px; margin: 0 auto 20px;">
-                <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="22" stroke="#D4AF37" stroke-width="2.5" fill="none"/>
-                  <circle cx="24" cy="24" r="14" stroke="#D4AF37" stroke-width="2" fill="none"/>
-                  <circle cx="24" cy="24" r="7" fill="#D4AF37"/>
-                </svg>
-              </div>
-              <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #D4AF37;">The Circle</h1>
-              <p style="margin: 10px 0 0 0; font-size: 14px; color: #9ca3af;">Where Ambitious Founders Stop Building Alone</p>
-            </td>
-          </tr>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:32px 28px;text-align:center;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#E5C77E,#D4AF37);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;">
+        👑
+      </div>
+      <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Circle Network</h1>
+      <p style="margin:0;opacity:0.8;font-size:14px;">Invitation-Only • Founding Member Opportunity</p>
+    </div>
 
-          <!-- Main Content -->
-          <tr>
-            <td style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid #27272a; border-radius: 16px; padding: 40px;">
-              
-              <p style="margin: 0 0 24px 0; font-size: 18px; line-height: 1.6; color: #ffffff;">Hi ${recipient.first_name},</p>
-              
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                I'm reaching out because you're exactly the type of founder we're looking for.
-              </p>
+    <!-- Main Content -->
+    <div style="padding:32px 28px;">
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">Hi ${firstName},</p>
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You've been personally selected to join <strong>Circle Network</strong>—an invitation-only community of accomplished professionals who are transforming how high-achievers connect and grow.
+      </p>
 
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                <strong style="color: #ffffff;">The Circle</strong> is an exclusive network of <strong style="color: #F59E0B;">500 ambitious founders</strong> who are tired of:
-              </p>
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You're receiving this because you're among a highly selective group being invited to join during our <strong>founding member phase</strong>.
+      </p>
 
-              <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #d1d5db; font-size: 16px; line-height: 1.8;">
-                <li>Cold LinkedIn DMs that go nowhere</li>
-                <li>Dead Slack groups with zero engagement</li>
-                <li>Networking events where everyone's scanning for someone "more important"</li>
-                <li>Building in isolation without real support</li>
-              </ul>
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
+        This isn't another LinkedIn group or networking event. This is something different.
+      </p>
 
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Instead, you get:
-              </p>
+      <!-- What is Circle Network -->
+      <div style="background:#f8f9fa;border-left:4px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:4px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">WHAT IS CIRCLE NETWORK?</h2>
+        <p style="margin:0 0 12px 0;font-size:15px;line-height:1.6;color:#333;">
+          Circle Network is a private platform where accomplished professionals leverage AI-powered tools to:
+        </p>
+        <ul style="margin:0;padding:0 0 0 20px;">
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Get matched with <strong>3 high-value connections every week</strong></li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Receive <strong>real-time deal flow alerts</strong> tailored to your investment criteria</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Protect your reputation with <strong>AI-powered monitoring</strong> and threat detection</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;">Gain <strong>competitive intelligence</strong> on market trends and opportunities</li>
+        </ul>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-style:italic;">
+          Think of it as your personal intelligence network—powered by AI, curated by humans.
+        </p>
+      </div>
 
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
-                <tr>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #3f3f46;">
-                    <span style="color: #10b981; font-size: 18px; margin-right: 8px;">✓</span>
-                    <span style="color: #ffffff; font-weight: 600;">Warm intros that close deals</span>
-                    <div style="color: #9ca3af; font-size: 14px; margin-top: 4px; margin-left: 26px;">Connect with founders who actually help</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #3f3f46;">
-                    <span style="color: #10b981; font-size: 18px; margin-right: 8px;">✓</span>
-                    <span style="color: #ffffff; font-weight: 600;">Responses in hours, not days</span>
-                    <div style="color: #9ca3af; font-size: 14px; margin-top: 4px; margin-left: 26px;">Average response time under 2 hours</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #3f3f46;">
-                    <span style="color: #10b981; font-size: 18px; margin-right: 8px;">✓</span>
-                    <span style="color: #ffffff; font-weight: 600;">Curated, active community</span>
-                    <div style="color: #9ca3af; font-size: 14px; margin-top: 4px; margin-left: 26px;">Every member is personally vetted</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px 0;">
-                    <span style="color: #10b981; font-size: 18px; margin-right: 8px;">✓</span>
-                    <span style="color: #ffffff; font-weight: 600;">Real partnerships that scale</span>
-                    <div style="color: #9ca3af; font-size: 14px; margin-top: 4px; margin-left: 26px;">Investor intros, co-founders, key hires</div>
-                  </td>
-                </tr>
-              </table>
+      <!-- Core Features -->
+      <div style="margin:0 0 24px 0;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">CORE FEATURES</h2>
+        
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">🤝 AI-Powered Strategic Introductions</p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Our algorithm analyzes your goals, expertise, and needs to recommend 3 high-value connections every week. Accept an intro, and we facilitate the email introduction automatically. No cold outreach—just warm, curated connections.
+          </p>
+        </div>
 
-              <!-- Founding Member Offer -->
-              <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border: 2px solid #F59E0B; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-                <div style="text-align: center; margin-bottom: 16px;">
-                  <span style="display: inline-block; background: #F59E0B; color: #000000; font-weight: bold; font-size: 12px; padding: 6px 12px; border-radius: 20px; letter-spacing: 0.5px;">FOUNDING MEMBER</span>
-                </div>
-                <p style="margin: 0 0 12px 0; font-size: 18px; font-weight: bold; color: #ffffff; text-align: center;">
-                  Lock in <span style="color: #F59E0B;">$199/month forever</span>
-                </p>
-                <p style="margin: 0; font-size: 14px; color: #d1d5db; text-align: center;">
-                  First 500 founding members only • Regular price: $249/mo<br/>
-                  <strong style="color: #10b981;">Save $600/year for life</strong>
-                </p>
-              </div>
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">💼 AI Deal Flow Alerts <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:4px;margin-left:6px;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Set your investment criteria—industry, deal size, stage, geography—and our AI monitors the network and external sources to surface opportunities that match. Get notified the moment relevant deals emerge.
+          </p>
+        </div>
 
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center" style="padding: 20px 0;">
-                    <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #F59E0B, #D97706); color: #000000; text-decoration: none; font-weight: bold; font-size: 18px; padding: 18px 48px; border-radius: 12px; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);">
-                      Claim Your Founding Spot →
-                    </a>
-                  </td>
-                </tr>
-              </table>
+        <div style="margin:0 0 16px 0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">🛡️ Reputation Guardian <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:4px;margin-left:6px;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Your reputation is your most valuable asset. Our AI continuously monitors mentions of you and your company across social media, news, and forums. Get instant alerts about potential threats before they escalate.
+          </p>
+        </div>
 
-              <p style="margin: 24px 0 0 0; font-size: 14px; line-height: 1.6; color: #9ca3af; text-align: center;">
-                Your exclusive invite code: <strong style="color: #F59E0B; font-family: monospace;">${recipient.invite_code}</strong>
-              </p>
+        <div style="margin:0;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:700;color:#1a1a1a;">📊 AI Competitive Intelligence <span style="font-size:11px;background:#8B5CF6;color:white;padding:2px 6px;border-radius:4px;margin-left:6px;">ELITE • Q1 2026</span></p>
+          <p style="margin:0;font-size:14px;line-height:1.5;color:#666;">
+            Stay ahead of your competition. Our AI tracks market trends, competitor moves, funding announcements, and strategic shifts in your industry. Receive weekly intelligence reports with actionable insights.
+          </p>
+        </div>
+      </div>
 
-            </td>
-          </tr>
+      <!-- Founding Member Benefits -->
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:24px;margin:0 0 24px 0;border-radius:8px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#D4AF37;">WHAT YOU GET AS A FOUNDING MEMBER</h2>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+          You're being invited during our founding member phase, which means:
+        </p>
+        <ul style="margin:0 0 16px 0;padding:0 0 0 20px;">
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Lifetime Founding Member Status</strong><br/>Lock in $2,497/year forever (regular pricing will be $4,997+ after January 15, 2026)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ ALL Elite AI Features INCLUDED—Forever</strong><br/>While future Premium members must pay $4,997-$8,994 to access AI features, you get them all at no additional cost: AI Deal Flow Alerts ($1,997 value) + Reputation Guardian ($1,497 value) + AI Competitive Intelligence ($1,497 value)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original founding members</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
+          <li style="margin:0;font-size:15px;line-height:1.5;"><strong>✓ Unlimited Access to All Core Features</strong><br/>Strategic Intros, Member Directory, Private Messaging, and more—no paywalls, no limits</li>
+        </ul>
+      </div>
 
-          <!-- Social Proof -->
-          <tr>
-            <td style="padding: 40px 0 0 0;">
-              <div style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px;">
-                <p style="margin: 0 0 16px 0; font-size: 14px; color: #9ca3af; font-style: italic; line-height: 1.6;">
-                  "Made a post about struggling with CAC. Three founders shared their exact playbooks. Cut our acquisition cost by 40% in 6 weeks."
-                </p>
-                <p style="margin: 0; font-size: 14px; color: #6b7280;">
-                  <strong style="color: #ffffff;">— John Chen</strong>, E-commerce Founder
-                </p>
-              </div>
-            </td>
-          </tr>
+      <!-- Invitation Code -->
+      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Apply Now →</a>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">This code is unique to you and expires in 14 days.</p>
+      </div>
 
-          <!-- Why Now -->
-          <tr>
-            <td style="padding: 40px 0;">
-              <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: bold; color: #ffffff;">Why This Matters</h2>
-              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #d1d5db;">
-                We're limiting The Circle to <strong style="color: #F59E0B;">500 founding members</strong> who lock in $199/mo forever.
-              </p>
-              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #d1d5db;">
-                After that? Regular members pay <strong>$249/mo</strong> with no price lock guarantee.
-              </p>
-              <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #d1d5db;">
-                This isn't artificial scarcity. It's intentional curation to keep the community intimate, active, and valuable.
-              </p>
-            </td>
-          </tr>
+      <!-- Timeline -->
+      <div style="margin:0 0 24px 0;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">THE TIMELINE</h2>
+        <div style="font-size:14px;line-height:1.8;color:#333;">
+          <p style="margin:0 0 8px 0;"><strong>📅 November 10, 2025:</strong> Soft Launch (Invitation-Only Early Access)<br/><span style="color:#666;">Platform goes live for founding members. Core features available immediately.</span></p>
+          <p style="margin:0 0 8px 0;"><strong>📅 December 1, 2025:</strong> Official Public Launch<br/><span style="color:#666;">Full platform launch with all features. Founding member pricing still available.</span></p>
+          <p style="margin:0;"><strong>📅 January 15, 2026:</strong> Founding Member Window Closes<br/><span style="color:#666;">Pricing increases to $4,997/year (Premium) or $9,997/year (Elite)</span></p>
+        </div>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-style:italic;">
+          Founding member pricing ends when we reach capacity OR January 15, 2026—whichever comes first.
+        </p>
+      </div>
 
-          <!-- Final CTA -->
-          <tr>
-            <td style="text-align: center; padding: 20px 0 40px 0;">
-              <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; padding: 14px 32px; border-radius: 8px;">
-                Join The Circle Now
-              </a>
-              <p style="margin: 16px 0 0 0; font-size: 13px; color: #6b7280;">
-                30-day money-back guarantee • Cancel anytime
-              </p>
-            </td>
-          </tr>
+      <!-- CTA -->
+      <div style="background:#f8f9fa;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 16px 0;font-size:16px;font-weight:600;color:#1a1a1a;">Ready to Transform Your Network?</p>
+        <p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#666;">Early access gives you first choice of connections, influence on features, locked-in pricing, and founding member status that lasts forever.</p>
+        <a href="${inviteLink}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Apply Now →</a>
+      </div>
 
-          <!-- Footer -->
-          <tr>
-            <td style="border-top: 1px solid #27272a; padding: 32px 0; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #ffffff; font-weight: 600;">The Circle Network</p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280;">
-                13114 Willow Stream Lane<br/>
-                Fairfax, VA 22033
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
+      <!-- Footer -->
+      <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Questions? Just reply to this email—I read every message personally.</p>
+        <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#1a1a1a;">Shehab Salamah</p>
+        <p style="margin:0 0 16px 0;font-size:13px;color:#999;">Founder, Circle Network</p>
+        
+        <p style="margin:16px 0 0 0;font-size:11px;color:#999;">
+          Don't want to receive invitations? <a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        
+        <p style="margin:12px 0 0 0;font-size:12px;color:#999;">© 2025 Circle Network. All rights reserved.</p>
+      </div>
 
-        </table>
-      </td>
-    </tr>
-  </table>
+    </div>
+  </div>
+  ${trackingPixel}
+</body>
+</html>
+      `
+    };
+  }
+
+  // EMAIL 2: Day 3 Reminder (Stage 1)
+  if (stage === 1) {
+    return {
+      subject: "Quick follow-up on your Circle Network invitation",
+      html: `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    
+    <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:32px 28px;text-align:center;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#E5C77E,#D4AF37);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;">👑</div>
+      <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Circle Network</h1>
+      <p style="margin:0;opacity:0.8;font-size:14px;">Invitation-Only • Founding Member Opportunity</p>
+    </div>
+
+    <div style="padding:32px 28px;">
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">Hi ${firstName},</p>
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        I sent you an invitation to join <strong>Circle Network</strong> a few days ago, and wanted to follow up in case it got buried in your inbox.
+      </p>
+
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You're among a highly selective group being invited during our <strong>founding member phase</strong>—and there are only <strong>11 days left</strong> to claim your spot at the locked-in price of $2,497/year.
+      </p>
+
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
+        After January 15, 2026, this same membership will cost $4,997-$9,997/year.
+      </p>
+
+      <div style="background:#f8f9fa;border-left:4px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:4px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#1a1a1a;">QUICK REMINDER: WHAT YOU GET</h2>
+        <ul style="margin:0;padding:0 0 0 20px;">
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;"><strong>AI-Powered Strategic Introductions:</strong> 3 curated connections every week</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;"><strong>AI Deal Flow Alerts:</strong> Real-time opportunities matching your criteria (Q1 2026)</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#333;"><strong>Reputation Guardian:</strong> 24/7 monitoring and threat detection (Q1 2026)</li>
+          <li style="margin:0;font-size:15px;line-height:1.6;color:#333;"><strong>Competitive Intelligence:</strong> Weekly market insights (Q1 2026)</li>
+        </ul>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-weight:600;">
+          All Elite AI features included at no extra cost—a $4,991/year value.
+        </p>
+      </div>
+
+      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Complete Your Application →</a>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">Expires in 11 days</p>
+      </div>
+
+      <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Questions? Just reply to this email.</p>
+        <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#1a1a1a;">Shehab Salamah</p>
+        <p style="margin:0 0 16px 0;font-size:13px;color:#999;">Founder, Circle Network</p>
+        <p style="margin:16px 0 0 0;font-size:11px;color:#999;">
+          <a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#999;">© 2025 Circle Network. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+  ${trackingPixel}
+</body>
+</html>
+      `
+    };
+  }
+
+  // EMAIL 3: Day 7 Value Reminder (Stage 2)
+  if (stage === 2) {
+    return {
+      subject: "The ROI of one good connection (Circle Network)",
+      html: `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    
+    <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:32px 28px;text-align:center;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#E5C77E,#D4AF37);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;">👑</div>
+      <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Circle Network</h1>
+      <p style="margin:0;opacity:0.8;font-size:14px;">Invitation-Only • Founding Member Opportunity</p>
+    </div>
+
+    <div style="padding:32px 28px;">
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">Hi ${firstName},</p>
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">Let me ask you a question:</p>
+
+      <p style="margin:0 0 24px 0;font-size:18px;line-height:1.6;color:#1a1a1a;font-weight:600;font-style:italic;">
+        What's one valuable connection worth to you?
+      </p>
+
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
+        A strategic partnership? $250,000.<br/>
+        A key hire that saves recruiting fees? $150,000.<br/>
+        An introduction to the right investor? Priceless.
+      </p>
+
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:24px;margin:0 0 24px 0;border-radius:8px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#D4AF37;">THE MATH IS SIMPLE</h2>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+          Circle Network costs $2,497/year as a founding member.
+        </p>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+          If just <strong style="color:#D4AF37;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#D4AF37;">20x</strong>.
+        </p>
+        <p style="margin:0;font-size:14px;line-height:1.6;opacity:0.8;font-style:italic;">
+          Most members make multiple valuable connections per year.
+        </p>
+      </div>
+
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        You have <strong>7 days left</strong> to join at founding member pricing before it increases to $4,997-$9,997/year.
+      </p>
+
+      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Join Now →</a>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">7 days remaining</p>
+      </div>
+
+      <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Questions? Just reply to this email.</p>
+        <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#1a1a1a;">Shehab Salamah</p>
+        <p style="margin:0 0 16px 0;font-size:13px;color:#999;">Founder, Circle Network</p>
+        <p style="margin:16px 0 0 0;font-size:11px;color:#999;">
+          <a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#999;">© 2025 Circle Network. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+  ${trackingPixel}
+</body>
+</html>
+      `
+    };
+  }
+
+  // EMAIL 4: Day 11 Final Urgency (Stage 3)
+  return {
+    subject: "Last call: Your Circle Network founding member invite expires in 3 days",
+    html: `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:20px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    
+    <div style="background:linear-gradient(135deg,#8B0000 0%,#DC143C 100%);color:white;padding:32px 28px;text-align:center;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#E5C77E,#D4AF37);border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;">⏰</div>
+      <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Your Invitation Expires Soon</h1>
+      <p style="margin:0;opacity:0.9;font-size:16px;font-weight:600;">3 Days Remaining</p>
+    </div>
+
+    <div style="padding:32px 28px;">
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">${firstName},</p>
+      
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        This is my final message about your Circle Network invitation.
+      </p>
+
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        Your invitation code expires in <strong style="color:#DC143C;">72 hours</strong>, and after that, you'll miss the founding member pricing of $2,497/year—locked in for life.
+      </p>
+
+      <div style="background:#FEE2E2;border-left:4px solid #DC143C;padding:20px;margin:0 0 24px 0;border-radius:4px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#991B1B;">WHAT YOU'RE ABOUT TO LOSE:</h2>
+        <ul style="margin:0;padding:0 0 0 20px;">
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>$2,500/year savings</strong> (forever)</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>$4,991/year</strong> in Elite AI features (included free for founding members)</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>Founding Member Badge</strong> and priority matching</li>
+          <li style="margin:0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>First choice</strong> of connections in the network</li>
+        </ul>
+        <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#7F1D1D;font-weight:600;">
+          Total value over 10 years: $74,910
+        </p>
+      </div>
+
+      <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
+        I handpicked you for this invitation because I believe you'd be a valuable member of this community.
+      </p>
+
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
+        But if you're not interested, that's okay too—just know that this opportunity won't come around again.
+      </p>
+
+      <div style="background:#1a1a1a;border:2px solid #DC143C;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#DC143C;">FINAL CALL • EXPIRES IN 72 HOURS</p>
+        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#DC143C,#8B0000);color:#fff;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(220,20,60,0.3);">Claim Your Spot Now →</a>
+      </div>
+
+      <p style="margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#666;text-align:center;font-style:italic;">
+        After this email, you won't hear from me again about this opportunity.
+      </p>
+
+      <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
+        <p style="margin:0 0 4px 0;font-size:14px;font-weight:600;color:#1a1a1a;">Shehab Salamah</p>
+        <p style="margin:0 0 16px 0;font-size:13px;color:#999;">Founder, Circle Network</p>
+        <p style="margin:16px 0 0 0;font-size:11px;color:#999;">
+          <a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        <p style="margin:12px 0 0 0;font-size:12px;color:#999;">© 2025 Circle Network. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
   ${trackingPixel}
 </body>
 </html>
@@ -203,402 +402,12 @@ function getEmail1Template(recipient, trackingPixel, unsubscribeUrl) {
   };
 }
 
-function getEmail2Template(recipient, trackingPixel, unsubscribeUrl) {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(recipient.email)}&code=${recipient.invite_code}`;
-  
-  return {
-    subject: `${recipient.first_name}, 387 founders have already joined`,
-    html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #000000; color: #ffffff;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
-          
-          <!-- Header -->
-          <tr>
-            <td style="text-align: center; padding-bottom: 30px;">
-              <div style="width: 50px; height: 50px; margin: 0 auto 16px;">
-                <svg width="50" height="50" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="22" stroke="#D4AF37" stroke-width="2.5" fill="none"/>
-                  <circle cx="24" cy="24" r="14" stroke="#D4AF37" stroke-width="2" fill="none"/>
-                  <circle cx="24" cy="24" r="7" fill="#D4AF37"/>
-                </svg>
-              </div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #D4AF37;">The Circle</h1>
-            </td>
-          </tr>
-
-          <!-- Main Content -->
-          <tr>
-            <td style="padding: 0 0 40px 0;">
-              
-              <p style="margin: 0 0 24px 0; font-size: 17px; color: #ffffff;">Hi ${recipient.first_name},</p>
-              
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Quick update: <strong style="color: #F59E0B;">387 founders</strong> have already claimed their founding member spots in The Circle.
-              </p>
-
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                That leaves <strong style="color: #10b981;">113 spots</strong> at the locked $199/mo rate.
-              </p>
-
-              <!-- Urgency Box -->
-              <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border: 2px solid #ef4444; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-                <p style="margin: 0 0 12px 0; font-size: 18px; font-weight: bold; color: #ef4444; text-align: center;">
-                  ⏰ The Math is Simple
-                </p>
-                <p style="margin: 0; font-size: 15px; color: #d1d5db; text-align: center; line-height: 1.6;">
-                  Once we hit 500 founding members, the rate jumps to $249/mo.<br/>
-                  That's <strong style="color: #ffffff;">$600/year more</strong> if you wait.
-                </p>
-              </div>
-
-              <!-- What's Happening Inside -->
-              <h2 style="margin: 0 0 20px 0; font-size: 20px; font-weight: bold; color: #ffffff;">What's Happening Inside Right Now</h2>
-              
-              <div style="background: #18181b; border-left: 3px solid #10b981; padding: 16px 20px; margin-bottom: 16px; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-size: 15px; color: #ffffff; font-weight: 600;">Sarah K. just got funded</p>
-                <p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5;">
-                  Posted about needing investor intros on Monday. Connected with the right VC by Wednesday. Term sheet by Friday.
-                </p>
-              </div>
-
-              <div style="background: #18181b; border-left: 3px solid #8b5cf6; padding: 16px 20px; margin-bottom: 16px; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-size: 15px; color: #ffffff; font-weight: 600;">Marcus T. solved his hiring problem</p>
-                <p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5;">
-                  Posted a hiring question at 9am. Had 8 qualified responses by lunch. Made the hire by Friday.
-                </p>
-              </div>
-
-              <div style="background: #18181b; border-left: 3px solid #F59E0B; padding: 16px 20px; margin-bottom: 32px; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-size: 15px; color: #ffffff; font-weight: 600;">Lisa R. found her co-founder</p>
-                <p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.5;">
-                  Met at a Circle dinner. Started working together. Closed their seed round 6 months later.
-                </p>
-              </div>
-
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                This is what happens when founders <strong style="color: #ffffff;">actually show up for each other.</strong>
-              </p>
-
-              <!-- CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center" style="padding: 20px 0;">
-                    <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #F59E0B, #D97706); color: #000000; text-decoration: none; font-weight: bold; font-size: 18px; padding: 18px 48px; border-radius: 12px; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);">
-                      Lock In $199/Mo Forever →
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 24px 0 0 0; font-size: 14px; line-height: 1.6; color: #9ca3af; text-align: center;">
-                Your invite code: <strong style="color: #F59E0B; font-family: monospace;">${recipient.invite_code}</strong>
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="border-top: 1px solid #27272a; padding: 32px 0; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #ffffff; font-weight: 600;">The Circle Network</p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280;">
-                13114 Willow Stream Lane, Fairfax, VA 22033
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-  ${trackingPixel}
-</body>
-</html>
-    `
-  };
-}
-
-function getEmail3Template(recipient, trackingPixel, unsubscribeUrl) {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(recipient.email)}&code=${recipient.invite_code}`;
-  
-  return {
-    subject: `Final call: Your founding member spot expires soon`,
-    html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #000000; color: #ffffff;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
-          
-          <!-- Header -->
-          <tr>
-            <td style="text-align: center; padding-bottom: 30px;">
-              <div style="width: 50px; height: 50px; margin: 0 auto 16px;">
-                <svg width="50" height="50" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="22" stroke="#ef4444" stroke-width="2.5" fill="none"/>
-                  <circle cx="24" cy="24" r="14" stroke="#ef4444" stroke-width="2" fill="none"/>
-                  <circle cx="24" cy="24" r="7" fill="#ef4444"/>
-                </svg>
-              </div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ef4444;">Last Chance</h1>
-            </td>
-          </tr>
-
-          <!-- Main Content -->
-          <tr>
-            <td style="padding: 0 0 40px 0;">
-              
-              <p style="margin: 0 0 24px 0; font-size: 17px; color: #ffffff;">${recipient.first_name},</p>
-              
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                I'll be direct: <strong style="color: #ef4444;">This is your last email about The Circle.</strong>
-              </p>
-
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                We're down to <strong style="color: #F59E0B;">less than 50 founding member spots</strong> at the locked $199/mo rate.
-              </p>
-
-              <!-- Urgency Box -->
-              <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2)); border: 3px solid #ef4444; border-radius: 12px; padding: 32px; margin-bottom: 32px; text-align: center;">
-                <p style="margin: 0 0 16px 0; font-size: 28px; font-weight: bold; color: #ef4444;">
-                  $600/Year Savings
-                </p>
-                <p style="margin: 0 0 20px 0; font-size: 16px; color: #ffffff;">
-                  Once we hit 500 founding members, this offer disappears forever.
-                </p>
-                <div style="background: rgba(0,0,0,0.5); border-radius: 8px; padding: 16px;">
-                  <table width="100%" cellpadding="8" cellspacing="0" border="0" style="text-align: left;">
-                    <tr style="border-bottom: 1px solid #3f3f46;">
-                      <td style="color: #9ca3af; font-size: 14px;">Founding Member:</td>
-                      <td style="color: #10b981; font-size: 16px; font-weight: bold; text-align: right;">$199/mo locked forever</td>
-                    </tr>
-                    <tr>
-                      <td style="color: #9ca3af; font-size: 14px; padding-top: 12px;">Regular Member:</td>
-                      <td style="color: #ef4444; font-size: 16px; font-weight: bold; text-align: right; padding-top: 12px;">$249/mo (no lock)</td>
-                    </tr>
-                  </table>
-                </div>
-              </div>
-
-              <h2 style="margin: 0 0 20px 0; font-size: 20px; font-weight: bold; color: #ffffff;">What You're Walking Away From</h2>
-              
-              <ul style="margin: 0 0 32px 0; padding-left: 20px; color: #d1d5db; font-size: 15px; line-height: 1.8;">
-                <li style="margin-bottom: 12px;">A network that actually responds (avg. 2 hour response time)</li>
-                <li style="margin-bottom: 12px;">Founders who close real deals, not just "let's circle back"</li>
-                <li style="margin-bottom: 12px;">Introductions to investors, co-founders, key hires</li>
-                <li style="margin-bottom: 12px;">Events where meaningful partnerships actually form</li>
-                <li style="margin-bottom: 12px;">$600/year in savings by joining now vs. waiting</li>
-              </ul>
-
-              <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                I'm not going to keep emailing you. Either you see the value or you don't.
-              </p>
-
-              <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 1.6; color: #ffffff; font-weight: 600;">
-                But if you're tired of building alone, this is your moment.
-              </p>
-
-              <!-- CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center" style="padding: 20px 0;">
-                    <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #ef4444, #dc2626); color: #ffffff; text-decoration: none; font-weight: bold; font-size: 20px; padding: 18px 48px; border-radius: 12px; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);">
-                      Secure My Founding Spot Now →
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 24px 0 0 0; font-size: 14px; line-height: 1.6; color: #9ca3af; text-align: center;">
-                Your invite code: <strong style="color: #ef4444; font-family: monospace;">${recipient.invite_code}</strong>
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- P.S. -->
-          <tr>
-            <td style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 40px;">
-              <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #ffffff;">P.S.</p>
-              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #d1d5db; font-style: italic;">
-                Still not sure? We have a 30-day money-back guarantee. Try it. If you don't get tangible value, I'll refund you personally. No questions. No hard feelings.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="border-top: 1px solid #27272a; padding: 32px 0; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #ffffff; font-weight: 600;">The Circle Network</p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280;">
-                13114 Willow Stream Lane, Fairfax, VA 22033
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-  ${trackingPixel}
-</body>
-</html>
-    `
-  };
-}
-
-function getEmail4Template(recipient, trackingPixel, unsubscribeUrl) {
-  const waitlistUrl = `${process.env.NEXT_PUBLIC_APP_URL}/waitlist?email=${encodeURIComponent(recipient.email)}`;
-  
-  return {
-    subject: `${recipient.first_name}, we'll save you a spot on the waitlist`,
-    html: `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #000000; color: #ffffff;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
-          
-          <!-- Header -->
-          <tr>
-            <td style="text-align: center; padding-bottom: 30px;">
-              <div style="width: 50px; height: 50px; margin: 0 auto 16px;">
-                <svg width="50" height="50" viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="22" stroke="#D4AF37" stroke-width="2.5" fill="none"/>
-                  <circle cx="24" cy="24" r="14" stroke="#D4AF37" stroke-width="2" fill="none"/>
-                  <circle cx="24" cy="24" r="7" fill="#D4AF37"/>
-                </svg>
-              </div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #D4AF37;">The Circle</h1>
-            </td>
-          </tr>
-
-          <!-- Main Content -->
-          <tr>
-            <td style="padding: 0 0 40px 0;">
-              
-              <p style="margin: 0 0 24px 0; font-size: 17px; color: #ffffff;">Hi ${recipient.first_name},</p>
-              
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                I understand The Circle might not be right for you right now.
-              </p>
-
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Maybe it's timing. Maybe it's budget. Maybe you're just not convinced yet.
-              </p>
-
-              <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                That's completely fine.
-              </p>
-
-              <!-- Waitlist Option -->
-              <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border: 2px solid #10b981; border-radius: 12px; padding: 32px; margin-bottom: 32px;">
-                <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: bold; color: #10b981; text-align: center;">
-                  Join Our Waitlist Instead
-                </h2>
-                <p style="margin: 0 0 20px 0; font-size: 15px; color: #d1d5db; text-align: center; line-height: 1.6;">
-                  Stay connected. Get updates. See what members are achieving.<br/>
-                  When you're ready, you'll be first in line.
-                </p>
-                <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td align="center">
-                      <a href="${waitlistUrl}" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; text-decoration: none; font-weight: bold; font-size: 16px; padding: 14px 32px; border-radius: 8px;">
-                        Join Waitlist (Free)
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-
-              <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Here's what happens next:
-              </p>
-
-              <ul style="margin: 0 0 32px 0; padding-left: 20px; color: #d1d5db; font-size: 15px; line-height: 1.8;">
-                <li style="margin-bottom: 12px;">We'll send you monthly updates about The Circle</li>
-                <li style="margin-bottom: 12px;">You'll see real results from actual members</li>
-                <li style="margin-bottom: 12px;">When you're ready, you can join (if spots are available)</li>
-                <li style="margin-bottom: 12px;">No pressure. No spam. Just valuable updates.</li>
-              </ul>
-
-              <!-- Honesty Section -->
-              <div style="background: #18181b; border-left: 3px solid #F59E0B; padding: 20px; margin-bottom: 32px; border-radius: 4px;">
-                <p style="margin: 0 0 12px 0; font-size: 15px; font-weight: 600; color: #ffffff;">I'll be honest with you:</p>
-                <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.6;">
-                  The founding member rate ($199/mo) is gone once we hit 500 founding members. If you join later, you'll pay the regular rate of $249/mo. But that's okay—the value is still there, and you can decide when you're ready.
-                </p>
-              </div>
-
-              <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 1.6; color: #d1d5db;">
-                Either way, I appreciate you taking the time to consider The Circle.
-              </p>
-
-              <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #ffffff;">
-                Good luck with your venture,<br/>
-                <strong>The Circle Network Team</strong>
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="border-top: 1px solid #27272a; padding: 32px 0; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #ffffff; font-weight: 600;">The Circle Network</p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6b7280;">
-                13114 Willow Stream Lane, Fairfax, VA 22033
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                <a href="${unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-  ${trackingPixel}
-</body>
-</html>
-    `
-  };
-}
-
+/**
+ * POST /api/bulk-invites/track/send
+ * Automated cron job that sends up to daily_limit emails per campaign
+ * Handles 4-email drip sequence: Day 0 → Day 3 → Day 7 → Day 11
+ */
 export async function POST(request) {
-  // Initialize at runtime
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
   try {
     const { campaignId } = await request.json();
 
@@ -609,6 +418,8 @@ export async function POST(request) {
       );
     }
 
+    console.log(`📧 Processing campaign: ${campaignId}`);
+
     // Get campaign details
     const { data: campaign, error: campaignError } = await supabaseAdmin
       .from('bulk_invite_campaigns')
@@ -617,30 +428,36 @@ export async function POST(request) {
       .single();
 
     if (campaignError || !campaign) {
+      console.error('Campaign error:', campaignError);
       return NextResponse.json(
         { error: 'Campaign not found' },
         { status: 404 }
       );
     }
 
-    // Check daily limit
+    // Check daily limit (prevent duplicate sends on same day)
     const today = new Date().toISOString().split('T')[0];
     if (campaign.last_send_date === today) {
+      console.log(`⏸️  Daily limit already reached for campaign ${campaignId} today`);
       return NextResponse.json(
-        { error: 'Daily limit already reached for today' },
+        { 
+          success: true,
+          sent: 0,
+          message: 'Daily limit already reached for today' 
+        },
         { status: 429 }
       );
     }
 
-    // Get recipients ready to send
+    // Get recipients ready to send (respects daily_limit)
     const { data: recipients, error: recipientsError } = await supabaseAdmin
-      .from('bulk_invite_recipients')
+      .from('bulk_invites')
       .select('*')
       .eq('campaign_id', campaignId)
-      .in('status', ['pending', 'sent', 'opened', 'clicked'])
+      .in('status', ['queued', 'sent'])
       .lte('next_email_scheduled', new Date().toISOString())
       .lt('sequence_stage', 4)
-      .limit(campaign.daily_limit);
+      .limit(campaign.daily_limit || 100);
 
     if (recipientsError) {
       console.error('Recipients error:', recipientsError);
@@ -651,6 +468,7 @@ export async function POST(request) {
     }
 
     if (!recipients || recipients.length === 0) {
+      console.log('✅ No recipients ready to send');
       return NextResponse.json({ 
         success: true, 
         sent: 0,
@@ -658,15 +476,71 @@ export async function POST(request) {
       });
     }
 
+    console.log(`📨 Sending to ${recipients.length} recipients (limit: ${campaign.daily_limit || 100})`);
+
+    // DEDUPLICATION: Remove duplicates by email
+    const uniqueRecipients = [];
+    const seenEmails = new Set();
+    
+    for (const r of recipients) {
+      const emailLower = r.email.toLowerCase();
+      if (!seenEmails.has(emailLower)) {
+        seenEmails.add(emailLower);
+        uniqueRecipients.push(r);
+      }
+    }
+
+    // SUPPRESSION: Check for unsubscribes and existing members
+    const emails = uniqueRecipients.map(r => r.email.toLowerCase());
+    
+    const { data: unsubscribed } = await supabaseAdmin
+      .from('unsubscribes')
+      .select('email')
+      .in('email', emails);
+
+    const unsubscribedSet = new Set(
+      (unsubscribed || []).map(u => u.email.toLowerCase())
+    );
+
+    const { data: existingMembers } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .in('email', emails);
+
+    const memberEmailsSet = new Set(
+      (existingMembers || []).map(m => m.email.toLowerCase())
+    );
+
+    // Filter out suppressed emails
+    const filteredRecipients = uniqueRecipients.filter(r => {
+      const emailLower = r.email.toLowerCase();
+      
+      if (unsubscribedSet.has(emailLower)) {
+        console.log(`⚠️  Suppressed ${r.email} - unsubscribed`);
+        return false;
+      }
+      
+      if (memberEmailsSet.has(emailLower)) {
+        console.log(`⚠️  Suppressed ${r.email} - already a member`);
+        return false;
+      }
+      
+      return true;
+    });
+
+    console.log(`✅ Sending to ${filteredRecipients.length} after suppression`);
+
     // Send emails
     let sentCount = 0;
-    for (const recipient of recipients) {
+    const errors = [];
+
+    for (const recipient of filteredRecipients) {
       try {
         const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track?rid=${recipient.id}&type=open" width="1" height="1" alt="" />`;
-        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe/${recipient.id}`;
+        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${recipient.code}`;
         
         const emailTemplate = getEmailTemplate(
-          recipient.sequence_stage,
+          recipient.sequence_stage || 0,
           recipient,
           trackingPixel,
           unsubscribeUrl
@@ -685,61 +559,177 @@ export async function POST(request) {
               subject: emailTemplate.subject
             }],
             from: {
-              email: 'invite@thecirclenetwork.org',
-              name: 'The Circle Network'
+              email: process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org',
+              name: process.env.SENDGRID_FROM_NAME || 'Shehab Salamah'
+            },
+            reply_to: {
+              email: process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclenetwork.org'
             },
             content: [{
               type: 'text/html',
               value: emailTemplate.html
-            }]
+            }],
+            tracking_settings: {
+              click_tracking: { enable: true },
+              open_tracking: { enable: true }
+            },
+            custom_args: {
+              invite_id: String(recipient.id),
+              campaign_id: String(campaignId),
+              sequence_stage: String(recipient.sequence_stage || 0)
+            }
           })
         });
 
         if (sendGridResponse.ok) {
-          // Calculate next email time
-          const daysUntilNext = [3, 4, 7][recipient.sequence_stage] || null;
+          // Calculate next email time based on sequence stage
+          const daysUntilNext = [3, 4, 4][recipient.sequence_stage || 0]; // Day 0→3, Day 3→7, Day 7→11
           const nextEmailScheduled = daysUntilNext 
-            ? new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000)
+            ? new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000).toISOString()
             : null;
 
-          // Update recipient
+          // Update recipient - IDEMPOTENT
           await supabaseAdmin
-            .from('bulk_invite_recipients')
+            .from('bulk_invites')
             .update({
               status: 'sent',
-              sequence_stage: recipient.sequence_stage + 1,
+              sent: true,
+              sent_at: new Date().toISOString(),
+              sequence_stage: (recipient.sequence_stage || 0) + 1,
               last_email_sent: new Date().toISOString(),
               next_email_scheduled: nextEmailScheduled
             })
             .eq('id', recipient.id);
 
+          // Log success
+          await supabaseAdmin
+            .from('bulk_invite_events')
+            .insert({
+              invite_id: recipient.id,
+              event: 'sent',
+              details: { 
+                email: recipient.email,
+                sequence_stage: recipient.sequence_stage || 0,
+                sent_at: new Date().toISOString()
+              }
+            });
+
           sentCount++;
+          console.log(`✅ Sent to ${recipient.email} (Stage ${recipient.sequence_stage || 0})`);
+        } else {
+          const errorText = await sendGridResponse.text();
+          console.error(`❌ Failed to send to ${recipient.email}:`, errorText);
+          errors.push({ email: recipient.email, error: errorText });
         }
       } catch (emailError) {
-        console.error(`Failed to send to ${recipient.email}:`, emailError);
+        console.error(`❌ Failed to send to ${recipient.email}:`, emailError);
+        errors.push({ email: recipient.email, error: emailError.message });
       }
     }
 
-    // Update campaign
+    // Update campaign stats
     await supabaseAdmin
       .from('bulk_invite_campaigns')
       .update({
-        status: 'active',
-        total_sent: campaign.total_sent + sentCount,
-        last_send_date: today
+        sent_count: (campaign.sent_count || 0) + sentCount,
+        last_send_date: today,
+        last_sent_at: new Date().toISOString()
       })
       .eq('id', campaignId);
+
+    console.log(`✅ Campaign ${campaignId}: Sent ${sentCount}/${filteredRecipients.length} emails`);
 
     return NextResponse.json({
       success: true,
       sent: sentCount,
-      message: `Successfully sent ${sentCount} emails`
+      failed: errors.length,
+      suppressed: uniqueRecipients.length - filteredRecipients.length,
+      duplicates: recipients.length - uniqueRecipients.length,
+      total: recipients.length,
+      errors: errors.length > 0 ? errors : undefined
     });
 
   } catch (error) {
-    console.error('Send error:', error);
+    console.error('❌ Send error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/bulk-invites/track/send (Called by Vercel Cron)
+ * Processes all active campaigns daily
+ */
+export async function GET(request) {
+  try {
+    // Security: Verify cron secret
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.error('❌ Unauthorized cron access attempt');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('🔄 Daily cron job started at', new Date().toISOString());
+
+    // Get all active campaigns
+    const { data: campaigns, error: campaignsError } = await supabaseAdmin
+      .from('bulk_invite_campaigns')
+      .select('id, name, daily_limit')
+      .eq('status', 'active');
+
+    if (campaignsError) {
+      console.error('Campaigns error:', campaignsError);
+      return NextResponse.json({ error: campaignsError.message }, { status: 500 });
+    }
+
+    if (!campaigns || campaigns.length === 0) {
+      console.log('✅ No active campaigns');
+      return NextResponse.json({ success: true, message: 'No active campaigns' });
+    }
+
+    console.log(`📧 Processing ${campaigns.length} active campaigns`);
+
+    const results = [];
+
+    // Process each campaign
+    for (const campaign of campaigns) {
+      try {
+        console.log(`📨 Processing campaign: ${campaign.name} (ID: ${campaign.id})`);
+        
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ campaignId: campaign.id })
+        });
+
+        const result = await response.json();
+        results.push({ campaign: campaign.name, ...result });
+        
+      } catch (error) {
+        console.error(`❌ Error processing campaign ${campaign.id}:`, error);
+        results.push({ campaign: campaign.name, error: error.message });
+      }
+    }
+
+    console.log('✅ Daily cron job completed');
+
+    return NextResponse.json({
+      success: true,
+      campaigns_processed: campaigns.length,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Cron job error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
   }
