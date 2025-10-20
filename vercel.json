@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/email-automation",
+      "path": "/api/bulk-invites/track/send",
       "schedule": "0 9 * * *"
     }
   ]
