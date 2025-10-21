@@ -3,7 +3,20 @@ import { createClient } from '@supabase/supabase-js';
 import { getCurrentLaunchPhase } from '@/lib/launch-phase';
 
 /**
+ * Generate a unique invitation code in format FOUNDING-XXXXXX
+ */
+function generateInviteCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'FOUNDING-';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+/**
  * Email Template Generator - All 4 Sequences Using Your Exact Format
+ * Updated with high-contrast colors for better readability (WCAG-compliant)
  */
 function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
@@ -119,12 +132,12 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         </ul>
       </div>
 
-      <!-- Invitation Code -->
-      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
-        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
-        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
-        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Unlock Your 3 Strategic Introductions →</a>
-        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">This code is unique to you and expires in 14 days.</p>
+      <!-- Invitation Code - High Contrast for Accessibility -->
+      <div style="background:#FFF9E6;border:3px solid #B8860B;padding:24px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 12px 0;font-size:15px;font-weight:700;color:#000;letter-spacing:0.5px;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 20px 0;font-size:32px;font-weight:700;color:#000;letter-spacing:3px;font-family:monospace;background:#FFFBF0;padding:16px;border:2px solid #B8860B;border-radius:6px;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:#D4AF37;color:#000;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:17px;border:2px solid #B8860B;">Unlock Your 3 Strategic Introductions →</a>
+        <p style="margin:16px 0 0 0;font-size:13px;color:#000;font-weight:600;">This code is unique to you and expires in 14 days.</p>
       </div>
 
       <!-- Timeline -->
@@ -218,11 +231,11 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         </p>
       </div>
 
-      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
-        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
-        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
-        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Complete Your Application →</a>
-        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">Expires in 11 days</p>
+      <div style="background:#FFF9E6;border:3px solid #B8860B;padding:24px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 12px 0;font-size:15px;font-weight:700;color:#000;letter-spacing:0.5px;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 20px 0;font-size:32px;font-weight:700;color:#000;letter-spacing:3px;font-family:monospace;background:#FFFBF0;padding:16px;border:2px solid #B8860B;border-radius:6px;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:#D4AF37;color:#000;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:17px;border:2px solid #B8860B;">Complete Your Application →</a>
+        <p style="margin:16px 0 0 0;font-size:13px;color:#000;font-weight:600;">Expires in 11 days</p>
       </div>
 
       <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
@@ -296,11 +309,11 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         You have <strong>7 days left</strong> to join at founding member pricing before it increases to $4,997-$9,997/year.
       </p>
 
-      <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
-        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#92400E;">YOUR INVITATION CODE</p>
-        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
-        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Join Now →</a>
-        <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">7 days remaining</p>
+      <div style="background:#FFF9E6;border:3px solid #B8860B;padding:24px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 12px 0;font-size:15px;font-weight:700;color:#000;letter-spacing:0.5px;">YOUR INVITATION CODE</p>
+        <p style="margin:0 0 20px 0;font-size:32px;font-weight:700;color:#000;letter-spacing:3px;font-family:monospace;background:#FFFBF0;padding:16px;border:2px solid #B8860B;border-radius:6px;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:#D4AF37;color:#000;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:17px;border:2px solid #B8860B;">Join Now →</a>
+        <p style="margin:16px 0 0 0;font-size:13px;color:#000;font-weight:600;">7 days remaining</p>
       </div>
 
       <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
@@ -373,10 +386,10 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         But if you're not interested, that's okay too—just know that this opportunity won't come around again.
       </p>
 
-      <div style="background:#1a1a1a;border:2px solid #DC143C;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
-        <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#DC143C;">FINAL CALL • EXPIRES IN 72 HOURS</p>
-        <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
-        <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#DC143C,#8B0000);color:#fff;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(220,20,60,0.3);">Claim Your Spot Now →</a>
+      <div style="background:#FFE6E6;border:3px solid #DC143C;padding:24px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 12px 0;font-size:15px;font-weight:700;color:#8B0000;letter-spacing:0.5px;">FINAL CALL • EXPIRES IN 72 HOURS</p>
+        <p style="margin:0 0 20px 0;font-size:32px;font-weight:700;color:#000;letter-spacing:3px;font-family:monospace;background:#FFF5F5;padding:16px;border:2px solid #DC143C;border-radius:6px;">${inviteCode}</p>
+        <a href="${inviteLink}" style="display:inline-block;background:#DC143C;color:#fff;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:18px;border:2px solid #8B0000;">Claim Your Spot Now →</a>
       </div>
 
       <p style="margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#666;text-align:center;font-style:italic;">
@@ -545,12 +558,27 @@ export async function POST(request) {
 
     for (const recipient of filteredRecipients) {
       try {
+        // Ensure recipient has a code - generate and persist if missing
+        let codeValue = recipient.code;
+        if (!codeValue) {
+          codeValue = generateInviteCode();
+          // Persist the generated code
+          await supabaseAdmin
+            .from('bulk_invites')
+            .update({ code: codeValue })
+            .eq('id', recipient.id);
+          console.log(`✅ Generated and stored code ${codeValue} for ${recipient.email}`);
+        }
+
         const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track?rid=${recipient.id}&type=open" width="1" height="1" alt="" />`;
-        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${recipient.code}`;
+        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${codeValue}`;
+        
+        // Use the recipient with updated code for template generation
+        const recipientWithCode = { ...recipient, code: codeValue };
         
         const emailTemplate = getEmailTemplate(
           recipient.sequence_stage || 0,
-          recipient,
+          recipientWithCode,
           trackingPixel,
           unsubscribeUrl
         );

@@ -3,19 +3,20 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Upload, Send, Users, Mail, 
   TrendingUp, Clock, Loader2, Plus, Eye,
   Download, AlertCircle, CheckCircle, X, FileDown, ExternalLink
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default function BulkInvitesPage() {
+  const [supabase, setSupabase] = useState(null);
+  
+  // Initialize Supabase client only in browser
+  useEffect(() => {
+    setSupabase(getSupabaseBrowser());
+  }, []);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [campaigns, setCampaigns] = useState([]);
@@ -33,8 +34,10 @@ export default function BulkInvitesPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    checkAdminAndLoad();
-  }, []);
+    if (supabase) {
+      checkAdminAndLoad();
+    }
+  }, [supabase]);
 
   const checkAdminAndLoad = async () => {
     try {

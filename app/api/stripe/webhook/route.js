@@ -133,6 +133,46 @@ export async function POST(request) {
         } else {
           console.log(`User ${userId} activated with Stripe customer ${stripeCustomerId}`);
           
+          // Mark bulk invite as converted (match on email, case-insensitive)
+          if (session.customer_email) {
+            const { data: bulkInvites, error: inviteSearchError } = await supabaseAdmin
+              .from('bulk_invites')
+              .select('id, campaign_id')
+              .ilike('email', session.customer_email)
+              .in('status', ['queued', 'sent']);
+
+            if (!inviteSearchError && bulkInvites && bulkInvites.length > 0) {
+              // Mark all matching invites as converted
+              for (const invite of bulkInvites) {
+                await supabaseAdmin
+                  .from('bulk_invites')
+                  .update({ 
+                    status: 'converted',
+                    converted_at: new Date().toISOString()
+                  })
+                  .eq('id', invite.id);
+
+                // Increment campaign total_converted safely
+                const { data: campaign, error: campaignFetchErr } = await supabaseAdmin
+                  .from('bulk_invite_campaigns')
+                  .select('total_converted')
+                  .eq('id', invite.campaign_id)
+                  .single();
+
+                if (!campaignFetchErr && campaign) {
+                  await supabaseAdmin
+                    .from('bulk_invite_campaigns')
+                    .update({ 
+                      total_converted: (campaign.total_converted || 0) + 1 
+                    })
+                    .eq('id', invite.campaign_id);
+                }
+
+                console.log(`✅ Marked bulk invite ${invite.id} as converted for ${session.customer_email}`);
+              }
+            }
+          }
+          
           // Track successful payment conversion with PostHog
           await trackServerEvent('payment_successful', {
             user_id: userId,
