@@ -367,6 +367,20 @@ export default function LandingClient() {
   const launched = isLaunched();
   const membersJoined = parseInt(foundersCap) - spotsRemaining;
 
+  // Check for invite link parameters
+  const [inviteName, setInviteName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      const code = params.get('code') || params.get('invite');
+      if (name) setInviteName(name);
+      if (code) setInviteCode(code);
+    }
+  }, []);
+
   return (
     <main className="min-h-screen bg-black text-white">
       {/* ===== NAVIGATION ===== */}
@@ -408,6 +422,23 @@ export default function LandingClient() {
         </div>
 
         <div className="max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
+          {/* Invite greeting */}
+          {inviteName && (
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-emerald-500/20 border border-amber-500/30">
+                <Crown className="w-5 h-5 text-amber-400" />
+                <span className="text-lg text-white">
+                  Welcome, <strong className="text-amber-400">{inviteName}</strong> — your private invitation is active
+                </span>
+                {inviteCode && (
+                  <span className="px-3 py-1 bg-black/40 rounded-lg text-xs font-mono text-amber-300 border border-amber-500/30">
+                    {inviteCode}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Status badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-8">
             <Lock className="w-4 h-4 text-amber-400" />
@@ -722,6 +753,113 @@ export default function LandingClient() {
           </div>
 
           <AIFeaturesTabs />
+        </div>
+      </section>
+
+      {/* ===== AI-POWERED ONBOARDING ===== */}
+      <section className="py-20 bg-gradient-to-b from-zinc-950/50 to-transparent">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="bg-gradient-to-br from-purple-500/10 via-zinc-900 to-zinc-950 border-2 border-purple-500/30 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+            <div className="relative">
+              <div className="flex flex-col md:flex-row items-start gap-8">
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 mb-6">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm text-purple-400 font-medium">Personalized Experience</span>
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    AI-Powered Onboarding
+                  </h2>
+                  
+                  <p className="text-xl text-white/80 mb-6 leading-relaxed">
+                    When you join, you'll complete a brief AI-powered calibration that customizes your entire experience
+                  </p>
+                  
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Target className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white mb-1">Tell us your strategic goals</div>
+                        <div className="text-sm text-zinc-400">What do you want to achieve in the next 12 months?</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Users className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white mb-1">Define your ideal connections</div>
+                        <div className="text-sm text-zinc-400">Industry focus, geography, expertise needed</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <TrendingUp className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white mb-1">Set your deal flow preferences</div>
+                        <div className="text-sm text-zinc-400">Investment criteria, deal size, stage, sectors (Elite)</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Shield className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white mb-1">Configure your reputation monitoring</div>
+                        <div className="text-sm text-zinc-400">Keywords, brands, companies to track (Elite)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="w-full md:w-80 flex-shrink-0">
+                  <div className="bg-black/40 border border-purple-500/30 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl flex items-center justify-center">
+                        <Clock className="w-6 h-6 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-white">Under 7 Days</div>
+                        <div className="text-sm text-zinc-400">Time to First Value</div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-400">Onboarding</span>
+                        <span className="text-white font-medium">~10 minutes</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-400">AI Calibration</span>
+                        <span className="text-white font-medium">Instant</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-400">First Intros</span>
+                        <span className="text-white font-medium">Next Monday</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                      <div className="flex items-start gap-2 mb-2">
+                        <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-white/90">
+                          <strong>Your first strategic introductions arrive the following Monday</strong> after completing onboarding
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

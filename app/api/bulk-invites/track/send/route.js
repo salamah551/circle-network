@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getCurrentLaunchPhase } from '@/lib/launch-phase';
 
 /**
  * Email Template Generator - All 4 Sequences Using Your Exact Format
@@ -529,6 +530,12 @@ export async function POST(request) {
     });
 
     console.log(`✅ Sending to ${filteredRecipients.length} after suppression`);
+
+    // Get current launch phase to determine which email sequence to use
+    const launchPhase = await getCurrentLaunchPhase(supabaseAdmin);
+    const useFoundingSequence = launchPhase.phase === 'founding';
+    
+    console.log(`📧 Using ${useFoundingSequence ? 'FOUNDING' : 'STANDARD'} member email sequence (phase: ${launchPhase.phase}, founding members: ${launchPhase.foundingMemberCount}/50)`);
 
     // Send emails
     let sentCount = 0;
