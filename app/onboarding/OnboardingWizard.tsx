@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import { ArrowRight, ArrowLeft, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowRight, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,114 +11,111 @@ const supabase = createClient(
 );
 
 interface OnboardingData {
-  strategicGoal: string;
-  dealPreferences: string;
+  strategicSyncSkills: string;
+  dealFlowCriteria: string;
   reputationKeywords: string;
-  industries: string[];
-  geos: string[];
-  competitorWatch: string;
 }
 
-const INDUSTRY_OPTIONS = [
-  'Technology/SaaS',
-  'Fintech',
-  'Healthcare',
-  'E-commerce',
-  'Real Estate',
-  'Consumer Products',
-  'B2B Services',
-  'Manufacturing',
-  'Media/Entertainment',
-  'Education',
-  'Other'
-];
-
-const GEO_OPTIONS = [
-  'North America',
-  'Europe',
-  'Asia Pacific',
-  'Latin America',
-  'Middle East',
-  'Africa',
-  'Global/No Preference'
-];
+interface UserProfile {
+  name: string;
+  full_name?: string;
+  first_name?: string;
+  primaryGoal?: string;
+  strategic_goal?: string;
+}
 
 export default function OnboardingWizard() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   
   const [formData, setFormData] = useState<OnboardingData>({
-    strategicGoal: '',
-    dealPreferences: '',
-    reputationKeywords: '',
-    industries: [],
-    geos: [],
-    competitorWatch: ''
+    strategicSyncSkills: '',
+    dealFlowCriteria: '',
+    reputationKeywords: ''
   });
+
+  // Fetch user profile on mount
+  useEffect(() => {
+    async function fetchUserProfile() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+
+        // Fetch user profile from database
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('full_name, first_name, name, strategic_goal, primary_goal')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          // Continue with basic user data from auth
+          setUserProfile({
+            name: user.email?.split('@')[0] || 'User',
+            primaryGoal: 'growing your network and finding strategic opportunities'
+          });
+        } else {
+          const userName = profile?.first_name || profile?.full_name || profile?.name || user.email?.split('@')[0] || 'User';
+          const userGoal = profile?.strategic_goal || profile?.primary_goal || 'growing your network and finding strategic opportunities';
+          
+          setUserProfile({
+            name: userName,
+            primaryGoal: userGoal
+          });
+        }
+      } catch (err) {
+        console.error('Error in fetchUserProfile:', err);
+        setUserProfile({
+          name: 'User',
+          primaryGoal: 'growing your network and finding strategic opportunities'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchUserProfile();
+  }, [router]);
 
   const steps = [
     {
-      id: 'strategic-goal',
-      title: 'What is your primary strategic goal?',
-      description: 'Help us understand what you want to achieve in the next 12 months',
-      field: 'strategicGoal',
-      type: 'textarea',
-      placeholder: 'e.g., Raise Series A funding, find strategic partners, expand into new markets, hire key executives...',
+      id: 'strategic-sync',
+      title: 'Strategic Sync AI',
+      question: 'To find your most valuable connections, what specific skills or expertise are you looking for in a new introduction?',
+      field: 'strategicSyncSkills',
+      placeholder: 'e.g., Series A fundraising experience, B2B SaaS marketing expertise, healthcare regulatory knowledge...',
       required: true
     },
     {
-      id: 'deal-preferences',
-      title: 'What types of investment opportunities interest you?',
-      description: 'If you invest, tell us what you look for',
-      field: 'dealPreferences',
-      type: 'textarea',
-      placeholder: 'e.g., Early-stage SaaS, $1M-5M checks, B2B focus, or "Not an active investor"',
-      required: false
-    },
-    {
-      id: 'industries',
-      title: 'Which industries are you focused on?',
-      description: 'Select all that apply',
-      field: 'industries',
-      type: 'multi-select',
-      options: INDUSTRY_OPTIONS,
+      id: 'deal-flow',
+      title: 'Deal Flow AI',
+      question: 'To find your ideal opportunities, what is your target investment size and preferred industry sectors?',
+      field: 'dealFlowCriteria',
+      placeholder: 'e.g., $500K-$2M seed rounds in fintech and healthcare, or "Not currently investing"',
       required: true
     },
     {
-      id: 'geos',
-      title: 'Which geographies are you focused on?',
-      description: 'Select all that apply',
-      field: 'geos',
-      type: 'multi-select',
-      options: GEO_OPTIONS,
-      required: true
-    },
-    {
-      id: 'reputation',
-      title: 'What should we monitor for reputation management?',
-      description: 'Keywords related to you, your company, or your brand',
+      id: 'reputation-guardian',
+      title: 'Reputation Guardian AI',
+      question: 'To protect your digital footprint, what are the key phrases, brand names, or projects you want me to monitor?',
       field: 'reputationKeywords',
-      type: 'textarea',
-      placeholder: 'e.g., Your name, company name, brand names, product names (comma-separated)',
-      required: false
-    },
-    {
-      id: 'competitors',
-      title: 'Which competitors or companies should we track?',
-      description: 'For competitive intelligence (optional)',
-      field: 'competitorWatch',
-      type: 'textarea',
-      placeholder: 'e.g., Company names you want to track (comma-separated)',
-      required: false
+      placeholder: 'e.g., Your name, company name, product names, key projects (comma-separated)',
+      required: true
     }
   ];
 
   const currentStepData = steps[currentStep];
 
-  const handleInputChange = (value: string | string[]) => {
+  const handleInputChange = (value: string) => {
     setFormData({
       ...formData,
       [currentStepData.field]: value
@@ -129,8 +126,8 @@ export default function OnboardingWizard() {
     // Validate required fields
     if (currentStepData.required) {
       const value = formData[currentStepData.field as keyof OnboardingData];
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        setError('This field is required');
+      if (!value || value.trim() === '') {
+        setError('Please provide an answer to continue');
         return;
       }
     }
@@ -141,13 +138,6 @@ export default function OnboardingWizard() {
       setCurrentStep(currentStep + 1);
     } else {
       handleSubmit();
-    }
-  };
-
-  const handleBack = () => {
-    setError('');
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -165,14 +155,18 @@ export default function OnboardingWizard() {
         return;
       }
 
-      // Call calibrate API
+      // Call calibrate API with the collected data
       const response = await fetch('/api/onboarding/calibrate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          strategicGoal: formData.strategicSyncSkills,
+          dealPreferences: formData.dealFlowCriteria,
+          reputationKeywords: formData.reputationKeywords
+        })
       });
 
       if (!response.ok) {
@@ -195,14 +189,19 @@ export default function OnboardingWizard() {
     }
   };
 
-  const toggleMultiSelect = (option: string) => {
-    const currentValue = formData[currentStepData.field as keyof OnboardingData] as string[];
-    const newValue = currentValue.includes(option)
-      ? currentValue.filter(v => v !== option)
-      : [...currentValue, option];
-    handleInputChange(newValue);
-  };
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-amber-400 animate-spin mx-auto mb-4" />
+          <p className="text-zinc-400">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
+  // Success state
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -226,31 +225,48 @@ export default function OnboardingWizard() {
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Sparkles className="w-8 h-8 text-black" />
+      <div className="max-w-2xl mx-auto">
+        {/* Welcome Header - shown only on first question */}
+        {currentStep === 0 && userProfile && (
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-8 h-8 text-black" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              Welcome, {userProfile.name} 👋
+            </h1>
+            <p className="text-xl text-zinc-300 mb-2">
+              My purpose is to help you achieve:
+            </p>
+            <p className="text-2xl font-semibold text-amber-400 mb-6">
+              "{userProfile.primaryGoal}"
+            </p>
+            <p className="text-zinc-400 max-w-xl mx-auto">
+              Let's calibrate your AI suite with a few quick questions. This ensures you receive the most relevant connections, opportunities, and intelligence.
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            AI-Powered Onboarding
-          </h1>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
-            Answer a few questions to calibrate your AI suite. This ensures you get the most relevant connections, deal flow, and intelligence.
-          </p>
-        </div>
+        )}
 
-        {/* Progress Bar */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-2">
+        {/* Compact header for subsequent questions */}
+        {currentStep > 0 && (
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-6 h-6 text-black" />
+            </div>
+          </div>
+        )}
+
+        {/* Progress Indicator */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-zinc-500">
-              Step {currentStep + 1} of {steps.length}
+              Question {currentStep + 1} of {steps.length}
             </span>
             <span className="text-sm text-amber-400 font-semibold">
               {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
             </span>
           </div>
-          <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500"
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
@@ -258,76 +274,43 @@ export default function OnboardingWizard() {
           </div>
         </div>
 
-        {/* Current Step */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-3">
-            {currentStepData.title}
+        {/* Question Card */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 md:p-10 mb-8 shadow-xl">
+          {/* AI Service Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full mb-6">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-sm font-medium text-amber-400">{currentStepData.title}</span>
+          </div>
+
+          {/* Question */}
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 leading-snug">
+            {currentStepData.question}
           </h2>
-          <p className="text-zinc-400 mb-6">
-            {currentStepData.description}
-          </p>
 
           {/* Input Field */}
-          {currentStepData.type === 'textarea' && (
-            <textarea
-              value={formData[currentStepData.field as keyof OnboardingData] as string}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder={currentStepData.placeholder}
-              rows={5}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 transition-colors"
-            />
-          )}
-
-          {currentStepData.type === 'multi-select' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {currentStepData.options?.map((option) => {
-                const isSelected = (formData[currentStepData.field as keyof OnboardingData] as string[]).includes(option);
-                return (
-                  <button
-                    key={option}
-                    onClick={() => toggleMultiSelect(option)}
-                    className={`px-4 py-3 rounded-lg border-2 transition-all text-left ${
-                      isSelected
-                        ? 'bg-amber-500/20 border-amber-500 text-white'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        isSelected ? 'bg-amber-500 border-amber-500' : 'border-zinc-600'
-                      }`}>
-                        {isSelected && <CheckCircle className="w-4 h-4 text-black" />}
-                      </div>
-                      <span>{option}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <textarea
+            value={formData[currentStepData.field as keyof OnboardingData]}
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder={currentStepData.placeholder}
+            rows={5}
+            autoFocus
+            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white text-lg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all resize-none"
+          />
 
           {error && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-              {error}
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
+              <span className="text-lg">⚠️</span>
+              <span>{error}</span>
             </div>
           )}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </button>
-
+        {/* Navigation Button */}
+        <div className="flex justify-end">
           <button
             onClick={handleNext}
             disabled={isSubmitting}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-lg shadow-lg hover:shadow-amber-500/20"
           >
             {isSubmitting ? (
               <>
@@ -341,24 +324,19 @@ export default function OnboardingWizard() {
               </>
             ) : (
               <>
-                <span>Next</span>
+                <span>Continue</span>
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
           </button>
         </div>
 
-        {/* Skip Link */}
-        {!currentStepData.required && (
-          <div className="text-center mt-6">
-            <button
-              onClick={handleNext}
-              className="text-zinc-500 hover:text-zinc-400 text-sm transition-colors"
-            >
-              Skip this step →
-            </button>
-          </div>
-        )}
+        {/* Help Text */}
+        <div className="text-center mt-6">
+          <p className="text-sm text-zinc-500">
+            Your responses help us personalize your experience
+          </p>
+        </div>
       </div>
     </div>
   );
