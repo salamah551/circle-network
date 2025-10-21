@@ -26,9 +26,21 @@ async function checkAccess() {
     redirect('/login');
   }
 
-  // Note: In a production environment, you might want to check subscription_status
-  // However, since this is a new feature and schemas may vary, we'll allow access
-  // for any authenticated user and let the component handle the logic
+  // Check subscription status - only active subscribers can access onboarding
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_status, status')
+    .eq('id', user.id)
+    .single();
+  
+  // Allow access if subscription_status is 'active' or status is 'active'
+  // (handles different schema variations)
+  const hasActiveSubscription = profile?.subscription_status === 'active' || profile?.status === 'active';
+  
+  if (!hasActiveSubscription) {
+    // Redirect to subscribe page if no active subscription
+    redirect('/subscribe');
+  }
   
   return { user };
 }
