@@ -1,6 +1,6 @@
 import './globals.css'
-import ToastContainer from '@/components/Toast'
-import PostHogProvider from '@/components/PostHogProvider'
+import ToastContainer from '../components/Toast'
+import PostHogProvider from '../components/PostHogProvider'
 
 export const metadata = {
   title: 'The Circle Network - Invite-Only',

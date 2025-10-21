@@ -3,7 +3,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { initPostHog, trackPageView } from '@/lib/posthog';
+import { initPostHog, trackPageView } from '../lib/posthog';
 
 /**
  * PostHog Provider Component
