@@ -25,7 +25,7 @@ export async function POST(request) {
       if (seen.has(email)) continue;
       seen.add(email);
       normalized.push({
-        full_name: r.full_name || null,
+        full_name: `${r.firstName || ''} ${r.lastName || ''}`.trim(),
         email,
         company: r.company || null,
         title: r.title || null,
@@ -68,7 +68,7 @@ export async function POST(request) {
     for (const n of normalized) {
       if (existingSet.has(n.email)) { skipped.duplicates_in_campaign++; continue; }
       if (suppressionSet.has(n.email)) { skipped.suppressed++; continue; }
-      toInsert.append?.(n) || toInsert.push(n);
+      toInsert.push(n);
     }
 
     if (toInsert.length === 0) {
