@@ -2,11 +2,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 /**
  * POST /api/invites/claim
  * Claims an invite code when a new member signs in for the first time
@@ -14,6 +9,11 @@ const supabase = createClient(
  */
 export async function POST(request) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json(
