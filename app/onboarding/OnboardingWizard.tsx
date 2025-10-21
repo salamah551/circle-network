@@ -176,7 +176,7 @@ export default function OnboardingWizard() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({ error: 'Failed to save onboarding data' }));
         throw new Error(data.error || 'Failed to save onboarding data');
       }
 
@@ -190,7 +190,9 @@ export default function OnboardingWizard() {
 
     } catch (err: any) {
       console.error('Onboarding submit error:', err);
-      setError(err.message || 'Failed to complete onboarding');
+      // Show user-friendly error message
+      const errorMessage = err.message || 'An error occurred. Please try again.';
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
@@ -274,7 +276,7 @@ export default function OnboardingWizard() {
               onChange={(e) => handleInputChange(e.target.value)}
               placeholder={currentStepData.placeholder}
               rows={5}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 transition-colors"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300"
             />
           )}
 
@@ -286,14 +288,14 @@ export default function OnboardingWizard() {
                   <button
                     key={option}
                     onClick={() => toggleMultiSelect(option)}
-                    className={`px-4 py-3 rounded-lg border-2 transition-all text-left ${
+                    className={`px-4 py-3 rounded-lg border-2 transition-all duration-300 text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 ${
                       isSelected
-                        ? 'bg-amber-500/20 border-amber-500 text-white'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                        ? 'bg-amber-500/20 border-amber-500 text-white focus:ring-amber-500/50'
+                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700 focus:ring-zinc-700'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
                         isSelected ? 'bg-amber-500 border-amber-500' : 'border-zinc-600'
                       }`}>
                         {isSelected && <CheckCircle className="w-4 h-4 text-black" />}
@@ -318,7 +320,7 @@ export default function OnboardingWizard() {
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
-            className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:ring-offset-2 focus:ring-offset-black"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
@@ -327,7 +329,7 @@ export default function OnboardingWizard() {
           <button
             onClick={handleNext}
             disabled={isSubmitting}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold rounded-lg transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
           >
             {isSubmitting ? (
               <>
@@ -353,7 +355,7 @@ export default function OnboardingWizard() {
           <div className="text-center mt-6">
             <button
               onClick={handleNext}
-              className="text-zinc-500 hover:text-zinc-400 text-sm transition-colors"
+              className="text-zinc-500 hover:text-zinc-400 text-sm transition-all duration-300 focus:outline-none focus:text-zinc-300"
             >
               Skip this step →
             </button>
