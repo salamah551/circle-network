@@ -399,13 +399,13 @@ export default function LandingClient() {
             <div className="flex items-center gap-3">
               <Link 
                 href="/login"
-                className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all"
+                className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20"
               >
                 Sign In
               </Link>
               <Link 
                 href="/apply"
-                className="text-sm bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition-all"
+                className="text-sm bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
               >
                 Request Invitation
               </Link>
@@ -478,14 +478,14 @@ export default function LandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/apply"
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl hover:shadow-amber-500/20 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all duration-300 shadow-xl hover:shadow-amber-500/20 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
             >
               Request Invitation
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="#benefits"
-              className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold text-lg rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold text-lg rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-black"
             >
               See What's Inside
             </Link>
@@ -1105,7 +1105,7 @@ export default function LandingClient() {
               </ul>
               <Link
                 href="/apply"
-                className="block w-full py-3 bg-amber-500 text-black font-bold text-center rounded-lg hover:bg-amber-400 transition-all"
+                className="block w-full py-3 bg-amber-500 text-black font-bold text-center rounded-lg hover:bg-amber-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
               >
                 Request Invitation
               </Link>
@@ -1269,7 +1269,7 @@ export default function LandingClient() {
           </p>
           <Link
             href="/apply"
-            className="inline-block px-12 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg hover:shadow-amber-500/20 mb-4"
+            className="inline-block px-12 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all duration-300 shadow-lg hover:shadow-amber-500/20 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-black"
           >
             Request Your Invitation
           </Link>
