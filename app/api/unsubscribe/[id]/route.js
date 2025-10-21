@@ -12,14 +12,61 @@ export async function GET(request, { params }) {
   try {
     const recipientId = params.id;
 
-    // Update recipient to unsubscribed
-    await supabaseAdmin
-      .from('bulk_invite_recipients')
-      .update({
-        status: 'unsubscribed',
-        unsubscribed_at: new Date().toISOString()
-      })
-      .eq('id', recipientId);
+    // Look up recipient in bulk_invites table
+    const { data: recipient, error: lookupError } = await supabaseAdmin
+      .from('bulk_invites')
+      .select('id, email, campaign_id')
+      .eq('id', recipientId)
+      .single();
+
+    if (lookupError || !recipient) {
+      console.error('Recipient not found:', lookupError);
+      // Still show unsubscribe confirmation even if not found
+    } else {
+      // Record unsubscribe event in bulk_invite_events
+      await supabaseAdmin
+        .from('bulk_invite_events')
+        .insert({
+          invite_id: recipientId,
+          event: 'unsubscribed',
+          details: { 
+            email: recipient.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+
+      // Add to bulk_invite_suppressions table
+      await supabaseAdmin
+        .from('bulk_invite_suppressions')
+        .upsert(
+          {
+            email: recipient.email.toLowerCase(),
+            reason: 'unsubscribed'
+          },
+          { onConflict: 'email' }
+        );
+
+      // Update recipient status in bulk_invites (idempotent)
+      await supabaseAdmin
+        .from('bulk_invites')
+        .update({
+          status: 'unsubscribed',
+          unsubscribed_at: new Date().toISOString()
+        })
+        .eq('id', recipientId);
+
+      // Also add to global unsubscribes table for cross-campaign suppression
+      await supabaseAdmin
+        .from('unsubscribes')
+        .upsert(
+          {
+            email: recipient.email.toLowerCase(),
+            reason: 'unsubscribed',
+            unsubscribed_at: new Date().toISOString()
+          },
+          { onConflict: 'email' }
+        );
+    }
 
     // Return simple HTML page
     return new NextResponse(`

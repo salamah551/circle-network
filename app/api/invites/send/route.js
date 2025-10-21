@@ -85,16 +85,14 @@ export async function POST(request) {
 
     // Add recipient to bulk invite system with 4-email drip sequence
     const { error: recipientError } = await supabaseAdmin
-      .from('bulk_invite_recipients')
+      .from('bulk_invites')
       .insert({
         campaign_id: personalCampaign.id,
         email: email.toLowerCase(),
-        first_name: firstName || 'Member',
-        last_name: lastName || '',
-        name: `${firstName || 'Member'} ${lastName || ''}`.trim(),
-        invite_code: inviteCode,
+        full_name: `${firstName || 'Member'} ${lastName || ''}`.trim(),
+        code: inviteCode,
         persona_type: 'wildcard',
-        status: 'pending',
+        status: 'queued',
         sequence_stage: 0,
         next_email_scheduled: new Date().toISOString() // Send first email immediately
       });
@@ -105,6 +103,22 @@ export async function POST(request) {
         { error: 'Failed to add recipient to drip sequence', details: recipientError.message },
         { status: 500 }
       );
+    }
+
+    // Update campaign totals
+    const { data: campaign } = await supabaseAdmin
+      .from('bulk_invite_campaigns')
+      .select('total_recipients')
+      .eq('id', personalCampaign.id)
+      .single();
+
+    if (campaign) {
+      await supabaseAdmin
+        .from('bulk_invite_campaigns')
+        .update({ 
+          total_recipients: (campaign.total_recipients || 0) + 1 
+        })
+        .eq('id', personalCampaign.id);
     }
 
     // Trigger immediate send of first email via bulk system
