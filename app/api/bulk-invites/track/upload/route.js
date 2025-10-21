@@ -2,6 +2,17 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * Generate a unique invite code
+ * Format: CN-XXXX-XXXX (where X is alphanumeric)
+ */
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars: 0, O, 1, I
+  const part1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const part2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `CN-${part1}-${part2}`;
+}
+
 export async function POST(request) {
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -29,7 +40,7 @@ export async function POST(request) {
         email,
         company: r.company || null,
         title: r.title || null,
-        code: r.code || null,
+        code: r.code || generateInviteCode(), // Generate code if not provided
         notes: r.notes || ''
       });
     }

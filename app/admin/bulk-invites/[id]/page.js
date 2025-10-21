@@ -1,17 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Mail, Eye, MousePointer, UserCheck, 
   TrendingUp, Clock, Loader2, Search, Download,
   CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 export default function CampaignDetailsPage() {
   const router = useRouter();
