@@ -1,6 +1,8 @@
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import PostHogProvider from '@/components/PostHogProvider'
+import { Suspense } from 'react'
+import InviteCapture from '@/components/InviteCapture'
 
 export const metadata = {
   title: 'The Circle Network - Invite-Only',
@@ -24,6 +26,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body suppressHydrationWarning>
         <PostHogProvider>
+          <Suspense fallback={null}>
+            <InviteCapture />
+          </Suspense>
           {children}
           <ToastContainer />
         </PostHogProvider>

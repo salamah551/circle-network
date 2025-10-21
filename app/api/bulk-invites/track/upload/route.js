@@ -2,6 +2,18 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * Generate a unique invitation code in format FOUNDING-XXXXXX
+ */
+function generateInviteCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'FOUNDING-';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 export async function POST(request) {
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -75,12 +87,12 @@ export async function POST(request) {
       return NextResponse.json({ success: true, inserted: 0, skipped }, { status: 200 });
     }
 
-    // Insert rows
+    // Insert rows - generate code if missing
     const rows = toInsert.map(n => ({
       campaign_id: campaignId,
       full_name: n.full_name,
       email: n.email,
-      code: n.code,
+      code: n.code || generateInviteCode(), // Generate code if not provided
       company: n.company,
       title: n.title,
       status: 'queued',

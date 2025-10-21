@@ -1,19 +1,20 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Mail, Eye, MousePointer, UserCheck, 
   TrendingUp, Clock, Loader2, Search, Download,
   CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default function CampaignDetailsPage() {
+  const [supabase, setSupabase] = useState(null);
+  
+  // Initialize Supabase client only in browser
+  useEffect(() => {
+    setSupabase(getSupabaseBrowser());
+  }, []);
   const router = useRouter();
   const params = useParams();
   const campaignId = params?.id;
@@ -26,10 +27,10 @@ export default function CampaignDetailsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    if (campaignId) {
+    if (campaignId && supabase) {
       checkAdminAndLoad();
     }
-  }, [campaignId]);
+  }, [campaignId, supabase]);
 
   useEffect(() => {
     filterRecipients();
