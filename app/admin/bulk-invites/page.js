@@ -3,17 +3,14 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Upload, Send, Users, Mail, 
   TrendingUp, Clock, Loader2, Plus, Eye,
   Download, AlertCircle, CheckCircle, X, FileDown, ExternalLink
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 export default function BulkInvitesPage() {
   const router = useRouter();

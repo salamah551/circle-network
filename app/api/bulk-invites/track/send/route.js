@@ -3,13 +3,24 @@ import { createClient } from '@supabase/supabase-js';
 import { getCurrentLaunchPhase } from '@/lib/launch-phase';
 
 /**
+ * Generate a unique invite code
+ * Format: CN-XXXX-XXXX (where X is alphanumeric)
+ */
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars: 0, O, 1, I
+  const part1 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const part2 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  return `CN-${part1}-${part2}`;
+}
+
+/**
  * Email Template Generator - All 4 Sequences Using Your Exact Format
  */
 function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
   // Handle both old (invite_code) and new (code) field names
   const inviteCode = recipient.invite_code || recipient.code || 'CN-XXXX-XXXX';
-  const inviteLink = `${appUrl}/?invite=${inviteCode}&iid=${recipient.id}`;
+  const inviteLink = `${appUrl}/?code=${inviteCode}&iid=${recipient.id}`;
   // Handle both first_name and full_name
   const firstName = recipient.first_name || recipient.full_name?.split(' ')[0] || 'there';
 
@@ -105,17 +116,17 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </div>
 
       <!-- Founding Member Benefits -->
-      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:24px;margin:0 0 24px 0;border-radius:8px;">
-        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#D4AF37;">WHAT YOU GET AS A FOUNDING MEMBER</h2>
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:#fff;padding:24px;margin:0 0 24px 0;border-radius:8px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#E5C77E;">WHAT YOU GET AS A FOUNDING MEMBER</h2>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
           You're being invited during our founding member phase, which means:
         </p>
-        <ul style="margin:0 0 16px 0;padding:0 0 0 20px;">
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Lifetime Founding Member Status</strong><br/>Lock in $2,497/year forever (regular pricing will be $4,997+ after January 15, 2026)</li>
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ ALL Elite AI Features INCLUDED—Forever</strong><br/>While future Premium members must pay $4,997-$8,994 to access AI features, you get them all at no additional cost: AI Deal Flow Alerts ($1,997 value) + Reputation Guardian ($1,497 value) + AI Competitive Intelligence ($1,497 value)</li>
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original founding members</li>
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong>✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
-          <li style="margin:0;font-size:15px;line-height:1.5;"><strong>✓ Unlimited Access to All Core Features</strong><br/>Strategic Intros, Member Directory, Private Messaging, and more—no paywalls, no limits</li>
+        <ul style="margin:0 0 16px 0;padding:0 0 0 20px;color:#f5f5f5;">
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Lifetime Founding Member Status</strong><br/>Lock in $2,497/year forever (regular pricing will be $4,997+ after January 15, 2026)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ ALL Elite AI Features INCLUDED—Forever</strong><br/>While future Premium members must pay $4,997-$8,994 to access AI features, you get them all at no additional cost: AI Deal Flow Alerts ($1,997 value) + Reputation Guardian ($1,497 value) + AI Competitive Intelligence ($1,497 value)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original founding members</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
+          <li style="margin:0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Unlimited Access to All Core Features</strong><br/>Strategic Intros, Member Directory, Private Messaging, and more—no paywalls, no limits</li>
         </ul>
       </div>
 
@@ -125,6 +136,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
         <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Unlock Your 3 Strategic Introductions →</a>
         <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">This code is unique to you and expires in 14 days.</p>
+        <p style="margin:8px 0 0 0;font-size:11px;color:#92400E;font-style:italic;">Copy code: ${inviteCode}</p>
       </div>
 
       <!-- Timeline -->
@@ -223,6 +235,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
         <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Complete Your Application →</a>
         <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">Expires in 11 days</p>
+        <p style="margin:8px 0 0 0;font-size:11px;color:#92400E;font-style:italic;">Copy code: ${inviteCode}</p>
       </div>
 
       <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
@@ -279,15 +292,15 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         An introduction to the right investor? Priceless.
       </p>
 
-      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:white;padding:24px;margin:0 0 24px 0;border-radius:8px;">
-        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#D4AF37;">THE MATH IS SIMPLE</h2>
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:#fff;padding:24px;margin:0 0 24px 0;border-radius:8px;">
+        <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#E5C77E;">THE MATH IS SIMPLE</h2>
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
           Circle Network costs $2,497/year as a founding member.
         </p>
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;opacity:0.95;">
-          If just <strong style="color:#D4AF37;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#D4AF37;">20x</strong>.
+        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
+          If just <strong style="color:#E5C77E;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#E5C77E;">20x</strong>.
         </p>
-        <p style="margin:0;font-size:14px;line-height:1.6;opacity:0.8;font-style:italic;">
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#e0e0e0;font-style:italic;">
           Most members make multiple valuable connections per year.
         </p>
       </div>
@@ -301,6 +314,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#1a1a1a;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
         <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#E5C77E,#D4AF37);color:#000;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:16px;">Join Now →</a>
         <p style="margin:12px 0 0 0;font-size:12px;color:#92400E;">7 days remaining</p>
+        <p style="margin:8px 0 0 0;font-size:11px;color:#92400E;font-style:italic;">Copy code: ${inviteCode}</p>
       </div>
 
       <div style="padding:20px 0;border-top:1px solid #eee;text-align:center;">
@@ -377,6 +391,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         <p style="margin:0 0 8px 0;font-size:14px;font-weight:600;color:#DC143C;">FINAL CALL • EXPIRES IN 72 HOURS</p>
         <p style="margin:0 0 16px 0;font-size:28px;font-weight:700;color:#fff;letter-spacing:2px;font-family:monospace;">${inviteCode}</p>
         <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#DC143C,#8B0000);color:#fff;text-decoration:none;padding:16px 40px;border-radius:8px;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(220,20,60,0.3);">Claim Your Spot Now →</a>
+        <p style="margin:12px 0 0 0;font-size:11px;color:#DC143C;font-style:italic;">Copy code: ${inviteCode}</p>
       </div>
 
       <p style="margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#666;text-align:center;font-style:italic;">
@@ -545,8 +560,24 @@ export async function POST(request) {
 
     for (const recipient of filteredRecipients) {
       try {
+        // Ensure invite code exists - generate and persist if missing
+        let inviteCode = recipient.code || recipient.invite_code;
+        if (!inviteCode) {
+          inviteCode = generateInviteCode();
+          // Persist the generated code back to the database
+          await supabaseAdmin
+            .from('bulk_invites')
+            .update({ code: inviteCode })
+            .eq('id', recipient.id);
+          
+          // Update recipient object for email template
+          recipient.code = inviteCode;
+          recipient.invite_code = inviteCode;
+          console.log(`✅ Generated and persisted invite code ${inviteCode} for ${recipient.email}`);
+        }
+
         const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track?rid=${recipient.id}&type=open" width="1" height="1" alt="" />`;
-        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${recipient.code}`;
+        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${inviteCode}`;
         
         const emailTemplate = getEmailTemplate(
           recipient.sequence_stage || 0,
