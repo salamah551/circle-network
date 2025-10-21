@@ -16,6 +16,7 @@ import {
   Play,
   CheckCircle,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -419,6 +420,18 @@ export default function AdminDashboard() {
               Analytics
             </h3>
             <p className="text-zinc-500 text-sm mb-3">View detailed analytics</p>
+            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/operator')}
+            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
+          >
+            <Sparkles className="w-8 h-8 text-amber-400 mb-3" />
+            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
+              AI Command Center
+            </h3>
+            <p className="text-zinc-500 text-sm mb-3">Delegate operations to the AI</p>
             <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
           </button>
         </div>
