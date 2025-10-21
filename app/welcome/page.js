@@ -20,12 +20,20 @@ export default function WelcomePage() {
   }, []);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && profile) {
       const timer = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            router.push('/dashboard');
+            // Redirect new paid users to onboarding if they haven't completed it
+            // Check if user has completed onboarding
+            const hasCompletedOnboarding = profile.onboarding_completed || profile.onboarding_completed_at;
+            
+            if (!hasCompletedOnboarding) {
+              router.push('/onboarding/start');
+            } else {
+              router.push('/dashboard');
+            }
             return 0;
           }
           return prev - 1;
@@ -34,7 +42,7 @@ export default function WelcomePage() {
 
       return () => clearInterval(timer);
     }
-  }, [loading, router]);
+  }, [loading, profile, router]);
 
   const checkAuthAndNotify = async () => {
     try {
@@ -262,15 +270,18 @@ export default function WelcomePage() {
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">
             <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
             <span className="text-zinc-400">
-              Redirecting to dashboard in <strong className="text-white">{countdown}</strong> seconds...
+              Redirecting in <strong className="text-white">{countdown}</strong> seconds...
             </span>
           </div>
           <div>
             <button
-              onClick={() => router.push('/dashboard')}
+              onClick={() => {
+                const hasCompletedOnboarding = profile?.onboarding_completed || profile?.onboarding_completed_at;
+                router.push(hasCompletedOnboarding ? '/dashboard' : '/onboarding/start');
+              }}
               className="text-amber-400 hover:text-amber-300 font-semibold text-sm flex items-center gap-2 mx-auto"
             >
-              Go to Dashboard Now
+              Continue Now
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

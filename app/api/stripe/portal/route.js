@@ -5,10 +5,9 @@ import Stripe from 'stripe';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export async function POST(req) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     // Create server-side Supabase client with cookie-based auth
     const cookieStore = cookies();
     const supabase = createServerClient(

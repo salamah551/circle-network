@@ -257,6 +257,7 @@ export default function DashboardPage() {
 
   const isFoundingMember = profile?.membership_tier === 'founding' || profile?.is_founding_member;
   const isEliteMember = profile?.membership_tier === 'elite';
+  const isPremiumMember = profile?.membership_tier === 'premium' || profile?.subscription_tier === 'premium';
   const canAccessEliteFeatures = isFoundingMember || isEliteMember;
 
   if (loading) {
@@ -711,10 +712,11 @@ export default function DashboardPage() {
                 icon={TrendingUp}
                 title="AI Deal Flow Alerts"
                 description="Get notified the moment investment opportunities matching your criteria emerge—before they hit the market."
-                status={canAccessEliteFeatures ? 'coming-soon' : 'locked'}
+                status={canAccessEliteFeatures ? 'coming-soon' : (isPremiumMember ? 'preview' : 'locked')}
                 launchDate="Q1 2026"
                 href="/deal-flow"
                 isFoundingMember={isFoundingMember}
+                isPremiumMember={isPremiumMember}
               />
 
               {/* Reputation Guardian Card */}
@@ -722,10 +724,11 @@ export default function DashboardPage() {
                 icon={Shield}
                 title="Reputation Guardian"
                 description="24/7 AI monitoring of your online reputation with instant alerts for potential threats."
-                status={canAccessEliteFeatures ? 'coming-soon' : 'locked'}
+                status={canAccessEliteFeatures ? 'coming-soon' : (isPremiumMember ? 'preview' : 'locked')}
                 launchDate="Q1 2026"
                 href="/reputation"
                 isFoundingMember={isFoundingMember}
+                isPremiumMember={isPremiumMember}
               />
 
               {/* Competitive Intelligence Card */}
@@ -733,10 +736,11 @@ export default function DashboardPage() {
                 icon={BarChart3}
                 title="AI Competitive Intelligence"
                 description="Weekly intelligence reports on competitors, market trends, and strategic opportunities."
-                status={canAccessEliteFeatures ? 'coming-soon' : 'locked'}
+                status={canAccessEliteFeatures ? 'coming-soon' : (isPremiumMember ? 'preview' : 'locked')}
                 launchDate="Q1 2026"
                 href="/intelligence"
                 isFoundingMember={isFoundingMember}
+                isPremiumMember={isPremiumMember}
               />
             </div>
           </div>
@@ -756,9 +760,77 @@ export default function DashboardPage() {
 }
 
 // Locked Feature Card Component
-function LockedFeatureCard({ icon: Icon, title, description, status, launchDate, href, isFoundingMember }) {
+function LockedFeatureCard({ icon: Icon, title, description, status, launchDate, href, isFoundingMember, isPremiumMember }) {
   const isLocked = status === 'locked';
   const isComingSoon = status === 'coming-soon';
+  const isPreview = status === 'preview';
+
+  if (isPreview) {
+    // Premium members get preview mode for Deal Flow AI
+    const maskedOpportunities = [
+      { industry: 'FinTech', valuation: '<$5M', stage: 'Series A', match: '92%' },
+      { industry: 'Healthcare', valuation: '$3-8M', stage: 'Seed+', match: '87%' },
+      { industry: 'B2B SaaS', valuation: '$2-4M', stage: 'Pre-Seed', match: '85%' }
+    ];
+
+    return (
+      <div className="relative bg-gradient-to-br from-emerald-500/5 via-zinc-900 to-black rounded-xl p-6 border border-emerald-500/20">
+        <div className="absolute top-4 right-4">
+          <Eye className="w-5 h-5 text-emerald-400" />
+        </div>
+        
+        <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-4">
+          <Icon className="w-6 h-6 text-emerald-400" />
+        </div>
+        
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <p className="text-sm text-zinc-400 mb-4 leading-relaxed">{description}</p>
+        
+        {/* Masked Opportunities Preview */}
+        {title.includes('Deal Flow') && (
+          <div className="space-y-2 mb-4">
+            <div className="text-xs font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+              <Eye className="w-3 h-3" />
+              PREVIEW MODE
+            </div>
+            {maskedOpportunities.map((opp, i) => (
+              <div key={i} className="bg-zinc-900/80 border border-zinc-800 rounded-lg p-3 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-white">New Opportunity in {opp.industry}</span>
+                  <span className="text-xs font-bold text-emerald-400">{opp.match} match</span>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  Valuation {opp.valuation} • {opp.stage}
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-xs text-zinc-600">
+                  <Lock className="w-3 h-3" />
+                  <span>Full details hidden in preview mode</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Upgrade CTA */}
+        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-lg p-4">
+          <div className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+            <Crown className="w-4 h-4 text-amber-400" />
+            Upgrade to Elite to Unlock All Deals
+          </div>
+          <p className="text-xs text-zinc-400 mb-3">
+            Get full details, direct connections, and real-time alerts for all opportunities matching your criteria.
+          </p>
+          <Link
+            href="/#pricing"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all text-sm font-semibold w-full justify-center"
+          >
+            <ArrowRight className="w-4 h-4" />
+            Upgrade Now
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isLocked) {
     return (

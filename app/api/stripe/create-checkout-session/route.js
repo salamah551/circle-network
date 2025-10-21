@@ -4,10 +4,9 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export async function POST(req) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const { priceId, lookupKey } = await req.json();
     if (!priceId && !lookupKey) {
       return NextResponse.json({ error: 'priceId or lookupKey required' }, { status: 400 });

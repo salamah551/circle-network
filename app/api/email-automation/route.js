@@ -2,11 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
 import { NextResponse } from 'next/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org';
@@ -15,6 +10,10 @@ const REPLY_TO_EMAIL = process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclen
 
 export async function GET(request) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
     // Security: Verify cron secret OR x-vercel-cron header
     const authHeader = request.headers.get('authorization');
     const vercelCron = request.headers.get('x-vercel-cron');
