@@ -226,11 +226,13 @@ export default function BulkInvitesPage() {
   };
 
   const startCampaign = async (campaignId) => {
-    if (!confirm('Start sending emails for this campaign?')) return;
+    if (!confirm('Start this campaign? It will change status to active and begin sending emails according to the daily limit.')) return;
 
     try {
       const session = await supabase.auth.getSession();
-      const response = await fetch('/api/bulk-invites/track/send', {
+      
+      // First, activate the campaign
+      const activateResponse = await fetch('/api/bulk-invites/campaigns/start', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,13 +241,32 @@ export default function BulkInvitesPage() {
         body: JSON.stringify({ campaignId })
       });
 
-      if (!response.ok) throw new Error('Failed to start campaign');
+      if (!activateResponse.ok) {
+        const errorData = await activateResponse.json();
+        throw new Error(errorData.error || 'Failed to activate campaign');
+      }
+
+      // Optionally trigger first send immediately
+      const sendResponse = await fetch('/api/bulk-invites/track/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.data.session.access_token}`
+        },
+        body: JSON.stringify({ campaignId })
+      });
 
       await loadCampaigns();
-      alert('Campaign started! Emails will be sent according to daily limit.');
+      
+      if (sendResponse.ok) {
+        const sendResult = await sendResponse.json();
+        alert(`Campaign activated! Sent ${sendResult.sent || 0} initial emails.`);
+      } else {
+        alert('Campaign activated! Emails will be sent according to schedule.');
+      }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to start campaign');
+      alert(`Failed to start campaign: ${error.message}`);
     }
   };
 

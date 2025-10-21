@@ -84,12 +84,29 @@ export async function POST(request) {
       company: n.company,
       title: n.title,
       status: 'queued',
-      meta: { notes: n.notes }
+      meta: { notes: n.notes },
+      next_email_scheduled: new Date().toISOString() // Initialize scheduling so sender can pick up
     }));
 
     const { error: insErr } = await supabaseAdmin.from('bulk_invites').insert(rows);
     if (insErr) {
       return NextResponse.json({ error: insErr.message }, { status: 500 });
+    }
+
+    // Update campaign totals immediately
+    const { data: campaign, error: campaignErr } = await supabaseAdmin
+      .from('bulk_invite_campaigns')
+      .select('total_recipients')
+      .eq('id', campaignId)
+      .single();
+
+    if (!campaignErr && campaign) {
+      await supabaseAdmin
+        .from('bulk_invite_campaigns')
+        .update({ 
+          total_recipients: (campaign.total_recipients || 0) + rows.length 
+        })
+        .eq('id', campaignId);
     }
 
     return NextResponse.json({ success: true, inserted: rows.length, skipped }, { status: 200 });

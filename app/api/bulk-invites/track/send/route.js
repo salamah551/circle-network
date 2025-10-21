@@ -7,9 +7,11 @@ import { getCurrentLaunchPhase } from '@/lib/launch-phase';
  */
 function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
-  const inviteLink = `${appUrl}/?invite=${recipient.invite_code}&iid=${recipient.id}`;
-  const firstName = recipient.first_name || recipient.name?.split(' ')[0] || 'there';
-  const inviteCode = recipient.invite_code || 'CN-XXXX-XXXX';
+  // Handle both old (invite_code) and new (code) field names
+  const inviteCode = recipient.invite_code || recipient.code || 'CN-XXXX-XXXX';
+  const inviteLink = `${appUrl}/?invite=${inviteCode}&iid=${recipient.id}`;
+  // Handle both first_name and full_name
+  const firstName = recipient.first_name || recipient.full_name?.split(' ')[0] || 'there';
 
   // EMAIL 1: Initial Invitation (Stage 0)
   if (stage === 0) {
@@ -634,11 +636,12 @@ export async function POST(request) {
       }
     }
 
-    // Update campaign stats
+    // Update campaign stats (use total_sent which the UI reads)
     await supabaseAdmin
       .from('bulk_invite_campaigns')
       .update({
         sent_count: (campaign.sent_count || 0) + sentCount,
+        total_sent: (campaign.total_sent || 0) + sentCount,
         last_send_date: today,
         last_sent_at: new Date().toISOString()
       })

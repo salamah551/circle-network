@@ -81,13 +81,24 @@ export default function CampaignDetailsPage() {
   const loadRecipients = async () => {
     try {
       const { data, error } = await supabase
-        .from('bulk_invite_recipients')
+        .from('bulk_invites')
         .select('*')
         .eq('campaign_id', campaignId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRecipients(data || []);
+      
+      // Map bulk_invites fields to expected UI fields
+      const mappedRecipients = (data || []).map(r => ({
+        ...r,
+        first_name: r.full_name?.split(' ')[0] || '',
+        last_name: r.full_name?.split(' ').slice(1).join(' ') || '',
+        invite_code: r.code,
+        last_email_sent: r.last_email_sent || r.sent_at,
+        sequence_stage: r.sequence_stage || 0
+      }));
+      
+      setRecipients(mappedRecipients);
     } catch (error) {
       console.error('Error loading recipients:', error);
     }
