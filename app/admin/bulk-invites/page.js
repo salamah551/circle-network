@@ -147,7 +147,7 @@ export default function BulkInvitesPage() {
 
     // Check against existing recipients in campaign
     const { data: existing } = await supabase
-      .from('bulk_invite_recipients')
+      .from('bulk_invites') // <<< CORRECTED TABLE NAME
       .select('email')
       .eq('campaign_id', selectedCampaign.id)
       .in('email', emails);
@@ -194,23 +194,31 @@ export default function BulkInvitesPage() {
         },
         body: JSON.stringify({
           campaignId: selectedCampaign.id,
-          recipients: validRecipients
+          recipients: validRecipients.map(r => ({
+            firstName: r.firstName,
+            lastName: r.lastName,
+            email: r.email
+          }))
         })
       });
 
       setUploadProgress(80);
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
 
       setUploadProgress(100);
       setShowUploadModal(false);
       setRecipients([{ firstName: '', lastName: '', email: '' }]);
       setDuplicates([]);
       await loadCampaigns();
-      alert(`Successfully added ${validRecipients.length} recipients!`);
+      const result = await response.json();
+      alert(`Successfully added ${result.inserted || 0} recipients! Skipped: ${Object.values(result.skipped || {}).reduce((a, b) => a + b, 0)}`);
     } catch (error) {
       console.error('Error uploading:', error);
-      alert('Failed to upload recipients');
+      alert(`Failed to upload recipients: ${error.message}`);
     } finally {
       setUploadProgress(0);
       setIsUploading(false);
@@ -222,7 +230,7 @@ export default function BulkInvitesPage() {
 
     try {
       const session = await supabase.auth.getSession();
-      const response = await fetch('/api/bulk-invites/send', {
+      const response = await fetch('/api/bulk-invites/track/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,6 +249,7 @@ export default function BulkInvitesPage() {
     }
   };
 
+  // ... (rest of your component is unchanged) ...
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
