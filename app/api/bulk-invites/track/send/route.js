@@ -617,6 +617,10 @@ export async function POST(request) {
               invite_id: String(recipient.id),
               campaign_id: String(campaignId),
               sequence_stage: String(recipient.sequence_stage || 0)
+            },
+            headers: {
+              'List-Unsubscribe': `<mailto:invites@thecirclenetwork.org?subject=unsubscribe>, <${unsubscribeUrl}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
             }
           })
         });
