@@ -72,15 +72,50 @@ export async function POST(request) {
       );
     }
 
-    // Update any pending bulk invites to mark as unsubscribed
+    // Add to bulk_invite_suppressions table
     await supabase
+      .from('bulk_invite_suppressions')
+      .upsert(
+        {
+          email: emailLower,
+          reason: 'unsubscribed'
+        },
+        { onConflict: 'email' }
+      );
+
+    // Update any pending bulk invites to mark as unsubscribed
+    const { data: invites } = await supabase
       .from('bulk_invites')
-      .update({ 
-        status: 'unsubscribed',
-        next_email_scheduled: null
-      })
+      .select('id, email')
       .eq('email', emailLower)
       .in('status', ['queued', 'sent']);
+
+    if (invites && invites.length > 0) {
+      // Record unsubscribe events for each invite
+      const events = invites.map(invite => ({
+        invite_id: invite.id,
+        event: 'unsubscribed',
+        details: { 
+          email: emailLower,
+          timestamp: new Date().toISOString()
+        }
+      }));
+
+      await supabase
+        .from('bulk_invite_events')
+        .insert(events);
+
+      // Update invite statuses
+      await supabase
+        .from('bulk_invites')
+        .update({ 
+          status: 'unsubscribed',
+          next_email_scheduled: null,
+          unsubscribed_at: new Date().toISOString()
+        })
+        .eq('email', emailLower)
+        .in('status', ['queued', 'sent']);
+    }
 
     console.log(`✅ Unsubscribed: ${emailLower}`);
 
