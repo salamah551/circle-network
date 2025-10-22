@@ -1,16 +1,14 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Loader2, Shield, Lock, Crown, Zap } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { Check, Loader2, Shield, Lock, Crown, Zap, Mail } from 'lucide-react';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import ROICalculator from '@/components/ROICalculator';
 import MoneyBackGuarantee from '@/components/MoneyBackGuarantee';
 import { trackEvent } from '@/lib/posthog';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// Use singleton Supabase browser client to prevent "Multiple GoTrueClient instances" warning
+const supabase = getSupabaseBrowserClient();
 
 // Launch date: November 1, 2025
 const LAUNCH_DATE = new Date('2025-11-01T00:00:00').getTime();
@@ -25,6 +23,8 @@ function SubscribePage() {
   const [session, setSession] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [countdown, setCountdown] = useState(30);
+  const [sendingMagicLink, setSendingMagicLink] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [foundingMemberStatus, setFoundingMemberStatus] = useState({
     isFull: false,
     spotsAvailable: 50,
@@ -83,21 +83,54 @@ function SubscribePage() {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('Session error:', error);
-        setError('Authentication error. Please try again.');
-        setCheckingAuth(false);
-        return;
+        // Don't set error here - just log it and allow user to request magic link
       }
 
-      if (!session) {
-        setError('Not authenticated. Please use the magic link from your email.');
-        setCheckingAuth(false);
-        return;
+      if (session) {
+        setSession(session);
       }
-
-      setSession(session);
+      
       setCheckingAuth(false);
     });
   }, [searchParams]);
+
+  // Handle magic link request for unauthenticated users
+  const handleRequestMagicLink = async (e) => {
+    e.preventDefault();
+    
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    setSendingMagicLink(true);
+    setError('');
+    
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/subscribe`,
+        }
+      });
+
+      if (error) throw error;
+
+      setMagicLinkSent(true);
+      setError('');
+      
+      // Track magic link request
+      trackEvent('magic_link_requested', {
+        email: email,
+        source: 'subscribe_page'
+      });
+    } catch (err) {
+      console.error('Magic link error:', err);
+      setError(err.message || 'Failed to send magic link. Please try again.');
+    } finally {
+      setSendingMagicLink(false);
+    }
+  };
 
  const handleCheckout = async () => {
     if (!session) {
@@ -203,18 +236,93 @@ function SubscribePage() {
     );
   }
 
-  if (error && !session) {
+  // Show magic link request UI if not authenticated
+  if (!session) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-red-500 rounded-2xl p-8 text-center">
-          <div className="text-red-400 text-lg font-bold mb-4">Authentication Required</div>
-          <p className="text-zinc-400 mb-6">{error}</p>
-          <button 
-            onClick={() => router.push('/')}
-            className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-2 rounded-lg transition-colors"
-          >
-            Back to Home
-          </button>
+        <div className="max-w-md w-full bg-zinc-900 border border-amber-500/30 rounded-2xl p-8">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-amber-400" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Sign In Required</h2>
+            <p className="text-zinc-400">
+              {magicLinkSent 
+                ? 'Check your email for the magic link to continue'
+                : 'Enter your email to receive a magic link to continue to checkout'
+              }
+            </p>
+          </div>
+
+          {magicLinkSent ? (
+            <div className="space-y-4">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-emerald-400 text-sm">
+                ✓ Magic link sent to <strong>{email}</strong>
+              </div>
+              <p className="text-zinc-400 text-sm text-center">
+                Click the link in your email to continue. It may take a minute to arrive.
+              </p>
+              <button
+                onClick={() => {
+                  setMagicLinkSent(false);
+                  setError('');
+                }}
+                className="w-full text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                Send to a different email
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleRequestMagicLink} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={sendingMagicLink}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {sendingMagicLink ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5" />
+                    Send Magic Link
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          <div className="mt-6 pt-6 border-t border-zinc-800">
+            <button 
+              onClick={() => router.push('/')}
+              className="w-full text-sm text-zinc-400 hover:text-white transition-colors"
+            >
+              ← Back to Home
+            </button>
+          </div>
         </div>
       </div>
     );
