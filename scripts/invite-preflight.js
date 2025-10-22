@@ -8,6 +8,27 @@
 
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+// Load .env.local if it exists
+const envPath = path.join(process.cwd(), '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    line = line.trim();
+    if (line && !line.startsWith('#')) {
+      const [key, ...valueParts] = line.split('=');
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join('=');
+        // Only set if not already in environment
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    }
+  });
+}
 
 const REQUIRED_ENV_VARS = [
   'NEXT_PUBLIC_SUPABASE_URL',
