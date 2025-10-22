@@ -20,7 +20,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
   // Handle both old (invite_code) and new (code) field names
   const inviteCode = recipient.invite_code || recipient.code || 'CN-XXXX-XXXX';
-  const inviteLink = `${appUrl}/?code=${inviteCode}&iid=${recipient.id}`;
+  const inviteLink = `${appUrl}/invite/accept?code=${inviteCode}&email=${encodeURIComponent(recipient.email)}`;
   // Handle both first_name and full_name
   const firstName = recipient.first_name || recipient.full_name?.split(' ')[0] || 'there';
 

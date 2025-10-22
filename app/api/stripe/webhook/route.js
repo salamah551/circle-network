@@ -192,6 +192,74 @@ export async function POST(request) {
           .eq('id', deletedUserId);
 
         console.log(`User ${deletedUserId} deactivated after cancellation`);
+        
+        // Track cancellation event
+        await trackServerEvent('subscription_cancelled', {
+          user_id: deletedUserId,
+          subscription_id: deletedSub.id,
+          cancelled_at: new Date().toISOString()
+        });
+      }
+      break;
+
+    case 'customer.subscription.updated':
+      const updatedSub = event.data.object;
+      const updatedUserId = updatedSub.metadata?.userId;
+      
+      if (updatedUserId) {
+        // Determine subscription status based on Stripe subscription status
+        let subscriptionStatus = 'active';
+        let userStatus = 'active';
+        
+        switch (updatedSub.status) {
+          case 'active':
+            subscriptionStatus = 'active';
+            userStatus = 'active';
+            break;
+          case 'past_due':
+            subscriptionStatus = 'past_due';
+            userStatus = 'active'; // Keep active but warn
+            break;
+          case 'canceled':
+          case 'cancelled':
+            subscriptionStatus = 'cancelled';
+            userStatus = 'inactive';
+            break;
+          case 'unpaid':
+            subscriptionStatus = 'unpaid';
+            userStatus = 'inactive';
+            break;
+          case 'incomplete':
+          case 'incomplete_expired':
+            subscriptionStatus = 'incomplete';
+            userStatus = 'inactive';
+            break;
+          case 'trialing':
+            subscriptionStatus = 'trialing';
+            userStatus = 'active';
+            break;
+          default:
+            subscriptionStatus = updatedSub.status;
+        }
+        
+        await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            status: userStatus,
+            subscription_status: subscriptionStatus
+          })
+          .eq('id', updatedUserId);
+
+        console.log(`User ${updatedUserId} subscription updated: ${subscriptionStatus}`);
+        
+        // Track subscription update event
+        await trackServerEvent('subscription_updated', {
+          user_id: updatedUserId,
+          subscription_id: updatedSub.id,
+          old_status: event.data.previous_attributes?.status,
+          new_status: updatedSub.status,
+          updated_at: new Date().toISOString()
+        });
       }
       break;
 
