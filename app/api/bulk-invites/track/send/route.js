@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getCurrentLaunchPhase } from '@/lib/launch-phase';
+import { getCurrentPhase } from '@/lib/phase-guard';
 
 /**
  * Generate a unique invite code
@@ -451,6 +452,40 @@ export async function POST(request) {
         { error: 'Campaign not found' },
         { status: 404 }
       );
+    }
+
+    // Phase-aware campaign check: Skip if campaign is paused or wrong phase
+    if (campaign.status === 'paused') {
+      console.log(`⏸️  Campaign ${campaignId} is paused, skipping send`);
+      return NextResponse.json(
+        { 
+          success: true,
+          sent: 0,
+          message: 'Campaign is paused' 
+        },
+        { status: 200 }
+      );
+    }
+
+    // Check if campaign's target phase matches current phase
+    if (campaign.target_phase) {
+      try {
+        const currentPhase = await getCurrentPhase(supabaseAdmin);
+        if (campaign.target_phase !== currentPhase) {
+          console.log(`⏸️  Campaign ${campaignId} targets ${campaign.target_phase}, but current phase is ${currentPhase}, skipping send`);
+          return NextResponse.json(
+            { 
+              success: true,
+              sent: 0,
+              message: `Campaign targets ${campaign.target_phase} phase, but current phase is ${currentPhase}` 
+            },
+            { status: 200 }
+          );
+        }
+      } catch (phaseError) {
+        console.error('Error checking phase:', phaseError);
+        // Continue sending if phase check fails (fail open)
+      }
     }
 
     // Check daily limit (prevent duplicate sends on same day)
