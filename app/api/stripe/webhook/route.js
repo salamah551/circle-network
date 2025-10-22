@@ -55,10 +55,10 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
-  // IDEMPOTENCY: Check if event already processed
+  // IDEMPOTENCY: Check if event already processed using stripe_events table
   const { data: existingEvent } = await supabaseAdmin
-    .from('webhook_events')
-    .select('id')
+    .from('stripe_events')
+    .select('event_id')
     .eq('event_id', event.id)
     .single();
 
@@ -69,11 +69,10 @@ export async function POST(request) {
 
   // Record event to ensure idempotency
   const { error: eventInsertError } = await supabaseAdmin
-    .from('webhook_events')
+    .from('stripe_events')
     .insert({
       event_id: event.id,
-      event_type: event.type,
-      processed_at: new Date().toISOString()
+      received_at: new Date().toISOString()
     });
 
   if (eventInsertError) {
@@ -193,6 +192,105 @@ export async function POST(request) {
           .eq('id', deletedUserId);
 
         console.log(`User ${deletedUserId} deactivated after cancellation`);
+      }
+      break;
+
+    case 'invoice.payment_succeeded':
+      const invoice = event.data.object;
+      const inviteId = invoice.metadata?.invite_id;
+      const inviteCampaignId = invoice.metadata?.campaign_id;
+      const customerEmail = invoice.customer_email?.toLowerCase();
+
+      console.log(`invoice.payment_succeeded: invite_id=${inviteId}, campaign_id=${inviteCampaignId}, email=${customerEmail}`);
+
+      // Try to find the bulk invite by metadata first, then fall back to email
+      let bulkInvite = null;
+      
+      if (inviteId) {
+        const { data } = await supabaseAdmin
+          .from('bulk_invites')
+          .select('*')
+          .eq('id', inviteId)
+          .single();
+        bulkInvite = data;
+        console.log(`Found invite by ID: ${inviteId}`);
+      } else if (customerEmail && inviteCampaignId) {
+        const { data } = await supabaseAdmin
+          .from('bulk_invites')
+          .select('*')
+          .eq('campaign_id', inviteCampaignId)
+          .eq('email', customerEmail)
+          .single();
+        bulkInvite = data;
+        console.log(`Found invite by campaign_id + email: ${inviteCampaignId}, ${customerEmail}`);
+      } else if (customerEmail) {
+        // Fall back to email-only lookup across all campaigns
+        const { data } = await supabaseAdmin
+          .from('bulk_invites')
+          .select('*')
+          .eq('email', customerEmail)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        bulkInvite = data;
+        console.log(`Found invite by email only: ${customerEmail}`);
+      }
+
+      if (bulkInvite) {
+        // Check if conversion already recorded (idempotent)
+        const { data: existingConversion } = await supabaseAdmin
+          .from('bulk_invite_events')
+          .select('id')
+          .eq('invite_id', bulkInvite.id)
+          .eq('event', 'converted')
+          .single();
+
+        if (!existingConversion) {
+          // Record conversion event (idempotent via unique constraint)
+          const { error: eventError } = await supabaseAdmin
+            .from('bulk_invite_events')
+            .insert({
+              invite_id: bulkInvite.id,
+              event: 'converted',
+              details: {
+                email: bulkInvite.email,
+                stripe_invoice_id: invoice.id,
+                amount: invoice.amount_paid,
+                currency: invoice.currency,
+                timestamp: new Date().toISOString()
+              }
+            });
+
+          // Only log error if it's not a duplicate (23505 is unique constraint violation)
+          if (eventError && eventError.code !== '23505') {
+            console.error('Error recording conversion event:', eventError);
+          } else if (!eventError) {
+            console.log(`✅ Recorded conversion for invite ${bulkInvite.id}`);
+
+            // Update invite status
+            await supabaseAdmin
+              .from('bulk_invites')
+              .update({
+                status: 'converted',
+                converted_at: new Date().toISOString()
+              })
+              .eq('id', bulkInvite.id);
+
+            // Increment campaign conversion count (only once due to event uniqueness)
+            await supabaseAdmin
+              .from('bulk_invite_campaigns')
+              .update({
+                total_converted: supabaseAdmin.raw('total_converted + 1')
+              })
+              .eq('id', bulkInvite.campaign_id);
+
+            console.log(`✅ Conversion tracked for campaign ${bulkInvite.campaign_id}`);
+          }
+        } else {
+          console.log(`Conversion already recorded for invite ${bulkInvite.id}`);
+        }
+      } else {
+        console.log(`No bulk invite found for email: ${customerEmail}`);
       }
       break;
 

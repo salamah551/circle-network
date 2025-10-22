@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 export async function POST(req) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const { priceId, lookupKey } = await req.json();
+    const { priceId, lookupKey, invite_id, invite_code, campaign_id } = await req.json();
     if (!priceId && !lookupKey) {
       return NextResponse.json({ error: 'priceId or lookupKey required' }, { status: 400 });
     }
@@ -53,6 +53,23 @@ export async function POST(req) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
+    
+    // Build metadata object with optional invite tracking
+    const metadata = { 
+      user_id: profile.id 
+    };
+    
+    // Add invite tracking metadata if provided (for bulk invite conversion tracking)
+    if (invite_id) {
+      metadata.invite_id = invite_id;
+    }
+    if (invite_code) {
+      metadata.invite_code = invite_code;
+    }
+    if (campaign_id) {
+      metadata.campaign_id = campaign_id;
+    }
+    
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
@@ -60,7 +77,10 @@ export async function POST(req) {
       allow_promotion_codes: false,
       success_url: `${appUrl}/billing?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/billing?status=cancelled`,
-      metadata: { user_id: profile.id },
+      metadata,
+      subscription_data: {
+        metadata // Also attach metadata to the subscription for future reference
+      }
     });
 
     return NextResponse.json({ url: session.url }, { status: 200 });
