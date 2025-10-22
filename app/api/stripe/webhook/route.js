@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { sendFoundingMemberWelcomeEmail } from '@/lib/sendgrid';
 
+// Explicitly set to Node runtime (not Edge) for Stripe webhook signature validation
+export const runtime = 'nodejs';
+
 // PostHog server-side tracking helper
 async function trackServerEvent(eventName, properties = {}) {
   const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;

@@ -135,12 +135,15 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Tracking error:', error);
-    // Still return pixel on error
+    // Still return pixel on error with proper cache headers
     return new NextResponse(
       Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64'),
       {
         headers: {
-          'Content-Type': 'image/gif'
+          'Content-Type': 'image/gif',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       }
     );

@@ -265,6 +265,31 @@ export default function WelcomePage() {
           </div>
         )}
 
+        {/* Add to Contacts Nudge */}
+        <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-xl p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-2">📬 Never Miss an Update</h3>
+              <p className="text-sm text-zinc-400 mb-3">
+                Add <strong className="text-white">invite@thecirclenetwork.org</strong> to your contacts to ensure our emails land in your inbox, not your promotions folder.
+              </p>
+              <details className="text-xs text-zinc-500">
+                <summary className="cursor-pointer hover:text-zinc-400 transition-colors">Show instructions</summary>
+                <div className="mt-2 space-y-2 pl-4 border-l border-zinc-700">
+                  <p><strong>Gmail:</strong> Click the 3 dots on any email from us → "Add to Contacts"</p>
+                  <p><strong>Outlook:</strong> Right-click sender → "Add to Outlook Contacts"</p>
+                  <p><strong>Apple Mail:</strong> Click sender name → "Add to Contacts"</p>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+
         {/* Auto-redirect */}
         <div className="text-center">
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">

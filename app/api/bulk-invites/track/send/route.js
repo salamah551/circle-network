@@ -576,73 +576,157 @@ export async function POST(request) {
           console.log(`✅ Generated and persisted invite code ${inviteCode} for ${recipient.email}`);
         }
 
+        // Check if Email #0 (plain-text intro) is enabled
+        const enableIntroPlaintext = process.env.CAMPAIGN_ENABLE_INTRO_PLAINTEXT === 'true';
+        const currentStage = recipient.sequence_stage || 0;
+        const isEmail0 = enableIntroPlaintext && currentStage === 0 && !recipient.intro_email_sent;
+
         const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/bulk-invites/track?rid=${recipient.id}&type=open" width="1" height="1" alt="" />`;
         const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?email=${encodeURIComponent(recipient.email)}&token=${inviteCode}`;
         
-        const emailTemplate = getEmailTemplate(
-          recipient.sequence_stage || 0,
-          recipient,
-          trackingPixel,
-          unsubscribeUrl
-        );
+        let sendGridResponse;
+        
+        if (isEmail0) {
+          // Send plain-text Email #0 using SendGrid library for cleaner plain-text handling
+          const sgMail = require('@sendgrid/mail');
+          sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+          
+          const fromEmail = process.env.INVITES_FROM_EMAIL || process.env.SENDGRID_FROM_EMAIL || 'invites@thecirclenetwork.org';
+          const fromName = process.env.INVITES_FROM_NAME || 'The Circle Network';
+          const firstName = recipient.first_name || recipient.full_name?.split(' ')[0] || 'there';
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
+          const inviteLink = `${appUrl}/?code=${inviteCode}`;
+          
+          await sgMail.send({
+            to: recipient.email,
+            from: { email: fromEmail, name: fromName },
+            subject: 'Quick intro — Circle Network',
+            text: `Hi ${firstName},
 
-        // Send via SendGrid
-        const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            personalizations: [{
-              to: [{ email: recipient.email }],
-              subject: emailTemplate.subject
-            }],
-            from: {
-              email: process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org',
-              name: process.env.SENDGRID_FROM_NAME || 'Shehab Salamah'
+I wanted to reach out personally.
+
+You've been selected to join Circle Network—an invitation-only community of accomplished professionals who are transforming how high-achievers connect and grow.
+
+This isn't another networking group. It's a curated space where AI-powered tools help you:
+
+• Get matched with 3 high-value connections every week
+• Access real-time deal flow tailored to your criteria
+• Protect your reputation with AI monitoring
+• Gain competitive intelligence on your market
+
+You're receiving this because you're among a highly selective group being invited during our founding member phase.
+
+Your invitation link:
+${inviteLink}
+
+This is something different. I think you'll find it valuable.
+
+Best,
+${fromName}
+
+---
+Don't want these emails? Unsubscribe: ${unsubscribeUrl}
+`,
+            headers: {
+              'List-Unsubscribe': `<mailto:${fromEmail}?subject=unsubscribe>, <${unsubscribeUrl}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
             },
-            reply_to: {
-              email: process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclenetwork.org'
+            trackingSettings: {
+              clickTracking: { enable: false },
+              openTracking: { enable: false }
             },
-            content: [{
-              type: 'text/html',
-              value: emailTemplate.html
-            }],
-            tracking_settings: {
-              click_tracking: { enable: true },
-              open_tracking: { enable: true }
-            },
-            custom_args: {
+            customArgs: {
               invite_id: String(recipient.id),
               campaign_id: String(campaignId),
-              sequence_stage: String(recipient.sequence_stage || 0)
-            },
-            headers: {
-              'List-Unsubscribe': `<mailto:invites@thecirclenetwork.org?subject=unsubscribe>, <${unsubscribeUrl}>`,
-              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+              sequence_stage: 'intro'
             }
-          })
-        });
+          });
+          
+          sendGridResponse = { ok: true }; // Mock response for consistency
+          console.log(`✅ Sent Email #0 (plain-text intro) to ${recipient.email}`);
+        } else {
+          // Send regular HTML email (Email #1-4)
+          const emailTemplate = getEmailTemplate(
+            currentStage,
+            recipient,
+            trackingPixel,
+            unsubscribeUrl
+          );
+
+          // Send via SendGrid API
+          sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              personalizations: [{
+                to: [{ email: recipient.email }],
+                subject: emailTemplate.subject
+              }],
+              from: {
+                email: process.env.SENDGRID_FROM_EMAIL || 'shehab@thecirclenetwork.org',
+                name: process.env.SENDGRID_FROM_NAME || 'Shehab Salamah'
+              },
+              reply_to: {
+                email: process.env.SENDGRID_REPLY_TO_EMAIL || 'invite@thecirclenetwork.org'
+              },
+              content: [{
+                type: 'text/html',
+                value: emailTemplate.html
+              }],
+              tracking_settings: {
+                click_tracking: { enable: true },
+                open_tracking: { enable: true }
+              },
+              custom_args: {
+                invite_id: String(recipient.id),
+                campaign_id: String(campaignId),
+                sequence_stage: String(currentStage)
+              },
+              headers: {
+                'List-Unsubscribe': `<mailto:invites@thecirclenetwork.org?subject=unsubscribe>, <${unsubscribeUrl}>`,
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+              }
+            })
+          });
+        }
 
         if (sendGridResponse.ok) {
           // Calculate next email time based on sequence stage
-          const daysUntilNext = [3, 4, 4][recipient.sequence_stage || 0]; // Day 0→3, Day 3→7, Day 7→11
-          const nextEmailScheduled = daysUntilNext 
-            ? new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000).toISOString()
-            : null;
+          let daysUntilNext;
+          let updateData;
+          
+          if (isEmail0) {
+            // Email #0 sent - schedule Email #1 (stage 0) for 2 days later
+            daysUntilNext = 2;
+            updateData = {
+              intro_email_sent: true,
+              last_email_sent: new Date().toISOString(),
+              next_email_scheduled: new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000).toISOString()
+            };
+          } else {
+            // Regular sequence: Day 0→3, Day 3→7, Day 7→11
+            daysUntilNext = [3, 4, 4][currentStage];
+            const nextEmailScheduled = daysUntilNext 
+              ? new Date(Date.now() + daysUntilNext * 24 * 60 * 60 * 1000).toISOString()
+              : null;
+
+            updateData = {
+              status: 'sent',
+              sent: true,
+              sent_at: new Date().toISOString(),
+              sequence_stage: currentStage + 1,
+              last_email_sent: new Date().toISOString(),
+              next_email_scheduled: nextEmailScheduled
+            };
+          }
 
           // Update recipient - IDEMPOTENT
           await supabaseAdmin
             .from('bulk_invites')
-            .update({
-              status: 'sent',
-              sent: true,
-              sent_at: new Date().toISOString(),
-              sequence_stage: (recipient.sequence_stage || 0) + 1,
-              last_email_sent: new Date().toISOString(),
-              next_email_scheduled: nextEmailScheduled
-            })
+            .update(updateData)
             .eq('id', recipient.id);
 
           // Log success
@@ -653,13 +737,13 @@ export async function POST(request) {
               event: 'sent',
               details: { 
                 email: recipient.email,
-                sequence_stage: recipient.sequence_stage || 0,
+                sequence_stage: isEmail0 ? 'intro' : currentStage,
                 sent_at: new Date().toISOString()
               }
             });
 
           sentCount++;
-          console.log(`✅ Sent to ${recipient.email} (Stage ${recipient.sequence_stage || 0})`);
+          console.log(`✅ Sent to ${recipient.email} (Stage ${isEmail0 ? 'intro' : currentStage})`);
         } else {
           const errorText = await sendGridResponse.text();
           console.error(`❌ Failed to send to ${recipient.email}:`, errorText);
