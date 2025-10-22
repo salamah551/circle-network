@@ -38,13 +38,11 @@ INSERT INTO email_templates (name, subject, body, variables) VALUES
   'You''ve been selected for Circle Network',
   'Hi {{first_name}},
 
-You''ve been personally selected to join Circle Network—an invitation-only community of 250 accomplished professionals.
+I''m reaching out because I think you''d be a great fit for Circle Network. We''re building a private community where accomplished professionals get matched with 3 strategic connections every week using AI.
 
-Your invitation code: {{invitation_code}}
+You''re among the first people I''m inviting. Your invitation code is {{invitation_code}}.
 
-Apply now: {{apply_url}}
-
-This code expires in 14 days.
+Let me know if this sounds interesting? {{apply_url}}
 
 Best,
 Shehab Salamah
@@ -53,34 +51,31 @@ Founder, Circle Network',
 ),
 (
   'reminder_day3',
-  '{{first_name}}, your founding member invitation expires in 11 days',
+  'Quick follow-up on your Circle Network invitation',
   'Hi {{first_name}},
 
-I sent you an invitation to Circle Network a few days ago.
+Following up on the invitation I sent a few days ago. I know inboxes get busy, so wanted to make sure you saw it.
 
-Your invitation code expires in 11 days: {{invitation_code}}
+Your code is {{invitation_code}}: {{apply_url}}
 
-Apply: {{apply_url}}
+Does this sound like it could be useful for you?
 
-Best,
-Shehab Salamah
-Founder, Circle Network',
+Thanks,
+Shehab',
   '["first_name", "invitation_code", "apply_url"]'::jsonb
 ),
 (
   'final_day11',
-  'Final reminder: Your Circle Network invitation expires in 3 days',
+  'Last reminder: Your Circle Network invitation expires soon',
   'Hi {{first_name}},
 
-This is the last time I''ll reach out.
+This is my last message about your invitation. Your code expires soon.
 
-Your invitation expires in 3 days.
+{{invitation_code}}: {{apply_url}}
 
-Code: {{invitation_code}}
-Apply: {{apply_url}}
+Let me know if you have any questions?
 
-Shehab Salamah
-Founder, Circle Network',
+Shehab',
   '["first_name", "invitation_code", "apply_url"]'::jsonb
 )
 ON CONFLICT (name) DO NOTHING;

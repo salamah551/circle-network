@@ -10,81 +10,31 @@ variables:
   - deadline
 ---
 
-# Hook
-
 Hi {{first_name}},
 
-Let me ask you a question:
+Quick question: what's one valuable connection worth to you?
 
-**What's one valuable connection worth to you?**
+I've been thinking about this a lot as we build Circle Network. A strategic partnership might be worth $250K. The right investor introduction could be priceless. A key hire that saves recruiting fees might be $150K.
 
-A strategic partnership? **$250,000.**
-A key hire that saves recruiting fees? **$150,000.**
-An introduction to the right investor? **Priceless.**
+The cost to join as a founding member is $2,497/year. If one connection this year creates $50K in value, that's a 20x return. Most people make several valuable connections.
 
-# Value Proposition
+Here's what our beta members have seen:
 
-## The Math is Simple
+One SaaS founder's first intro led to a partnership that added $180K in ARR within 6 months.
 
-Circle Network costs **$2,497/year** as a founding member.
+A fintech CEO found their Series A lead investor through the platform. The AI matched them at 94% based on investment focus.
 
-If just **ONE connection** this year creates $50,000 in value (a conservative estimate), your ROI is **20x**.
+The quality of connections is consistently better than other platforms because everyone is vetted and accomplished.
 
-Most members make multiple valuable connections per year.
+The way it works is straightforward: every Monday, AI analyzes your profile and recommends 3 strategic connections. You see why each match makes sense, accept the ones you want, and we handle the introduction.
 
-## How It Works
+You have {{deadline}} days left to join at founding member pricing before it goes up to $4,997-$9,997/year. Your code is {{invite_code}}.
 
-Every Monday, our AI analyzes your profile and goals to recommend 3 strategic connections:
+Think this could work for you?
 
-1. **Match Analysis** – AI scores each connection based on mutual value (85%+ accuracy)
-2. **Context Provided** – See exactly why this connection matters to your goals
-3. **One-Click Accept** – We handle the warm introduction via email
-4. **Follow Through** – Connect directly via our platform or email
+{{apply_url}}
 
-**No cold outreach. No awkward networking events. Just high-value, curated connections.**
+Best,
+Shehab
 
-# Proof / Social Proof
-
-## Real Member Impact (Beta Program)
-
-*"My first intro led to a partnership that added $180K in ARR within 6 months. ROI was 72x."*
-— Beta Member, SaaS Founder
-
-*"I found my Series A lead investor through Circle Network. The AI matched us at 94% based on his portfolio and my space."*
-— Beta Member, Fintech CEO
-
-*"The quality of connections here is 10x better than any other platform. Everyone is vetted, accomplished, and looking to add value."*
-— Beta Member, Private Equity Partner
-
-## Your Founding Member Benefits
-
-✓ **Lifetime Price Lock** – $2,497/year forever (50% off)
-✓ **ALL Elite AI Tools** – $4,991/year value, included free
-✓ **Priority Matching** – First choice of high-value connections
-✓ **Founding Member Badge** – Permanent status and recognition
-✓ **30-Day Money-Back Guarantee** – Risk-free trial
-
-# CTA (Call to Action)
-
-You have **{{deadline}} days left** to join at founding member pricing before it increases to $4,997-$9,997/year.
-
-## Your Invitation Code
-
-**{{invite_code}}**
-
-[Join Now →]({{apply_url}})
-
-*{{deadline}} days remaining*
-
-# Footer / Unsubscribe
-
-Questions? Just reply to this email.
-
-**Shehab Salamah**
-Founder, Circle Network
-
----
-
-[Unsubscribe](#)
-
-© 2025 Circle Network. All rights reserved.
+P.S. We have a 30-day money-back guarantee, so there's no risk to trying it out.

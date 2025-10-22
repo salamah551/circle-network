@@ -10,67 +10,24 @@ variables:
   - deadline
 ---
 
-# Hook
-
 {{first_name}},
 
-This is my final message about your Circle Network invitation.
+This is my last message about your Circle Network invitation. Your code expires in {{deadline}} days.
 
-Your invitation code expires in **{{deadline}} days**, and after that, you'll miss the founding member pricing of $2,497/year—locked in for life.
+After that, you'll miss the founding member pricing of $2,497/year locked in for life. It goes to $4,997-$9,997/year, and the Elite AI features that would be included free become an extra $4,991/year.
 
-# Value Proposition
+That's about $75K in value over 10 years that you'd lose.
 
-## What You're About to Lose
+I personally selected you for this invitation because I thought you'd be a valuable member of the community. If you're not interested, that's completely fine—just know this opportunity won't come around again.
 
-❌ **$2,500/year savings** (forever)
-❌ **$4,991/year** in Elite AI features (included free for founding members)
-❌ **Founding Member Badge** and priority matching
-❌ **First choice** of connections in the network
+The founding member window was designed to reward early supporters. After {{deadline}} days, pricing increases permanently and there's no grandfathering.
 
-**Total value over 10 years: $74,910**
+We have a 30-day money-back guarantee and a "3 wins in 90 days or +3 months free" guarantee. So there's no risk to trying it.
 
-# Proof / Social Proof
+Your code is {{invite_code}}: {{apply_url}}
 
-I handpicked you for this invitation because I believe you'd be a valuable member of this community.
+Let me know if you have any questions?
 
-But if you're not interested, that's okay too—just know that this opportunity won't come around again.
+Shehab
 
-## Why This Matters
-
-The founding member window was designed to reward early supporters who help us build something special. After {{deadline}} days:
-
-- Pricing increases to $4,997-$9,997/year
-- Elite AI features require separate payment
-- Founding member status is permanently closed
-- No price protection or grandfathering
-
-**This is your last chance to lock in lifetime benefits.**
-
-# CTA (Call to Action)
-
-## Final Call • Expires in {{deadline}} Days
-
-**{{invite_code}}**
-
-[Claim Your Spot Now →]({{apply_url}})
-
-## Our Guarantees
-
-✓ **30-Day Money-Back Guarantee** – If Circle Network doesn't deliver value in your first 30 days, we'll refund your membership fee in full. No questions asked.
-
-✓ **3 Wins in 90 Days — Or +3 Months Free** – If you don't achieve at least 3 meaningful wins (valuable introductions, partnerships, or opportunities) within your first 90 days, we'll extend your membership by 3 months at no charge.
-
-**Zero risk. Maximum upside.**
-
-# Footer / Unsubscribe
-
-After this email, you won't hear from me again about this opportunity.
-
-**Shehab Salamah**
-Founder, Circle Network
-
----
-
-[Unsubscribe](#)
-
-© 2025 Circle Network. All rights reserved.
+P.S. After this email, I won't reach out again about this opportunity.

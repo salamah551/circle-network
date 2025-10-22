@@ -10,91 +10,32 @@ variables:
   - deadline
 ---
 
-# Hook
-
 {{first_name}},
 
-This is my final reminder about your Circle Network invitation.
+This is my final reminder about your Circle Network invitation. Your code expires in {{deadline}} days.
 
-Your invitation code expires in **{{deadline}} days**, and after that, you'll need to join our waitlist for the next opening.
+After that, you'll need to join the waitlist for the next opening.
 
-# Value Proposition
+What you get: 3 AI-matched strategic introductions every Monday, member directory with 250+ vetted professionals, direct messaging, events, and deal flow marketplace access. Elite members also get AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
 
-## What You Get With Membership
+Why join now: early member advantage (first choice of connections), current pricing (before any future increases), network effects (join while the community is most engaged), and input on what we build next.
 
-### Immediate Access
-✓ **3 AI-matched strategic introductions every Monday**
-✓ **Member directory** with 250+ vetted professionals
-✓ **Direct messaging** and connection tools
-✓ **Events calendar** with expert sessions
-✓ **Deal flow marketplace** access
+We're different from LinkedIn (highly curated, every member vetted), masterminds (AI matches you with relevant people), and forums (direct 1-on-1 introductions facilitated automatically). Our AI matching has 85%+ accuracy.
 
-### Coming Q1 2026 (Elite Members)
-✓ **AI Deal Flow Alerts** – Real-time investment opportunities
-✓ **Reputation Guardian** – 24/7 online reputation monitoring
-✓ **Competitive Intelligence** – Weekly market insights
+Some feedback from members:
 
-## Why Join Now?
+"I've made more valuable connections in 3 months on Circle Network than in 3 years on LinkedIn."
 
-1. **Early Member Advantage** – First choice of connections in the AI matching system
-2. **Current Pricing** – Before any future increases
-3. **Network Effects** – Join while the community is growing and most engaged
-4. **Feature Input** – Help shape what we build next
+"The ROI was 50x in the first 6 months. One intro led to a $200K partnership."
 
-# Proof / Social Proof
+"Best networking investment I've ever made. The quality of people and conversations is unmatched."
 
-## What Sets Circle Network Apart?
+Your code is {{invite_code}}: {{apply_url}}
 
-**Not LinkedIn:** We're highly curated. Every member is vetted and accomplished.
+We have a 30-day money-back guarantee and a "3 wins in 90 days or +3 months free" guarantee. Zero risk.
 
-**Not a Mastermind:** We use AI to match you with relevant people—no random networking.
+Let me know if you have any questions?
 
-**Not a Forum:** Direct 1-on-1 introductions facilitated automatically. No busy feeds to scroll.
+Shehab
 
-**AI-Powered:** Our matching algorithm has 85%+ accuracy at predicting valuable connections.
-
-## Member Success Stories
-
-*"I've made more valuable connections in 3 months on Circle Network than in 3 years on LinkedIn."*
-— Tech Founder, Premium Member
-
-*"The ROI on my membership was 50x in the first 6 months. One intro led to a $200K partnership."*
-— Consultant, Premium Member
-
-*"Best networking investment I've ever made. The quality of people and conversations is unmatched."*
-— Investor, Elite Member
-
-# CTA (Call to Action)
-
-## Last Chance
-
-**{{invite_code}}**
-
-[Join Premium ($4,997/year) →]({{apply_url}}?tier=premium)
-
-[Join Elite ($9,997/year) →]({{apply_url}}?tier=elite)
-
-*Invitation expires in {{deadline}} days.*
-
-## Our Risk-Free Guarantees
-
-**30-Day Money-Back Guarantee**
-If Circle Network doesn't deliver meaningful value in your first 30 days, we'll refund your membership fee in full. No questions asked.
-
-**3 Wins in 90 Days — Or +3 Months Free**
-If you don't achieve at least 3 meaningful wins (valuable introductions, partnerships, or opportunities) within your first 90 days, we'll extend your membership by 3 months at no charge.
-
-**Zero risk. Maximum upside.**
-
-# Footer / Unsubscribe
-
-After this email, you won't hear from me again about this invitation. If you're not ready to join now, you can join our waitlist for the next opening.
-
-**Shehab Salamah**
-Founder, Circle Network
-
----
-
-[Unsubscribe](#)
-
-© 2025 Circle Network. All rights reserved.
+P.S. After this email, I won't reach out again about this invitation. If you're not ready now, you can join the waitlist for the next opening.

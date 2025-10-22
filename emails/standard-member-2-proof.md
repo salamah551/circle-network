@@ -10,93 +10,30 @@ variables:
   - deadline
 ---
 
-# Hook
-
 Hi {{first_name}},
 
-I wanted to follow up on your Circle Network invitation with some social proof from members who've already joined.
+Wanted to follow up on your Circle Network invitation with some context from members who've already joined.
 
-# Value Proposition
+One SaaS founder told me their first intro led to a strategic partnership worth $180K in the first year. ROI was 72x on their membership.
 
-## Real Member Impact
+A fintech CEO found their Series A lead investor through the platform. The AI matched them at 94% based on investment focus.
 
-### Connection ROI
+A PE partner said the quality of connections is 10x better than any other platform because everyone is vetted and accomplished.
 
-*"My first intro led to a strategic partnership worth $180K in the first year. ROI was 72x on my membership."*
-— SaaS Founder, Premium Member
+The difference from other networking platforms is that instead of attending events, cold outreach, or hoping for random introductions, you get 3 AI-matched strategic connections every Monday. Warm introductions. High match accuracy. Directly access vetted professionals.
 
-*"I found my Series A lead investor through Circle Network. The AI matched us at 94% based on his investment focus and my space."*
-— Fintech CEO, Premium Member
+Current members include people from Y Combinator, Fortune 500 C-suites, Andreessen Horowitz and Sequoia, successful exit founders, and board members. All actively looking to connect.
 
-*"The quality of connections is 10x better than any other platform. Everyone is vetted, accomplished, and actually helpful."*
-— Private Equity Partner, Elite Member
+You have {{deadline}} days left to use your invitation code ({{invite_code}}).
 
-### Time Saved
+Premium is $4,997/year (strategic introductions, member directory, events).
+Elite is $9,997/year (Premium plus AI Deal Flow, Reputation Guardian, Competitive Intelligence coming Q1 2026).
 
-Instead of:
-❌ Attending generic networking events
-❌ Cold outreach on LinkedIn
-❌ Hoping for random introductions
-❌ Wasting time on low-quality connections
+Both include 30-day money-back guarantee and our "3 wins in 90 days" performance guarantee.
 
-You get:
-✅ 3 AI-matched strategic connections every Monday
-✅ Warm introductions facilitated automatically
-✅ High match accuracy (85%+)
-✅ Direct access to vetted professionals
+Think this could be valuable for you? {{apply_url}}
 
-# Proof / Social Proof
+Thanks,
+Shehab
 
-## How the AI Matching Works
-
-Every week, our AI:
-
-1. **Analyzes your profile** – Goals, expertise, needs, industries, geography
-2. **Scans the network** – 250+ members (and growing) with detailed profiles
-3. **Calculates match scores** – Mutual value assessment for each potential connection
-4. **Ranks and selects** – Top 3 connections delivered every Monday
-5. **Provides context** – See exactly why each connection matters to your goals
-
-**Accept with one click.** We handle the warm email introduction.
-
-## Who You'll Meet
-
-Current members include professionals from:
-
-- Y Combinator alumni
-- Fortune 500 C-suite executives
-- Andreessen Horowitz, Sequoia, and other top VCs
-- Successful exit founders ($50M-$500M)
-- Board members and advisors to major companies
-
-**All vetted. All accomplished. All actively looking to connect.**
-
-# CTA (Call to Action)
-
-You have **{{deadline}} days left** to use your invitation code.
-
-## Your Invitation Code
-
-**{{invite_code}}**
-
-[Join Circle Network →]({{apply_url}})
-
-## Choose Your Tier
-
-**Premium** ($4,997/year) – Strategic introductions, member directory, events
-**Elite** ($9,997/year) – Premium + AI Deal Flow + Reputation Guardian + Competitive Intelligence
-
-Both tiers include our **30-day money-back guarantee** and **3 wins in 90 days** performance guarantee.
-
-# Footer / Unsubscribe
-
-Questions? Just reply to this email.
-
-**Shehab Salamah**
-Founder, Circle Network
-
----
-
-[Unsubscribe](#)
-
-© 2025 Circle Network. All rights reserved.
+P.S. If you have questions about which tier makes sense, just reply and I can help you decide.

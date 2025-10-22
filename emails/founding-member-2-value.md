@@ -10,75 +10,23 @@ variables:
   - deadline
 ---
 
-# Hook
-
 Hi {{first_name}},
 
-I sent you an invitation to join **Circle Network** a few days ago, and wanted to follow up in case it got buried in your inbox.
+Following up on the Circle Network invitation I sent a few days ago. I know inboxes get busy, so wanted to make sure you saw it.
 
-You're among a highly selective group being invited during our **founding member phase**—and there are only **{{deadline}} days left** to claim your spot at the locked-in price of $2,497/year.
+You have {{deadline}} days left to join at the founding member rate of $2,497/year (locks in forever). After January 15th, the same membership will be $4,997-$9,997/year.
 
-After January 15, 2026, this same membership will cost $4,997-$9,997/year.
+The core value is simple: every Monday, you get 3 AI-matched connections based on your goals. Accept the ones that interest you, and we make the introduction. No cold outreach, no networking events—just strategic connections that make sense.
 
-# Value Proposition
+As a founding member, you also get lifetime access to all our AI tools at no extra cost (deal flow alerts, reputation monitoring, competitive intelligence launching Q1 2026). That's normally $4,991/year extra, but you get it included.
 
-## Quick Reminder: What You Get
+Here's what I've seen work: if even one connection this year creates $50K in value, your ROI is 20x. Most people make multiple valuable connections.
 
-### AI-Powered Strategic Introductions
-3 curated connections every week based on your goals and expertise.
+Your code is still {{invite_code}}. Does this sound like it could be useful for you?
 
-### AI Deal Flow Alerts (Q1 2026)
-Real-time opportunities matching your investment criteria.
+{{apply_url}}
 
-### Reputation Guardian (Q1 2026)
-24/7 monitoring and threat detection for your personal and company reputation.
+Thanks,
+Shehab
 
-### Competitive Intelligence (Q1 2026)
-Weekly market insights tracking competitors and opportunities in your space.
-
-**All Elite AI features included at no extra cost—a $4,991/year value.**
-
-# Proof / Social Proof
-
-## Why Founding Members Win
-
-As a founding member, you get:
-
-✓ **50% Lifetime Discount** – $2,497/year locked in forever (vs $4,997+ starting January 16)
-
-✓ **$4,991/Year in Elite AI Tools** – Included free (others pay separately)
-
-✓ **First Choice of Connections** – Priority matching in the AI system
-
-✓ **Founding Member Status** – Permanent badge and recognition
-
-✓ **Input on Features** – Help shape what we build next
-
-# CTA (Call to Action)
-
-## Your Invitation Code
-
-**{{invite_code}}**
-
-[Complete Your Application →]({{apply_url}})
-
-*Expires in {{deadline}} days*
-
-## ROI Calculation
-
-**If just ONE connection this year creates $50,000 in value** (a conservative estimate for most professionals), your ROI is **20x**.
-
-Most members make multiple valuable connections per year.
-
-# Footer / Unsubscribe
-
-Questions? Just reply to this email.
-
-**Shehab Salamah**
-Founder, Circle Network
-
----
-
-[Unsubscribe](#)
-
-© 2025 Circle Network. All rights reserved.
+P.S. If you have questions about whether this is right for you, just reply and we can chat.
