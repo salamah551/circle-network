@@ -8,10 +8,10 @@ import { Loader2 } from 'lucide-react';
  * Redirect page for /invite/accept
  * 
  * This page handles the invite acceptance flow by reading the code and email
- * query parameters and redirecting to the root page (/) which already has
- * the logic to handle these parameters.
+ * query parameters and redirecting to the /apply page which contains
+ * the application form logic.
  * 
- * This fixes the 404 error when users navigate to /invite/accept from the apply form.
+ * This fixes the 404 error when users click invitation links from emails.
  */
 function InviteAcceptRedirect() {
   const router = useRouter();
@@ -27,9 +27,9 @@ function InviteAcceptRedirect() {
     if (code) params.set('code', code);
     if (email) params.set('email', email);
     
-    const redirectUrl = `/?${params.toString()}`;
+    const redirectUrl = `/apply?${params.toString()}`;
     
-    // Immediately redirect to root with params
+    // Immediately redirect to apply page with params
     router.replace(redirectUrl);
   }, [router, searchParams]);
 
