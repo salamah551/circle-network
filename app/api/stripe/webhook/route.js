@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { sendFoundingMemberWelcomeEmail } from '@/lib/sendgrid';
+import { incrementTierTotal, runPhaseGuard } from '@/lib/phase-guard';
 
 // PostHog server-side tracking helper
 async function trackServerEvent(eventName, properties = {}) {
@@ -29,6 +30,44 @@ async function trackServerEvent(eventName, properties = {}) {
   } catch (error) {
     console.error('PostHog tracking error:', error);
   }
+}
+
+/**
+ * Determine membership tier from Stripe price ID or amount
+ * @param {object} invoice - Stripe invoice object
+ * @returns {string} Tier name: 'founding', 'premium', or 'elite'
+ */
+function determineTierFromInvoice(invoice) {
+  // Try to get tier from metadata first
+  if (invoice.metadata?.tier) {
+    return invoice.metadata.tier.toLowerCase();
+  }
+
+  // Try to match price ID
+  const priceId = invoice.lines?.data?.[0]?.price?.id;
+  if (priceId) {
+    if (priceId === process.env.STRIPE_PRICE_FOUNDING) {
+      return 'founding';
+    }
+    if (priceId === process.env.STRIPE_PRICE_PREMIUM) {
+      return 'premium';
+    }
+    if (priceId === process.env.STRIPE_PRICE_ELITE) {
+      return 'elite';
+    }
+  }
+
+  // Fallback to amount thresholds (in cents)
+  // $2,500 = 250000, $4,500 = 450000, $10,000 = 1000000
+  const amount = invoice.amount_paid || 0;
+  if (amount >= 1000000) {
+    return 'elite';
+  }
+  if (amount >= 450000) {
+    return 'premium';
+  }
+  // Default to founding for any other amount
+  return 'founding';
 }
 
 export async function POST(request) {
@@ -203,6 +242,10 @@ export async function POST(request) {
 
       console.log(`invoice.payment_succeeded: invite_id=${inviteId}, campaign_id=${inviteCampaignId}, email=${customerEmail}`);
 
+      // Determine membership tier from invoice
+      const tier = determineTierFromInvoice(invoice);
+      console.log(`Determined tier: ${tier}`);
+
       // Try to find the bulk invite by metadata first, then fall back to email
       let bulkInvite = null;
       
@@ -257,6 +300,7 @@ export async function POST(request) {
                 stripe_invoice_id: invoice.id,
                 amount: invoice.amount_paid,
                 currency: invoice.currency,
+                tier: tier,
                 timestamp: new Date().toISOString()
               }
             });
@@ -285,6 +329,29 @@ export async function POST(request) {
               .eq('id', bulkInvite.campaign_id);
 
             console.log(`✅ Conversion tracked for campaign ${bulkInvite.campaign_id}`);
+
+            // NEW: Increment tier total in membership_tier_totals
+            try {
+              await incrementTierTotal(supabaseAdmin, tier);
+              console.log(`✅ Incremented ${tier} tier total`);
+            } catch (tierError) {
+              console.error(`Error incrementing tier total:`, tierError);
+            }
+
+            // NEW: Run phase guard to check if we need to switch campaigns
+            try {
+              const phaseResult = await runPhaseGuard(supabaseAdmin);
+              console.log(`✅ Phase guard completed: phase=${phaseResult.phase}`);
+              if (phaseResult.actions.pausedCampaigns.length > 0) {
+                console.log(`🔄 Phase transition: paused ${phaseResult.actions.pausedCampaigns.length} campaigns`);
+              }
+              if (phaseResult.actions.activatedCampaigns.length > 0) {
+                console.log(`🔄 Phase transition: activated ${phaseResult.actions.activatedCampaigns.length} campaigns`);
+              }
+            } catch (phaseError) {
+              console.error(`Error running phase guard:`, phaseError);
+              // Don't fail the webhook if phase guard fails
+            }
           }
         } else {
           console.log(`Conversion already recorded for invite ${bulkInvite.id}`);
