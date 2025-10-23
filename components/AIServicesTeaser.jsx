@@ -61,12 +61,7 @@ export default function AIServicesTeaser({ userTier = 'founding', isElite = fals
               <Zap className="w-7 h-7 text-purple-400" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold text-white">Circle AI Services</h2>
-                <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded text-xs font-bold text-emerald-400">
-                  COMING SOON
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Circle AI Services</h2>
               <p className="text-zinc-400">
                 Enterprise-grade AI tools exclusively for Circle Network members
               </p>
