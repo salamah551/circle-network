@@ -12,3 +12,5 @@ yarn-error.log*
 next-env.d.ts
 /tmp
 screenshots
+*-old.js
+*-old.jsx
