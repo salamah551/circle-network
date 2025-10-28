@@ -88,7 +88,13 @@ export default function PersonalizedDashboard() {
         setWelcomeMessage(welcome);
       }
 
-      // Get stats (mock for now - replace with real queries)
+      // Get stats - TODO: Replace with actual database queries
+      // For now using placeholder values
+      // Future implementation should query:
+      // - connections: COUNT from connections table
+      // - messages: COUNT from messages WHERE read=false
+      // - introsPending: COUNT from strategic_intros WHERE status='pending'
+      // - introsAccepted: COUNT from strategic_intros WHERE status='accepted'
       setStats({
         connections: 12,
         messages: 5,

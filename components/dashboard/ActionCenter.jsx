@@ -17,14 +17,27 @@ export default function ActionCenter() {
 
     setIsSubmitting(true);
     
-    // Simulate API call - replace with actual ARC™ engine integration
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // TODO: Implement actual ARC™ engine API call
-    console.log('ARC™ Request:', arcInput);
-    
-    setArcInput('');
-    setIsSubmitting(false);
+    try {
+      // TODO: Replace with actual ARC™ engine API integration
+      // For now, simulate processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Future implementation:
+      // const response = await fetch('/api/arc/request', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ request: arcInput })
+      // });
+      // const data = await response.json();
+      
+      console.log('ARC™ Request submitted:', arcInput);
+      setArcInput('');
+    } catch (error) {
+      console.error('Failed to submit ARC™ request:', error);
+      // TODO: Add user-facing error notification
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
