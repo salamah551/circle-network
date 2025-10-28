@@ -24,7 +24,13 @@ export default function ApplyForm() {
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
       return 'Please enter a valid email address';
     }
-    if (!linkedinUrl.trim() || !linkedinUrl.includes('linkedin.com')) {
+    // Validate LinkedIn URL more securely
+    try {
+      const url = new URL(linkedinUrl.trim());
+      if (url.hostname !== 'www.linkedin.com' && url.hostname !== 'linkedin.com') {
+        return 'Please enter a valid LinkedIn profile URL';
+      }
+    } catch {
       return 'Please enter a valid LinkedIn profile URL';
     }
     if (!industry.trim()) {
