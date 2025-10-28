@@ -231,15 +231,15 @@ export default function NewHomepage() {
           </div>
         </div>
 
-        {/* Coming Soon Features - Enhanced */}
+        {/* Advanced Features */}
         <div className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/80 border border-zinc-700 rounded-2xl p-8 backdrop-blur-sm">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-sm font-semibold text-purple-400 mb-2">
               <Zap className="w-4 h-4" />
-              Coming Soon
+              Advanced Capabilities
             </div>
-            <h3 className="text-2xl font-bold">Next-Generation Capabilities</h3>
-            <p className="text-white/50 text-sm mt-2">In active development for Q2 2025</p>
+            <h3 className="text-2xl font-bold">Next-Generation Features</h3>
+            <p className="text-white/50 text-sm mt-2">Available with Inner Circle membership</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -251,10 +251,10 @@ export default function NewHomepage() {
               <div>
                 <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
                   Network Intelligence
-                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">BETA Q2</span>
+                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">INNER CIRCLE</span>
                 </h4>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  ARC™ will map the hidden web of connections within your professional network, identifying 
+                  ARC™ maps the hidden web of connections within your professional network, identifying 
                   warm introduction paths to any decision-maker—even through 3-4 degrees of separation.
                 </p>
               </div>
@@ -268,7 +268,7 @@ export default function NewHomepage() {
               <div>
                 <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
                   Opportunity Radar
-                  <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-full">BETA Q2</span>
+                  <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-full">INNER CIRCLE</span>
                 </h4>
                 <p className="text-white/60 text-sm leading-relaxed">
                   Detect M&A signals, funding rounds, and market shifts before they're public knowledge. 
@@ -408,8 +408,8 @@ export default function NewHomepage() {
               THE INNER CIRCLE
             </div>
 
-            <h3 className="text-3xl md:text-4xl font-bold mb-2">Founding Member</h3>
-            <p className="text-white/60 text-sm mb-6">For visionary founders, VCs, and C-suite executives</p>
+            <h3 className="text-3xl md:text-4xl font-bold mb-2">Inner Circle (Founding Member)</h3>
+            <p className="text-white/60 text-sm mb-6">For visionary founders, VCs, and C-suite executives with full ARC™ access</p>
 
             <div className="mb-8">
               <div className="text-4xl font-bold text-white mb-2">$25,000</div>
@@ -482,8 +482,8 @@ export default function NewHomepage() {
               LIMITED TIME OFFER
             </div>
 
-            <h3 className="text-3xl md:text-4xl font-bold mb-2">Charter Member</h3>
-            <p className="text-white/60 text-sm mb-6">For accomplished professionals and frequent travelers</p>
+            <h3 className="text-3xl md:text-4xl font-bold mb-2">Core (Charter Member)</h3>
+            <p className="text-white/60 text-sm mb-6">For accomplished professionals with immediate but limited ARC™ access</p>
 
             <div className="mb-8">
               <div className="text-4xl font-bold text-white mb-2">$3,500</div>
@@ -494,8 +494,8 @@ export default function NewHomepage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-white">Limited ARC™ Access (Pre-Launch)</div>
-                  <div className="text-sm text-white/60">10 AI-powered briefs per month during beta</div>
+                  <div className="font-semibold text-white">Limited ARC™ Access</div>
+                  <div className="text-sm text-white/60">Essential AI-powered intelligence and insights</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -522,8 +522,8 @@ export default function NewHomepage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-white">Priority Full Access</div>
-                  <div className="text-sm text-white/60">First in line when unlimited ARC™ launches</div>
+                  <div className="font-semibold text-white">Priority Feature Access</div>
+                  <div className="text-sm text-white/60">Early access to new ARC™ capabilities as they launch</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
