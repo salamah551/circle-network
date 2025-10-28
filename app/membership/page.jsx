@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, Shield, Clock, Users, Zap, TrendingUp } from 'lucide-react';
+import { ArrowRight, CheckCircle, Shield, Crown } from 'lucide-react';
 
 export const metadata = {
-  title: 'Intelligence Membership | Circle Network',
-  description: 'Ongoing competitive intelligence with a dedicated analyst and community access.',
+  title: 'The Founding 100 | Circle Network',
+  description: 'Join an exclusive collective of 100 leaders with an annual contribution of $25,000.',
 };
 
 export default function MembershipPage() {
@@ -20,7 +20,7 @@ export default function MembershipPage() {
               href="/apply"
               className="text-sm bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition-all"
             >
-              Apply Now
+              Apply for Membership
             </Link>
           </div>
         </div>
@@ -30,27 +30,27 @@ export default function MembershipPage() {
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-12">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
-            <Shield className="w-4 h-4 text-amber-400" />
-            <span className="text-sm text-amber-400 font-medium">Premium Membership</span>
+            <Crown className="w-4 h-4 text-amber-400" />
+            <span className="text-sm text-amber-400 font-medium">Founding Member Opportunity</span>
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Intelligence Membership
+            The Founding 100
           </h1>
           
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-8">
-            Never be blindsided by your competition again. Get continuous intelligence monitoring, strategic analysis, and community access with a dedicated analyst.
+            An exclusive private intelligence collective limited to 100 founding members. Access by nomination only.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-amber-400">$8,500</div>
-              <div className="text-sm text-zinc-500">per month</div>
+              <div className="text-4xl font-bold text-amber-400">$25,000</div>
+              <div className="text-sm text-zinc-500">Annual Contribution</div>
             </div>
             <div className="hidden sm:block text-2xl text-zinc-700">•</div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">24/7</div>
-              <div className="text-sm text-zinc-500">Monitoring</div>
+              <div className="text-2xl font-bold text-white">100</div>
+              <div className="text-sm text-zinc-500">Founding Members</div>
             </div>
           </div>
 
@@ -64,56 +64,80 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* Core Features */}
+      {/* Value Proposition */}
+      <section className="max-w-4xl mx-auto px-6 py-12">
+        <div className="bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border-2 border-amber-500/30 rounded-2xl p-8 md:p-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">About The Circle Network</h2>
+          
+          <div className="space-y-6 text-lg text-zinc-300 leading-relaxed">
+            <p>
+              Membership is currently limited to 100 founding members. The annual contribution is $25,000. 
+              After the founding cohort is established, the doors will close, and the contribution level will 
+              increase for future members.
+            </p>
+            
+            <p>
+              The Circle Network is a private intelligence collective where exceptional leaders share strategic insights, 
+              create unprecedented opportunities, and leverage collective wisdom for competitive advantage.
+            </p>
+
+            <p>
+              This is not a service—it's a membership in an exclusive community where access equals advantage.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Benefits */}
       <section className="max-w-4xl mx-auto px-6 py-12">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold mb-8 text-center">What's Included</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">Membership Benefits</h2>
           
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-amber-400" />
+                <Shield className="w-6 h-6 text-amber-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Dedicated Intelligence Analyst</h3>
+                <h3 className="text-xl font-bold mb-2">Private Intelligence Collective</h3>
                 <p className="text-zinc-400">
-                  Your own analyst who learns your business, tracks your competitors, and proactively surfaces insights relevant to your strategy.
+                  Access exclusive intelligence and insights shared only within the network of 100 founding members.
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-emerald-400" />
+                <CheckCircle className="w-6 h-6 text-emerald-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">24/7 Competitive Monitoring</h3>
+                <h3 className="text-xl font-bold mb-2">Strategic Network Access</h3>
                 <p className="text-zinc-400">
-                  Continuous tracking of competitor moves including product launches, pricing changes, key hires, funding rounds, and market shifts.
+                  Connect with 99 other exceptional leaders across industries. Share insights, create partnerships, and leverage collective wisdom.
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-6 h-6 text-purple-400" />
+                <Crown className="w-6 h-6 text-purple-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Real-Time Alerts</h3>
+                <h3 className="text-xl font-bold mb-2">Founding Member Status</h3>
                 <p className="text-zinc-400">
-                  Get notified immediately when significant competitive moves happen. No more discovering major changes weeks later.
+                  Lifetime recognition as a founding member with privileged access and influence over the network's evolution.
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                <Users className="w-6 h-6 text-blue-400" />
+                <ArrowRight className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">Circle Network Community Access</h3>
+                <h3 className="text-xl font-bold mb-2">Competitive Intelligence</h3>
                 <p className="text-zinc-400">
-                  Full access to the Circle Network community during your engagement. Connect with high-achievers, get introductions, and tap into collective intelligence.
+                  Exclusive access to market intelligence, competitive insights, and strategic opportunities available only to members.
                 </p>
               </div>
             </div>
@@ -121,108 +145,12 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* Service Level Agreements */}
-      <section className="max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border border-amber-500/20 rounded-2xl p-8 md:p-12">
-          <h2 className="text-3xl font-bold mb-6">Our Commitments to You</h2>
-          
-          <div className="space-y-4">
-            {[
-              {
-                sla: 'Weekly Intelligence Briefing',
-                description: 'Delivered every Monday by 9 AM ET with the week\'s most important competitive moves'
-              },
-              {
-                sla: '< 2 Hour Alert Response',
-                description: 'Critical competitive moves flagged within 2 hours of detection during business hours'
-              },
-              {
-                sla: 'Monthly Strategy Session',
-                description: '60-minute video call to review trends, answer questions, and adjust monitoring priorities'
-              },
-              {
-                sla: 'Unlimited Slack/Email Access',
-                description: 'Direct line to your analyst for ad-hoc questions and deep-dive requests'
-              },
-              {
-                sla: 'Quarterly Deep-Dive Reports',
-                description: 'Comprehensive competitive analysis every quarter with strategic recommendations'
-              },
-            ].map((item, i) => (
-              <div key={i} className="flex items-start gap-3 bg-black/40 rounded-lg p-4">
-                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-bold text-white mb-1">{item.sla}</div>
-                  <div className="text-sm text-zinc-400">{item.description}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* What We Track */}
+      {/* Who Should Apply */}
       <section className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Comprehensive Monitoring</h2>
+          <h2 className="text-3xl font-bold mb-4">Who Should Apply</h2>
           <p className="text-zinc-400 max-w-2xl mx-auto">
-            We track everything that matters to your competitive position
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-3 text-amber-400">Product & Market Moves</h3>
-            <ul className="space-y-2 text-sm text-zinc-400">
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>New product launches and feature releases</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Pricing and packaging changes</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Marketing campaigns and positioning shifts</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Partnership and integration announcements</span>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-3 text-purple-400">Company Intelligence</h3>
-            <ul className="space-y-2 text-sm text-zinc-400">
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Funding rounds and financial activity</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Key hires and leadership changes</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Customer wins and case studies</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 mt-1">•</span>
-                <span>Industry trends and market shifts</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Who It's For */}
-      <section className="max-w-4xl mx-auto px-6 py-12">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Built For</h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto">
-            The Intelligence Membership is for leaders who can't afford to be caught off-guard
+            The Circle Network is for exceptional leaders who understand the value of strategic leverage
           </p>
         </div>
         
@@ -230,21 +158,21 @@ export default function MembershipPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h3 className="text-lg font-bold mb-2">CEOs & Founders</h3>
             <p className="text-sm text-zinc-400">
-              Stay ahead of competitors while focusing on building your company. We watch the market so you don't have to.
+              Leaders building companies who value strategic connections and collective intelligence.
             </p>
           </div>
           
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-2">Product Leaders</h3>
+            <h3 className="text-lg font-bold mb-2">Senior Executives</h3>
             <p className="text-sm text-zinc-400">
-              Know what features competitors are shipping, how they're positioning, and what customers are saying.
+              C-level executives and senior leaders who make strategic decisions that shape their organizations.
             </p>
           </div>
           
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-lg font-bold mb-2">GTM Executives</h3>
+            <h3 className="text-lg font-bold mb-2">Investors & Advisors</h3>
             <p className="text-sm text-zinc-400">
-              Track competitor pricing, messaging, and sales tactics. Stay one step ahead in every deal.
+              High-level investors and advisors who leverage networks for deal flow and market intelligence.
             </p>
           </div>
         </div>
@@ -253,9 +181,9 @@ export default function MembershipPage() {
       {/* CTA */}
       <section className="max-w-4xl mx-auto px-6 py-12">
         <div className="bg-gradient-to-r from-amber-500/20 to-emerald-500/20 border-2 border-amber-500/30 rounded-2xl p-8 md:p-12 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Never Be Blindsided Again?</h2>
+          <h2 className="text-3xl font-bold mb-4">Ready to Join The Founding 100?</h2>
           <p className="text-lg text-zinc-400 mb-8 max-w-2xl mx-auto">
-            Limited to 10 active memberships. Apply now to secure your spot.
+            Membership is limited to 100 founding members. Applications are reviewed by our membership committee.
           </p>
           
           <Link
@@ -267,7 +195,8 @@ export default function MembershipPage() {
           </Link>
           
           <p className="text-sm text-zinc-500 mt-6">
-            Questions? <Link href="/contact" className="text-amber-400 hover:text-amber-300">Schedule a consultation</Link> to discuss your needs.
+            Questions about membership?{' '}
+            <Link href="/contact" className="text-amber-400 hover:text-amber-300">Contact us</Link> to learn more.
           </p>
         </div>
       </section>
