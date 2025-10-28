@@ -1,13 +1,9 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Crown, ArrowRight, CheckCircle, Zap, Clock, Target, Shield, TrendingUp } from 'lucide-react';
-import SignalTicker from '../components/SignalTicker';
-import ThreatScanModal from '../components/ThreatScanModal';
-import FlashBriefingCTA from '../components/FlashBriefingCTA';
+import { Crown, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function NewHomepage() {
-  const [showThreatScan, setShowThreatScan] = useState(false);
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -35,7 +31,7 @@ export default function NewHomepage() {
                 href="/apply"
                 className="text-sm bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition-all duration-300"
               >
-                Request Invitation
+                Apply for Membership
               </Link>
             </div>
           </div>
@@ -51,212 +47,99 @@ export default function NewHomepage() {
 
         <div className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Get Your First Competitor Signal
+            The Private Network Where
             <br />
             <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
-              in 48 Hours
+              100 Leaders Share an Unfair Advantage
             </span>
           </h1>
 
           <h2 className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            Start with our free 90-second Threat Scan or order a $297 Flash Briefing directly. 
-            Know what moves your competitors are making this week.
+            The Circle Network is a private intelligence collective. Access is by nomination only.
           </h2>
 
-          {/* Dual CTAs */}
+          {/* Primary CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <FlashBriefingCTA className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all duration-300 shadow-xl hover:shadow-amber-500/20 flex items-center justify-center gap-2">
-              <Zap className="w-5 h-5" />
-              Order Your $297 Flash Briefing
-            </FlashBriefingCTA>
-            
-            <button
-              onClick={() => setShowThreatScan(true)}
-              className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold text-lg rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2"
+            <Link
+              href="/apply"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all duration-300 shadow-xl hover:shadow-amber-500/20 flex items-center justify-center gap-2"
             >
-              <Shield className="w-5 h-5" />
-              Take the Free Threat Scan
-            </button>
+              Apply for Membership
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
 
           {/* Trust indicators */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-white/60">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span>48-hour delivery</span>
+              <span>Limited to 100 founding members</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span>No subscription required</span>
+              <span>Access by nomination only</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span>Used by 100+ companies</span>
+              <span>Private intelligence collective</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Signal Ticker */}
-      <SignalTicker />
-
-      {/* How It Works */}
+      {/* The Founding 100 Section */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">The Founding 100</h2>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            From zero to competitive intelligence in three simple steps
+            An exclusive opportunity for the first 100 leaders to join our private intelligence collective
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-amber-500/10 border-2 border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-amber-400">1</span>
-            </div>
-            <h3 className="text-xl font-bold mb-3">Order Your Briefing</h3>
-            <p className="text-zinc-400">
-              Choose the free Threat Scan or order the full Flash Briefing. Tell us about your competitors and what you need to know.
-            </p>
-          </div>
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border-2 border-amber-500/30 rounded-2xl p-12">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/30 mb-6">
+                <Crown className="w-5 h-5 text-amber-400" />
+                <span className="text-sm text-amber-400 font-bold">FOUNDING MEMBER OPPORTUNITY</span>
+              </div>
+              
+              <h3 className="text-4xl font-bold mb-4">Limited to 100 Members</h3>
+              
+              <div className="mb-6">
+                <div className="text-5xl font-bold text-amber-400 mb-2">$25,000</div>
+                <div className="text-lg text-zinc-400">Annual Contribution</div>
+              </div>
 
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-emerald-400">2</span>
+              <p className="text-lg text-white/80 leading-relaxed mb-8">
+                Membership is currently limited to 100 founding members. The annual contribution is $25,000. 
+                After the founding cohort is established, the doors will close, and the contribution level will 
+                increase for future members.
+              </p>
             </div>
-            <h3 className="text-xl font-bold mb-3">We Research & Analyze</h3>
-            <p className="text-zinc-400">
-              Our analysts dig into competitor moves, pricing changes, product launches, and strategic shifts happening right now.
-            </p>
-          </div>
 
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border-2 border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-purple-400">3</span>
-            </div>
-            <h3 className="text-xl font-bold mb-3">Get Actionable Insights</h3>
-            <p className="text-zinc-400">
-              Receive a detailed report with strategic recommendations. Know exactly what to do with the intelligence you get.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Offer Cards */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Intelligence Level</h2>
-          <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            From one-time briefings to ongoing intelligence, we've got you covered
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Flash Briefing */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-amber-500/30 transition-all">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="w-6 h-6 text-amber-400" />
-              <h3 className="text-2xl font-bold">Flash Briefing</h3>
-            </div>
-            <div className="mb-4">
-              <div className="text-4xl font-bold text-white mb-2">$297</div>
-              <div className="text-sm text-zinc-500">One-time payment</div>
-            </div>
-            <p className="text-zinc-400 mb-6">
-              Get your first competitor intelligence report delivered within 48 hours. Perfect for urgent competitive questions.
-            </p>
-            <ul className="space-y-3 mb-6">
+            <div className="space-y-4 mb-8">
               {[
-                '48-hour delivery guarantee',
-                'Analysis of 3-5 competitors',
-                'Strategic recommendations',
-                '30-minute review call',
-                'Credits toward membership'
+                'Exclusive access to intelligence collective',
+                'Strategic insights from 100 top-tier leaders',
+                'Private network of high-achievers',
+                'Curated introductions and partnerships',
+                'Early access to opportunities and deals',
+                'Lifetime founding member status'
               ].map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-zinc-300">{feature}</span>
-                </li>
+                <div key={i} className="flex items-start gap-3 bg-black/40 rounded-lg p-4">
+                  <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-white">{feature}</span>
+                </div>
               ))}
-            </ul>
-            <FlashBriefingCTA className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all flex items-center justify-center gap-2">
-              <Zap className="w-4 h-4" />
-              Order Now
-            </FlashBriefingCTA>
-          </div>
+            </div>
 
-          {/* 30-Day Sprint */}
-          <div className="bg-zinc-900 border-2 border-purple-500/30 rounded-2xl p-8 relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-purple-500 text-white text-xs font-bold rounded-full">
-              MOST POPULAR
-            </div>
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="w-6 h-6 text-purple-400" />
-              <h3 className="text-2xl font-bold">30-Day Sprint</h3>
-            </div>
-            <div className="mb-4">
-              <div className="text-4xl font-bold text-white mb-2">$3,000</div>
-              <div className="text-sm text-zinc-500">One-time pilot</div>
-            </div>
-            <p className="text-zinc-400 mb-6">
-              Deep-dive into your competitive landscape over 30 days. Ideal for strategic planning, fundraising prep, or product launches.
-            </p>
-            <ul className="space-y-3 mb-6">
-              {[
-                'Comprehensive competitive analysis',
-                'Weekly intelligence briefings',
-                'Pricing & positioning matrix',
-                '90-minute strategy session',
-                'Quarterly report format'
-              ].map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-zinc-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
             <Link
-              href="/sprint"
-              className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold rounded-lg hover:from-purple-400 hover:to-purple-500 transition-all flex items-center justify-center gap-2"
+              href="/apply"
+              className="w-full px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl flex items-center justify-center gap-2"
             >
-              Learn More
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {/* Intelligence Membership */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-all">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-6 h-6 text-emerald-400" />
-              <h3 className="text-2xl font-bold">Membership</h3>
-            </div>
-            <div className="mb-4">
-              <div className="text-4xl font-bold text-white mb-2">$8,500</div>
-              <div className="text-sm text-zinc-500">per month</div>
-            </div>
-            <p className="text-zinc-400 mb-6">
-              Never be blindsided again with 24/7 monitoring, dedicated analyst, and Circle Network community access.
-            </p>
-            <ul className="space-y-3 mb-6">
-              {[
-                '24/7 competitive monitoring',
-                'Dedicated intelligence analyst',
-                'Real-time alerts',
-                'Weekly briefings & monthly calls',
-                'Full Circle Network access'
-              ].map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-zinc-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/membership"
-              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-lg hover:from-emerald-400 hover:to-emerald-500 transition-all flex items-center justify-center gap-2"
-            >
-              Learn More
-              <ArrowRight className="w-4 h-4" />
+              Apply for Membership
+              <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </div>
@@ -266,23 +149,19 @@ export default function NewHomepage() {
       <section className="max-w-4xl mx-auto px-6 py-20 text-center">
         <div className="bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border border-amber-500/20 rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-6">
-            Stop Being Caught Off Guard by Your Competition
+            Join the Elite Circle of Strategic Leaders
           </h2>
           <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
-            Join 100+ companies who use Circle Network to stay ahead of competitive moves and make better strategic decisions.
+            The Circle Network is where 100 exceptional leaders share insights, create opportunities, and leverage collective intelligence for unprecedented advantage.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <FlashBriefingCTA className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl flex items-center justify-center gap-2">
-              <Zap className="w-5 h-5" />
-              Start with Flash Briefing
-            </FlashBriefingCTA>
-            
-            <button
-              onClick={() => setShowThreatScan(true)}
-              className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold text-lg rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+            <Link
+              href="/apply"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl flex items-center justify-center gap-2"
             >
-              Try Free Threat Scan
-            </button>
+              Apply for Membership
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </section>
@@ -308,9 +187,6 @@ export default function NewHomepage() {
           </div>
         </div>
       </footer>
-
-      {/* Threat Scan Modal */}
-      <ThreatScanModal isOpen={showThreatScan} onClose={() => setShowThreatScan(false)} />
     </main>
   );
 }
