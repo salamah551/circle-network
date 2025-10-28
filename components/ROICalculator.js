@@ -2,15 +2,20 @@
 import { useState } from 'react';
 import { DollarSign, Plane, Users } from 'lucide-react';
 
+// ROI Calculation Constants
+const VENDOR_SAVINGS_RATE = 0.15; // 15% savings on software spend
+const TRAVEL_SAVINGS_PER_FLIGHT = 250; // $250 saved per flight
+const PRODUCTIVITY_GAIN_PER_PERSON = 5000; // $5K productivity gain per team member
+
 export default function ROICalculator() {
   const [softwareSpend, setSoftwareSpend] = useState(10000);
   const [annualFlights, setAnnualFlights] = useState(24);
   const [teamSize, setTeamSize] = useState(10);
 
   // Calculations
-  const vendorSavings = softwareSpend * 0.15; // 15% savings on software
-  const travelSavings = annualFlights * 250; // $250 per flight in optimizations
-  const productivityGains = teamSize * 5000; // $5K per team member in productivity
+  const vendorSavings = softwareSpend * VENDOR_SAVINGS_RATE;
+  const travelSavings = annualFlights * TRAVEL_SAVINGS_PER_FLIGHT;
+  const productivityGains = teamSize * PRODUCTIVITY_GAIN_PER_PERSON;
   
   const directSavings = vendorSavings + travelSavings;
   const totalValue = directSavings + productivityGains;
@@ -114,21 +119,21 @@ export default function ROICalculator() {
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <span className="text-white/70 flex items-center gap-2">
                 Vendor Optimization
-                <span className="text-xs text-white/40">(15% of spend)</span>
+                <span className="text-xs text-white/40">({Math.round(VENDOR_SAVINGS_RATE * 100)}% of spend)</span>
               </span>
               <span className="text-lg text-white/80">{formatCurrency(vendorSavings)}</span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <span className="text-white/70 flex items-center gap-2">
                 Travel Optimization
-                <span className="text-xs text-white/40">($250/flight)</span>
+                <span className="text-xs text-white/40">(${TRAVEL_SAVINGS_PER_FLIGHT}/flight)</span>
               </span>
               <span className="text-lg text-white/80">{formatCurrency(travelSavings)}</span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <span className="text-white/70 flex items-center gap-2">
                 Productivity Gains
-                <span className="text-xs text-white/40">($5K/person)</span>
+                <span className="text-xs text-white/40">(${PRODUCTIVITY_GAIN_PER_PERSON.toLocaleString()}/person)</span>
               </span>
               <span className="text-2xl font-bold text-purple-400">{formatCurrency(productivityGains)}</span>
             </div>
@@ -150,39 +155,30 @@ export default function ROICalculator() {
       </div>
 
       <style jsx>{`
-        .slider-indigo::-webkit-slider-thumb {
+        input[type="range"]::-webkit-slider-thumb {
           appearance: none;
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
           cursor: pointer;
+        }
+
+        .slider-indigo::-webkit-slider-thumb {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
           box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
 
         .slider-purple::-webkit-slider-thumb {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
           background: linear-gradient(135deg, #8b5cf6, #a855f7);
-          cursor: pointer;
           box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
         }
 
         .slider-pink::-webkit-slider-thumb {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
           background: linear-gradient(135deg, #a855f7, #ec4899);
-          cursor: pointer;
           box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
         }
 
-        .slider-indigo::-moz-range-thumb,
-        .slider-purple::-moz-range-thumb,
-        .slider-pink::-moz-range-thumb {
+        input[type="range"]::-moz-range-thumb {
           width: 20px;
           height: 20px;
           border-radius: 50%;
