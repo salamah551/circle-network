@@ -68,17 +68,17 @@ export default function NewHomepage() {
 
         <div className="max-w-7xl mx-auto px-6 pt-24 pb-20 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Where Human Collaboration
-            <br />
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Gains an AI Edge
+              The World's First
+              <br />
+              AI-Enhanced Private Network
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            The Circle is a private, application-only community for innovators and professionals. 
-            We leverage our proprietary AI engine, <span className="text-purple-400 font-semibold">ARC™</span>, to unlock 
-            collective intelligence and create an undeniable advantage for our members.
+            An exclusive community where elite founders, executives, and accomplished professionals 
+            gain an unfair advantage through our proprietary <span className="text-purple-400 font-semibold">ARC™</span> AI engine 
+            and a network designed for the few who understand that being exceptional requires exceptional resources.
           </p>
 
           {/* Primary CTA */}
@@ -96,15 +96,15 @@ export default function NewHomepage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-white/60">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-purple-400" />
-              <span>Application-only membership</span>
+              <span>Invitation-only access</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-purple-400" />
-              <span>100 founding members</span>
+              <span>Curated for excellence</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-purple-400" />
-              <span>AI-powered community</span>
+              <span>AI-enhanced intelligence</span>
             </div>
           </div>
         </div>
@@ -157,87 +157,122 @@ export default function NewHomepage() {
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-full text-sm font-semibold text-purple-400 mb-4">
-            Powered by AI
+            ⚡ Powered by AI
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Meet ARC™, Your Personal AI Chief of Staff
+            The ARC™ Engine: Your Unfair Advantage
           </h2>
           <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            Every Circle member gets access to our proprietary AI engine that works around the clock to give you an edge.
+            While others are still figuring out AI, our members are already leveraging a purpose-built intelligence 
+            platform that works 24/7 to deliver insights, opportunities, and advantages.
           </p>
         </div>
 
-        {/* Current Features */}
+        {/* Current Features - Enhanced Layout */}
         <div className="mb-12">
-          <h3 className="text-2xl font-bold mb-6 text-center text-purple-400">Available Now</h3>
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <h3 className="text-2xl font-bold text-center text-green-400">Available Now</h3>
+          </div>
           <div className="grid md:grid-cols-3 gap-6">
             {/* Vendor Leverage */}
-            <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-indigo-500/30 hover:bg-gradient-to-br hover:from-indigo-500/5 hover:to-purple-500/5 transition-all cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 border border-indigo-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Receipt className="w-6 h-6 text-indigo-400" />
+            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/30 to-indigo-500/10 border border-indigo-500/40 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                  <Receipt className="w-7 h-7 text-indigo-400" />
+                </div>
+                <h4 className="text-xl font-bold mb-3 group-hover:text-indigo-300 transition-colors">Vendor Leverage</h4>
+                <p className="text-white/60 leading-relaxed">
+                  ARC™ analyzes your SaaS and vendor invoices in real-time, identifies hidden overspending patterns, 
+                  and auto-generates negotiation scripts proven to save thousands in annual costs.
+                </p>
+                <div className="mt-4 pt-4 border-t border-zinc-700/50">
+                  <span className="text-xs text-indigo-400 font-semibold">AVERAGE SAVINGS: $12K+/YEAR</span>
+                </div>
               </div>
-              <h4 className="text-xl font-bold mb-3">Vendor Leverage</h4>
-              <p className="text-white/60">
-                ARC™ analyzes your SaaS and vendor invoices, identifies overspending, and generates negotiation scripts to save you thousands.
-              </p>
             </div>
 
             {/* Travel Optimization */}
-            <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-purple-500/30 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-pink-500/5 transition-all cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Plane className="w-6 h-6 text-purple-400" />
+            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-500/30 to-purple-500/10 border border-purple-500/40 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                  <Plane className="w-7 h-7 text-purple-400" />
+                </div>
+                <h4 className="text-xl font-bold mb-3 group-hover:text-purple-300 transition-colors">Travel Optimization</h4>
+                <p className="text-white/60 leading-relaxed">
+                  Simply forward your flight confirmations. ARC™ monitors upgrade opportunities, alerts you to lounge access 
+                  you didn't know you had, and predicts potential disruptions hours before airlines announce them.
+                </p>
+                <div className="mt-4 pt-4 border-t border-zinc-700/50">
+                  <span className="text-xs text-purple-400 font-semibold">SAVE 15+ HOURS/MONTH</span>
+                </div>
               </div>
-              <h4 className="text-xl font-bold mb-3">Travel Optimization</h4>
-              <p className="text-white/60">
-                Forward your flight confirmations and ARC™ finds upgrade opportunities, lounge access, and potential disruptions before they happen.
-              </p>
             </div>
 
             {/* Market Intelligence */}
-            <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-pink-500/30 hover:bg-gradient-to-br hover:from-pink-500/5 hover:to-purple-500/5 transition-all cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-6 h-6 text-pink-400" />
+            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-pink-500/50 hover:shadow-xl hover:shadow-pink-500/10 transition-all cursor-pointer overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-500/30 to-pink-500/10 border border-pink-500/40 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                  <TrendingUp className="w-7 h-7 text-pink-400" />
+                </div>
+                <h4 className="text-xl font-bold mb-3 group-hover:text-pink-300 transition-colors">Market Intelligence</h4>
+                <p className="text-white/60 leading-relaxed">
+                  ARC™ continuously scans industry newsletters, research reports, and competitive signals to surface 
+                  critical insights you would have missed—delivered as concise, actionable briefs every morning.
+                </p>
+                <div className="mt-4 pt-4 border-t border-zinc-700/50">
+                  <span className="text-xs text-pink-400 font-semibold">DAILY COMPETITIVE EDGE</span>
+                </div>
               </div>
-              <h4 className="text-xl font-bold mb-3">Market Intelligence</h4>
-              <p className="text-white/60">
-                ARC™ scans newsletters and reports, surfacing critical insights and competitor movements you would have missed.
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Coming Soon Features */}
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8">
+        {/* Coming Soon Features - Enhanced */}
+        <div className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/80 border border-zinc-700 rounded-2xl p-8 backdrop-blur-sm">
           <div className="text-center mb-8">
-            <div className="inline-block px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-sm font-semibold text-purple-400 mb-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-sm font-semibold text-purple-400 mb-2">
+              <Zap className="w-4 h-4" />
               Coming Soon
             </div>
-            <h3 className="text-2xl font-bold">In Development</h3>
+            <h3 className="text-2xl font-bold">Next-Generation Capabilities</h3>
+            <p className="text-white/50 text-sm mt-2">In active development for Q2 2025</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Network Intelligence */}
-            <div className="flex gap-4 p-6 bg-zinc-900/50 rounded-xl border border-zinc-800">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Network className="w-5 h-5 text-purple-400" />
+            <div className="flex gap-4 p-6 bg-gradient-to-br from-zinc-900 to-zinc-800/50 rounded-xl border border-zinc-700 hover:border-purple-500/30 transition-all">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Network className="w-6 h-6 text-purple-400" />
               </div>
               <div>
-                <h4 className="text-lg font-bold mb-2">Network Intelligence</h4>
-                <p className="text-white/60 text-sm">
-                  Map hidden connections within your professional network to find warm introductions.
+                <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
+                  Network Intelligence
+                  <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">BETA Q2</span>
+                </h4>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  ARC™ will map the hidden web of connections within your professional network, identifying 
+                  warm introduction paths to any decision-maker—even through 3-4 degrees of separation.
                 </p>
               </div>
             </div>
 
             {/* Opportunity Radar */}
-            <div className="flex gap-4 p-6 bg-zinc-900/50 rounded-xl border border-zinc-800">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Search className="w-5 h-5 text-pink-400" />
+            <div className="flex gap-4 p-6 bg-gradient-to-br from-zinc-900 to-zinc-800/50 rounded-xl border border-zinc-700 hover:border-pink-500/30 transition-all">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Search className="w-6 h-6 text-pink-400" />
               </div>
               <div>
-                <h4 className="text-lg font-bold mb-2">Opportunity Radar</h4>
-                <p className="text-white/60 text-sm">
-                  Identify M&amp;A signals and emerging market trends from unstructured data.
+                <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
+                  Opportunity Radar
+                  <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-full">BETA Q2</span>
+                </h4>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  Detect M&A signals, funding rounds, and market shifts before they're public knowledge. 
+                  ARC™ synthesizes unstructured data from hundreds of sources to give you first-mover advantage.
                 </p>
               </div>
             </div>
@@ -262,9 +297,10 @@ export default function NewHomepage() {
       {/* The Pillars of Value Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Two Pillars of Unmatched Value</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Where Technology Meets Exclusivity</h2>
           <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            The Circle is more than a network. It's a force multiplier.
+            The Circle isn't just a network or a tool—it's the convergence of both, 
+            designed exclusively for those who understand that exceptional results require exceptional resources.
           </p>
         </div>
 
@@ -274,11 +310,11 @@ export default function NewHomepage() {
             <div className="w-16 h-16 bg-gradient-to-br from-indigo-500/30 to-indigo-500/10 border border-indigo-500/40 rounded-2xl flex items-center justify-center mb-6">
               <Users className="w-8 h-8 text-indigo-400" />
             </div>
-            <h3 className="text-3xl font-bold mb-4 text-indigo-300">The Community</h3>
+            <h3 className="text-3xl font-bold mb-4 text-indigo-300">Elite Community</h3>
             <p className="text-white/70 text-lg leading-relaxed">
-              Collaborate with a vetted group of innovators from diverse industries. Share insights in private channels, 
-              solve complex problems in expert-led roundtables, and build a network of trusted peers who understand 
-              what it takes to win.
+              Access a rigorously vetted network of innovators, decision-makers, and industry leaders. 
+              Share insights in private channels, solve complex challenges in expert-led sessions, 
+              and build relationships with peers who operate at your level—or higher.
             </p>
           </div>
 
@@ -287,11 +323,11 @@ export default function NewHomepage() {
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500/30 to-purple-500/10 border border-purple-500/40 rounded-2xl flex items-center justify-center mb-6">
               <Brain className="w-8 h-8 text-purple-400" />
             </div>
-            <h3 className="text-3xl font-bold mb-4 text-purple-300">The AI Edge</h3>
+            <h3 className="text-3xl font-bold mb-4 text-purple-300">Proprietary AI Platform</h3>
             <p className="text-white/70 text-lg leading-relaxed">
-              Every member is equipped with our ARC™ engine. This tool not only provides individual leverage but also 
-              contributes anonymized patterns to the collective, making the entire community smarter. The more members 
-              we have, the more powerful ARC™ becomes.
+              Every member is equipped with ARC™, our purpose-built AI engine that doesn't just assist—it anticipates. 
+              The platform learns from the collective patterns of our community, creating a network effect 
+              where each member's intelligence amplifies the advantage for all.
             </p>
           </div>
         </div>
@@ -301,42 +337,42 @@ export default function NewHomepage() {
       <section className="max-w-5xl mx-auto px-6 py-20">
         <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-10 md:p-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">A Note From Our Founder</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Why We Built This</h2>
             <div className="w-16 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 mx-auto rounded-full" />
           </div>
 
           <div className="prose prose-invert prose-lg max-w-none">
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              For years, I've watched talented professionals struggle in isolation—brilliant minds working harder, 
-              not smarter, because they lacked two critical resources: access to the right people and access to 
-              the right intelligence.
+              For years, I watched brilliant professionals operate in isolation—working harder instead of smarter 
+              because they lacked two critical resources: access to the right intelligence and access to the right people.
             </p>
             
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              I built The Circle to solve this problem. My thesis is simple: <span className="text-purple-400 font-semibold">the 
-              future of success lies at the intersection of human collaboration and artificial intelligence.</span>
+              The Circle exists to solve this problem for a select few. <span className="text-purple-400 font-semibold">The 
+              future belongs to those who can harness both human expertise and artificial intelligence</span>—not as separate tools, 
+              but as a unified advantage.
             </p>
             
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              Our proprietary AI engine, ARC™, doesn't replace human judgment—it amplifies it. It handles the 
-              tedious work of monitoring, analyzing, and alerting so you can focus on what humans do best: 
-              building relationships, making decisions, and creating value.
+              ARC™, our proprietary AI engine, doesn't replace judgment—it amplifies it. It handles the exhausting work 
+              of monitoring markets, analyzing patterns, and surfacing opportunities so you can focus on what actually 
+              drives results: relationships, decisions, and execution.
             </p>
             
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              But technology alone isn't enough. That's why The Circle is built on a foundation of trust, 
-              exclusivity, and mutual value creation. Every member is vetted. Every interaction is intentional. 
-              Every connection has the potential to change the trajectory of your business.
+              But technology without the right community is incomplete. That's why membership is selective and intentional. 
+              Every person here has been vetted. Every interaction has purpose. Every connection has the potential to 
+              fundamentally change the trajectory of your career or business.
             </p>
             
             <p className="text-white/80 text-lg leading-relaxed">
-              We're not building another networking group. We're building an unfair advantage for the people 
-              who join us. I invite you to be part of this journey.
+              We're not building another networking platform or productivity tool. We're building an unfair advantage 
+              for the people who join us early. If you recognize the value of what we're creating, I invite you to apply.
             </p>
 
             <div className="mt-8 pt-6 border-t border-zinc-700">
               <p className="text-white/90 text-xl font-semibold">
-                Let's build the future together.
+                The future is built by those who show up first.
               </p>
               <p className="text-purple-400 mt-2">
                 — The Founder
@@ -346,64 +382,178 @@ export default function NewHomepage() {
         </div>
       </section>
 
-      {/* The Founding Members Invitation */}
+      {/* Two-Tier Membership Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 border-2 border-indigo-500/30 rounded-3xl p-12 md:p-16 text-center">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-10" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
-
+        <div className="text-center mb-12">
           <div className="inline-block px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full text-sm font-bold text-white mb-6">
-            LIMITED OPPORTUNITY
+            TWO PATHS TO EXTRAORDINARY
           </div>
-
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Become a Founding Member
+            Choose Your Level of Access
           </h2>
+          <p className="text-xl text-white/60 max-w-3xl mx-auto">
+            The Circle offers two distinct membership tiers, each designed to deliver exceptional value. 
+            Both provide access to our AI-powered platform and vetted community—the difference is depth and exclusivity.
+          </p>
+        </div>
 
-          <div className="max-w-3xl mx-auto mb-10">
-            <p className="text-xl text-white/80 leading-relaxed mb-6">
-              We are currently inviting <span className="text-purple-400 font-bold">100 founding members</span> to 
-              shape the future of our community. Founders receive lifetime-locked annual contributions and a 
-              permanent voice in our direction.
-            </p>
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {/* Inner Circle - Founding Member */}
+          <div className="relative bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500/50 rounded-3xl p-10 overflow-hidden group hover:border-indigo-400/70 transition-all duration-300">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl -z-10 group-hover:bg-indigo-500/30 transition-all" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
             
-            <p className="text-lg text-white/70">
-              After the first 100, the application process will become more stringent, and contribution levels 
-              will increase. This is your chance to be part of something exceptional from the ground up.
+            <div className="inline-block px-4 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-xs font-bold text-white mb-6">
+              THE INNER CIRCLE
+            </div>
+
+            <h3 className="text-3xl md:text-4xl font-bold mb-2">Founding Member</h3>
+            <p className="text-white/60 text-sm mb-6">For visionary founders, VCs, and C-suite executives</p>
+
+            <div className="mb-8">
+              <div className="text-4xl font-bold text-white mb-2">$25,000</div>
+              <div className="text-white/60 text-sm">Annual Contribution</div>
+            </div>
+
+            <div className="space-y-4 mb-10">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">White-Glove Networking</div>
+                  <div className="text-sm text-white/60">Personalized introductions and curated connections</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Exclusive Deal Flow</div>
+                  <div className="text-sm text-white/60">Early access to vetted opportunities and partnerships</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Direct Introductions</div>
+                  <div className="text-sm text-white/60">Skip the line with warm intros to key decision-makers</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Unlimited ARC™ Access</div>
+                  <div className="text-sm text-white/60">Full, unlimited access to all AI capabilities</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Private Roundtables</div>
+                  <div className="text-sm text-white/60">Quarterly executive sessions on strategic topics</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Platform Influence</div>
+                  <div className="text-sm text-white/60">Shape product roadmap and community direction</div>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/apply?tier=inner-circle"
+              className="block w-full py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 group"
+            >
+              <span className="flex items-center justify-center gap-2">
+                Apply for the Inner Circle
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+          </div>
+
+          {/* Core Membership - Charter Member */}
+          <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 border-purple-500/50 rounded-3xl p-10 overflow-hidden group hover:border-purple-400/70 transition-all duration-300">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl -z-10 group-hover:bg-pink-500/30 transition-all" />
+            
+            <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white mb-6 animate-pulse">
+              LIMITED TIME OFFER
+            </div>
+
+            <h3 className="text-3xl md:text-4xl font-bold mb-2">Charter Member</h3>
+            <p className="text-white/60 text-sm mb-6">For accomplished professionals and frequent travelers</p>
+
+            <div className="mb-8">
+              <div className="text-4xl font-bold text-white mb-2">$3,500</div>
+              <div className="text-white/60 text-sm">Annual Contribution <span className="text-purple-400 font-semibold">(Lifetime Rate)</span></div>
+            </div>
+
+            <div className="space-y-4 mb-10">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Limited ARC™ Access (Pre-Launch)</div>
+                  <div className="text-sm text-white/60">10 AI-powered briefs per month during beta</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">AI-Curated Matches</div>
+                  <div className="text-sm text-white/60">Intelligent connection recommendations</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Community Access</div>
+                  <div className="text-sm text-white/60">Full access to member directory and channels</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Lifetime Charter Rate</div>
+                  <div className="text-sm text-white/60">Lock in $3,500/year forever—never increases</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Priority Full Access</div>
+                  <div className="text-sm text-white/60">First in line when unlimited ARC™ launches</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-white">Charter Badge</div>
+                  <div className="text-sm text-white/60">Permanent recognition as an early supporter</div>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/apply?tier=charter"
+              className="block w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 group"
+            >
+              <span className="flex items-center justify-center gap-2">
+                Become a Charter Member
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+
+            <p className="text-xs text-white/50 mt-4 text-center">
+              Charter pricing ends when we reach capacity
             </p>
           </div>
+        </div>
 
-          {/* Benefits */}
-          <div className="grid md:grid-cols-3 gap-6 mb-10 max-w-4xl mx-auto">
-            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-              <CheckCircle className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-              <h4 className="font-bold mb-2">Locked Pricing</h4>
-              <p className="text-sm text-white/70">Founding rate forever, never increases</p>
-            </div>
-            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-              <CheckCircle className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-              <h4 className="font-bold mb-2">Permanent Voice</h4>
-              <p className="text-sm text-white/70">Shape product roadmap and community direction</p>
-            </div>
-            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-              <CheckCircle className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-              <h4 className="font-bold mb-2">ARC™ Access</h4>
-              <p className="text-sm text-white/70">Full access to our AI engine and all features</p>
-            </div>
-          </div>
-
-          {/* Final CTA */}
-          <Link 
-            href="/apply"
-            className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-xl rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 group"
-          >
-            Request an Invitation
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          <p className="text-sm text-white/50 mt-6">
-            Applications are reviewed within 48 hours
+        <div className="mt-12 text-center">
+          <p className="text-white/60 text-sm">
+            Not sure which tier is right for you? <Link href="/apply" className="text-purple-400 hover:text-purple-300 font-semibold">Apply now</Link> and we'll help you decide.
           </p>
         </div>
       </section>
@@ -423,8 +573,8 @@ export default function NewHomepage() {
                 </span>
               </Link>
               <p className="text-white/60 max-w-md">
-                An exclusive, application-only community leveraging AI to unlock collective intelligence 
-                and create an undeniable advantage for our members.
+                The world's first AI-enhanced private network. An exclusive, invitation-only community 
+                where technology and human expertise converge to create an undeniable advantage.
               </p>
             </div>
 
