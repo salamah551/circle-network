@@ -135,7 +135,7 @@ export async function POST(request) {
         }
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?welcome=true&tier=${tierName}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/welcome?tier=${tierName}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe?canceled=true&email=${encodeURIComponent(user.email)}`,
       metadata: { 
         userId: user.id, 
