@@ -101,9 +101,19 @@ export default function UpcomingTravelWidget() {
           ))}
 
           {trips.length === 0 && (
-            <div className="text-center py-8 text-zinc-500">
-              <Plane className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No upcoming trips</p>
+            <div className="text-center py-8">
+              <Plane className="w-12 h-12 mx-auto mb-3 text-blue-400/50" />
+              <p className="text-white font-medium mb-2">No trips scheduled</p>
+              <p className="text-sm text-zinc-400 mb-4">
+                Forward your next itinerary and ARC™ will watch for upgrades.
+              </p>
+              <a
+                href="/help/forward-trips"
+                className="inline-flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-medium"
+              >
+                How to forward trips
+                <ArrowRight className="w-3 h-3" />
+              </a>
             </div>
           )}
         </div>

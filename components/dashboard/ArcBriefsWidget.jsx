@@ -135,10 +135,19 @@ export default function ArcBriefsWidget() {
         ))}
 
           {requests.length === 0 && (
-            <div className="text-center py-8 text-zinc-500">
-              <Briefcase className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No active requests</p>
-              <p className="text-xs mt-1">Use the Action Center to make a new request</p>
+            <div className="text-center py-8">
+              <Briefcase className="w-12 h-12 mx-auto mb-3 text-purple-400/50" />
+              <p className="text-white font-medium mb-2">No briefs yet</p>
+              <p className="text-sm text-zinc-400 mb-4">
+                Try asking ARC to analyze your next contract or trip.
+              </p>
+              <a
+                href="/arc/request"
+                className="inline-flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-medium"
+              >
+                Request a brief
+                <ChevronRight className="w-3 h-3" />
+              </a>
             </div>
           )}
         </div>

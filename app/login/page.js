@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
-import { ArrowRight, Loader2, Mail } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { VALIDATION, LOADING, ERRORS } from '@/lib/copy';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,7 +11,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     checkExistingSession();
@@ -55,10 +55,11 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send login link');
+        throw new Error(data.error || ERRORS.GENERIC);
       }
 
-      setSuccess(true);
+      // Redirect to magic link interstitial page
+      router.push(`/auth/magic-link?email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
@@ -69,31 +70,6 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-amber-500 rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 bg-amber-500/20 border-2 border-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Mail className="w-8 h-8 text-amber-400" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-4">Check Your Email</h2>
-          <p className="text-zinc-400 mb-6">
-            We've sent a magic link to <strong className="text-white">{email}</strong>
-          </p>
-          <p className="text-sm text-zinc-500 mb-4">
-            Click the link in the email to sign in to your account.
-          </p>
-          <button
-            onClick={() => setSuccess(false)}
-            className="text-amber-400 hover:text-amber-300 text-sm font-medium"
-          >
-            Use a different email
-          </button>
-        </div>
       </div>
     );
   }
@@ -140,7 +116,7 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Sending magic link...
+                {LOADING.SENDING_MAGIC_LINK}
               </>
             ) : (
               <>
