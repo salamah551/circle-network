@@ -1,51 +1,54 @@
 // app/api/arc/briefs/route.js
 // GET /api/arc/briefs - Returns ARC™ request briefs and their status
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
 export const dynamic = 'force-dynamic';
+
+function createClient() {
+  const cookieStore = cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+}
 
 export async function GET() {
   try {
-    // Server-side mocked data - structured for easy replacement with real data
-    const briefs = [
-      {
-        id: 1,
-        title: 'Contract Analysis: Series A Term Sheet',
-        status: 'completed',
-        updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        priority: 'high'
-      },
-      {
-        id: 2,
-        title: 'Flight Upgrade Options: UA-567',
-        status: 'processing',
-        updated_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        priority: 'medium'
-      },
-      {
-        id: 3,
-        title: 'Market Research: SaaS Competition',
-        status: 'pending',
-        updated_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        priority: 'low'
-      },
-      {
-        id: 4,
-        title: 'Strategic Networking Opportunities',
-        status: 'completed',
-        updated_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        priority: 'medium'
-      }
-    ];
-
-    // Future: Filter by logged-in user
-    // const userId = request.headers.get('x-user-id');
-    // const userBriefs = await getUserBriefs(userId);
-
-    return Response.json(briefs);
+    const supabase = createClient();
+    
+    // Get authenticated user
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return Response.json([]);
+    }
+    
+    // Query arc_requests table for the authenticated user
+    const { data, error } = await supabase
+      .from('arc_requests')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('updated_at', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error('Error fetching ARC briefs:', error);
+      // Return empty array on error instead of failing
+      return Response.json([]);
+    }
+    
+    return Response.json(data || []);
   } catch (error) {
     console.error('Error fetching ARC briefs:', error);
-    return Response.json(
-      { error: 'Failed to fetch ARC briefs' },
-      { status: 500 }
-    );
+    // Return empty array instead of error
+    return Response.json([]);
   }
 }

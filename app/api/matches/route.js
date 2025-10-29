@@ -1,69 +1,82 @@
 // app/api/matches/route.js
 // GET /api/matches - Returns AI-curated member matches
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
 export const dynamic = 'force-dynamic';
+
+function createClient() {
+  const cookieStore = cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+}
 
 export async function GET() {
   try {
-    // Server-side mocked data - structured for easy replacement with real data
-    const matches = [
-      {
-        id: 1,
-        member_id: 'member_001',
-        full_name: 'Sarah Chen',
-        title: 'VP of Engineering',
-        company: 'TechCorp',
-        industry: 'Technology',
-        match_score: 94,
-        reason: 'Shared interest in AI/ML infrastructure',
-        avatar_url: null
-      },
-      {
-        id: 2,
-        member_id: 'member_002',
-        full_name: 'Michael Rodriguez',
-        title: 'Managing Partner',
-        company: 'Venture Capital Fund',
-        industry: 'Finance',
-        match_score: 89,
-        reason: 'Mutual focus on early-stage SaaS investments',
-        avatar_url: null
-      },
-      {
-        id: 3,
-        member_id: 'member_003',
-        full_name: 'Emily Thompson',
-        title: 'Chief Strategy Officer',
-        company: 'Global Logistics Inc',
-        industry: 'Logistics',
-        match_score: 87,
-        reason: 'Complementary expertise in supply chain optimization',
-        avatar_url: null
-      },
-      {
-        id: 4,
-        member_id: 'member_004',
-        full_name: 'David Park',
-        title: 'Founder & CEO',
-        company: 'AI Startup Inc',
-        industry: 'Technology',
-        match_score: 85,
-        reason: 'Aligned vision for enterprise AI solutions',
-        avatar_url: null
-      }
-    ];
-
-    // Future: Filter by logged-in user's needs_assessment
-    // const { searchParams } = new URL(request.url);
-    // const userId = searchParams.get('user_id');
-    // const needsAssessment = await getUserNeedsAssessment(userId);
-    // const filteredMatches = filterByNeeds(matches, needsAssessment);
-
+    const supabase = createClient();
+    
+    // Get authenticated user
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return Response.json([]);
+    }
+    
+    // Query strategic_intros or matches table filtered by user
+    // For now, return empty array until AI matching system is implemented
+    const { data, error } = await supabase
+      .from('strategic_intros')
+      .select(`
+        id,
+        match_member_id,
+        match_score,
+        match_reason,
+        profiles!strategic_intros_match_member_id_fkey(
+          id,
+          full_name,
+          title,
+          company,
+          industry,
+          photo_url
+        )
+      `)
+      .eq('user_id', session.user.id)
+      .eq('status', 'suggested')
+      .order('match_score', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error('Error fetching matches:', error);
+      // Return empty array on error instead of failing
+      return Response.json([]);
+    }
+    
+    // Transform data to expected format
+    const matches = (data || []).map(intro => ({
+      id: intro.profiles?.id || intro.match_member_id,
+      member_id: intro.match_member_id,
+      full_name: intro.profiles?.full_name || 'Member',
+      title: intro.profiles?.title || '',
+      company: intro.profiles?.company || '',
+      industry: intro.profiles?.industry || '',
+      match_score: intro.match_score || 0,
+      reason: intro.match_reason || '',
+      avatar_url: intro.profiles?.photo_url || null
+    }));
+    
     return Response.json(matches);
   } catch (error) {
     console.error('Error fetching matches:', error);
-    return Response.json(
-      { error: 'Failed to fetch matches' },
-      { status: 500 }
-    );
+    // Return empty array instead of error
+    return Response.json([]);
   }
 }
