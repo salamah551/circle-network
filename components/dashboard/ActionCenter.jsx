@@ -10,6 +10,12 @@ import DashboardWidget from './DashboardWidget';
 export default function ActionCenter() {
   const [arcInput, setArcInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,23 +24,25 @@ export default function ActionCenter() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Replace with actual ARC™ engine API integration
-      // For now, simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/arc/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request: arcInput })
+      });
       
-      // Future implementation:
-      // const response = await fetch('/api/arc/request', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ request: arcInput })
-      // });
-      // const data = await response.json();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit request');
+      }
       
-      console.log('ARC™ Request submitted:', arcInput);
+      const data = await response.json();
+      console.log('ARC™ Request submitted:', data);
+      
+      showToast('ARC is processing your brief.', 'success');
       setArcInput('');
     } catch (error) {
       console.error('Failed to submit ARC™ request:', error);
-      // TODO: Add user-facing error notification
+      showToast(error.message || 'Failed to submit request. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,6 +127,17 @@ export default function ActionCenter() {
             Market Research
           </button>
         </div>
+
+        {/* Toast notification */}
+        {toast && (
+          <div className={`mt-4 p-4 rounded-lg border ${
+            toast.type === 'success' 
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+              : 'bg-red-500/10 border-red-500/30 text-red-400'
+          }`}>
+            {toast.message}
+          </div>
+        )}
       </div>
     </DashboardWidget>
   );

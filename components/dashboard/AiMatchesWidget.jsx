@@ -1,5 +1,6 @@
 'use client';
-import { Users, Sparkles, Building2, Target, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, Sparkles, Building2, Target, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 import Link from 'next/link';
 
@@ -8,38 +9,29 @@ import Link from 'next/link';
  * Shows AI-matched members with complementary goals/expertise
  */
 export default function AiMatchesWidget() {
-  const mockMatches = [
-    {
-      id: 1,
-      name: 'Sarah Chen',
-      title: 'VP of Engineering',
-      company: 'TechCorp',
-      matchScore: 94,
-      reason: 'Shared interest in AI/ML infrastructure',
-      industry: 'Technology',
-      avatar: null
-    },
-    {
-      id: 2,
-      name: 'Michael Rodriguez',
-      title: 'Managing Partner',
-      company: 'Venture Capital Fund',
-      matchScore: 89,
-      reason: 'Mutual focus on early-stage SaaS investments',
-      industry: 'Finance',
-      avatar: null
-    },
-    {
-      id: 3,
-      name: 'Emily Thompson',
-      title: 'Chief Strategy Officer',
-      company: 'Global Logistics Inc',
-      matchScore: 87,
-      reason: 'Complementary expertise in supply chain optimization',
-      industry: 'Logistics',
-      avatar: null
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  const fetchMatches = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/matches');
+      if (!response.ok) throw new Error('Failed to load matches');
+      const data = await response.json();
+      setMatches(data.matches || []);
+    } catch (err) {
+      console.error('Error fetching matches:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getInitials = (name) => {
     return name
@@ -61,8 +53,40 @@ export default function AiMatchesWidget() {
         Based on your goals and interests, we suggest connecting with these members
       </p>
 
-      <div className="space-y-3">
-        {mockMatches.map((match) => (
+      {loading && (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 animate-pulse">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-zinc-800 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-zinc-800 rounded w-1/3" />
+                  <div className="h-3 bg-zinc-800 rounded w-1/2" />
+                  <div className="h-3 bg-zinc-800 rounded w-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-sm text-red-400 mb-3">Failed to load matches</p>
+          <button
+            onClick={fetchMatches}
+            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 
+                     rounded-lg text-sm text-red-300 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="space-y-3">
+          {matches.map((match) => (
           <div
             key={match.id}
             className="group bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 
@@ -73,7 +97,7 @@ export default function AiMatchesWidget() {
               <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 
                            rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-black font-bold text-sm">
-                  {getInitials(match.name)}
+                  {getInitials(match.full_name)}
                 </span>
               </div>
 
@@ -82,7 +106,7 @@ export default function AiMatchesWidget() {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
                     <h4 className="font-medium text-white group-hover:text-amber-400 transition-colors">
-                      {match.name}
+                      {match.full_name}
                     </h4>
                     <p className="text-sm text-zinc-400">
                       {match.title}
@@ -91,7 +115,7 @@ export default function AiMatchesWidget() {
                   <div className="flex items-center gap-1 px-2 py-1 bg-amber-500/20 text-amber-400 
                                text-xs font-bold rounded-full flex-shrink-0">
                     <Sparkles className="w-3 h-3" />
-                    {match.matchScore}%
+                    {match.match_score}%
                   </div>
                 </div>
 
@@ -112,7 +136,7 @@ export default function AiMatchesWidget() {
             {/* Action button (appears on hover) */}
             <div className="mt-3 pt-3 border-t border-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity">
               <Link
-                href={`/members/${match.id}`}
+                href={`/members/${match.member_id}`}
                 className="inline-flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors"
               >
                 View Profile & Connect
@@ -122,7 +146,7 @@ export default function AiMatchesWidget() {
           </div>
         ))}
 
-        {mockMatches.length === 0 && (
+        {matches.length === 0 && (
           <div className="text-center py-8 text-zinc-500">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p className="text-sm">No matches available yet</p>
@@ -130,6 +154,7 @@ export default function AiMatchesWidget() {
           </div>
         )}
       </div>
+      )}
     </DashboardWidget>
   );
 }
