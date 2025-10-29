@@ -130,10 +130,19 @@ export default function AiMatchesWidget() {
         ))}
 
           {matches.length === 0 && (
-            <div className="text-center py-8 text-zinc-500">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No matches available yet</p>
-              <p className="text-xs mt-1">Complete your profile to get personalized matches</p>
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 mx-auto mb-3 text-amber-400/50" />
+              <p className="text-white font-medium mb-2">We're calibrating your network</p>
+              <p className="text-sm text-zinc-400 mb-4">
+                Complete your profile to unlock smarter intros.
+              </p>
+              <Link
+                href="/profile"
+                className="inline-flex items-center gap-1 text-sm text-amber-400 hover:text-amber-300 font-medium"
+              >
+                Complete profile
+                <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
           )}
         </div>

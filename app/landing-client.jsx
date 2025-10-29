@@ -3,22 +3,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight } from 'lucide-react';
 import ROICalculator from '../components/ROICalculator';
-import { getCharterAnnualPrice } from '@/lib/pricing';
+import { getThreeTierPricing, shouldShowCharterUrgencyBadge } from '@/lib/pricing';
 
 export default function NewHomepage() {
-  const [activeQuote, setActiveQuote] = useState(0);
-  const charterPrice = getCharterAnnualPrice();
-
-  const quotes = [
-    {
-      text: "AI is not just another technology; it's the most profound invention of our time. It will reshape every industry.",
-      author: "Lead AI Researcher"
-    },
-    {
-      text: "The businesses that will dominate the next decade are those that can harness data and AI to make smarter, faster decisions.",
-      author: "Forbes Technology Council"
-    }
-  ];
+  const pricing = getThreeTierPricing();
+  const showCharterUrgency = shouldShowCharterUrgencyBadge();
 
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
@@ -112,45 +101,80 @@ export default function NewHomepage() {
         </div>
       </section>
 
-      {/* The Age of AI Section */}
+      {/* Social Proof - Statistics Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">The Age of AI</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">The AI Advantage</h2>
           <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            We're at an inflection point. Those who adapt will thrive.
+            Leading organizations are already seeing transformative results with AI
           </p>
         </div>
 
-        <div className="relative">
-          {/* Quote Carousel */}
-          <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-12 text-center">
-            <div className="mb-6">
-              <Sparkles className="w-12 h-12 text-purple-400 mx-auto" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Statistic 1 - Cost Reduction */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-indigo-500/30 transition-all">
+            <div className="flex items-start justify-between mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 border border-indigo-500/30 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-indigo-400" />
+              </div>
             </div>
-            
-            <blockquote className="text-2xl md:text-3xl font-medium text-white/90 mb-6 leading-relaxed">
-              "{quotes[activeQuote].text}"
-            </blockquote>
-            
-            <cite className="text-lg text-purple-400 not-italic">
-              — {quotes[activeQuote].author}
-            </cite>
+            <div className="text-4xl md:text-5xl font-bold text-white mb-4">10-20%</div>
+            <p className="text-white/80 text-lg leading-relaxed mb-4">
+              average cost decrease across various business functions through AI adoption
+            </p>
+            <a 
+              href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-2023-generative-ais-breakout-year" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1"
+            >
+              Source: McKinsey Global Survey
+              <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
 
-            {/* Quote navigation dots */}
-            <div className="flex justify-center gap-2 mt-8">
-              {quotes.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveQuote(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    activeQuote === index 
-                      ? 'w-8 bg-purple-400' 
-                      : 'bg-white/20 hover:bg-white/40'
-                  }`}
-                  aria-label={`View quote ${index + 1}`}
-                />
-              ))}
+          {/* Statistic 2 - Sales Impact */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-purple-500/30 transition-all">
+            <div className="flex items-start justify-between mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-purple-400" />
+              </div>
             </div>
+            <div className="text-4xl md:text-5xl font-bold text-white mb-4">50%+</div>
+            <p className="text-white/80 text-lg leading-relaxed mb-4">
+              increase in leads and 60-70% reduction in call time for companies using AI in sales
+            </p>
+            <a 
+              href="https://hbr.org/2021/07/when-sales-teams-should-and-shouldnt-use-ai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1"
+            >
+              Source: Harvard Business Review
+              <ArrowRight className="w-3 h-3" />
+            </a>
+          </div>
+
+          {/* Statistic 3 - Future Advantage */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-pink-500/30 transition-all">
+            <div className="flex items-start justify-between mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30 rounded-lg flex items-center justify-center">
+                <Brain className="w-6 h-6 text-pink-400" />
+              </div>
+            </div>
+            <div className="text-4xl md:text-5xl font-bold text-white mb-4">72%</div>
+            <p className="text-white/80 text-lg leading-relaxed mb-4">
+              of business leaders believe AI will be the business advantage of the future
+            </p>
+            <a 
+              href="https://www.pwc.com/us/en/tech-effect/ai-analytics/ai-business-survey.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-pink-400 hover:text-pink-300 transition-colors inline-flex items-center gap-1"
+            >
+              Source: PwC
+              <ArrowRight className="w-3 h-3" />
+            </a>
           </div>
         </div>
       </section>
@@ -377,179 +401,235 @@ export default function NewHomepage() {
                 The future is built by those who show up first.
               </p>
               <p className="text-purple-400 mt-2">
-                — The Founder
+                — Shehab Salamah
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Two-Tier Membership Section */}
+      {/* Three-Tier Membership Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
           <div className="inline-block px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full text-sm font-bold text-white mb-6">
-            TWO PATHS TO EXTRAORDINARY
+            THREE PATHS TO EXTRAORDINARY
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Choose Your Level of Access
           </h2>
           <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            The Circle offers two distinct membership tiers, each designed to deliver exceptional value. 
-            Both provide access to our AI-powered platform and vetted community—the difference is depth and exclusivity.
+            The Circle offers three distinct membership tiers, each designed to deliver exceptional value. 
+            All provide access to our AI-powered platform and vetted community—the difference is depth and exclusivity.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {/* Inner Circle - Founding Member */}
-          <div className="relative bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500/50 rounded-3xl p-10 overflow-hidden group hover:border-indigo-400/70 transition-all duration-300">
+          <div className="relative bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500/50 rounded-3xl p-8 overflow-hidden group hover:border-indigo-400/70 transition-all duration-300 flex flex-col">
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl -z-10 group-hover:bg-indigo-500/30 transition-all" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
             
-            <div className="inline-block px-4 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-xs font-bold text-white mb-6">
-              THE INNER CIRCLE
+            <div className="inline-block px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-xs font-bold text-white mb-4 self-start">
+              INVITE ONLY
             </div>
 
-            <h3 className="text-3xl md:text-4xl font-bold mb-2">Founding Member</h3>
-            <p className="text-white/60 text-sm mb-6">For visionary founders, VCs, and C-suite executives</p>
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">Inner Circle</h3>
+            <p className="text-white/60 text-sm mb-6">For visionary founders and C-suite executives</p>
 
-            <div className="mb-8">
-              <div className="text-4xl font-bold text-white mb-2">$25,000</div>
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${pricing.innerCircle.formattedPrice}</div>
               <div className="text-white/60 text-sm">Annual Contribution</div>
             </div>
 
-            <div className="space-y-4 mb-10">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-semibold text-white">White-Glove Networking</div>
-                  <div className="text-sm text-white/60">Personalized introductions and curated connections</div>
+            <div className="space-y-3 mb-8 flex-grow">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">White-Glove Concierge</div>
+                  <div className="text-white/60 text-xs">Personalized introductions and dedicated support</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Exclusive Deal Flow</div>
-                  <div className="text-sm text-white/60">Early access to vetted opportunities and partnerships</div>
+                  <div className="text-white/60 text-xs">Early access to vetted opportunities</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-semibold text-white">Direct Introductions</div>
-                  <div className="text-sm text-white/60">Skip the line with warm intros to key decision-makers</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Unlimited ARC™ Access</div>
-                  <div className="text-sm text-white/60">Full, unlimited access to all AI capabilities</div>
+                  <div className="text-white/60 text-xs">Full, unlimited AI capabilities</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Private Roundtables</div>
-                  <div className="text-sm text-white/60">Quarterly executive sessions on strategic topics</div>
+                  <div className="text-white/60 text-xs">Quarterly executive sessions</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Platform Influence</div>
-                  <div className="text-sm text-white/60">Shape product roadmap and community direction</div>
+                  <div className="text-white/60 text-xs">Shape the roadmap</div>
                 </div>
               </div>
             </div>
 
             <Link
               href="/apply?tier=inner-circle"
-              className="block w-full py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 group"
+              className="block w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 mt-auto"
             >
-              <span className="flex items-center justify-center gap-2">
-                Apply for the Inner Circle
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <span className="flex items-center justify-center gap-2 text-sm">
+                Apply for Inner Circle
+                <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
           </div>
 
-          {/* Core Membership - Charter Member */}
-          <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 border-purple-500/50 rounded-3xl p-10 overflow-hidden group hover:border-purple-400/70 transition-all duration-300">
+          {/* Charter Member - Highlighted */}
+          <div className="relative bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-2 border-purple-500/70 rounded-3xl p-8 overflow-hidden group hover:border-purple-400/90 transition-all duration-300 flex flex-col transform md:scale-105">
             {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl -z-10 group-hover:bg-pink-500/30 transition-all" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/30 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/40 transition-all" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/30 rounded-full blur-3xl -z-10 group-hover:bg-pink-500/40 transition-all" />
             
-            <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white mb-6 animate-pulse">
-              LIMITED TIME OFFER
+            {showCharterUrgency && (
+              <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white mb-4 self-start animate-pulse">
+                LIMITED TIME OFFER
+              </div>
+            )}
+
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">Charter Member</h3>
+            <p className="text-white/60 text-sm mb-6">For accomplished professionals</p>
+
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${pricing.charter.formattedPrice}</div>
+              <div className="text-white/60 text-sm">
+                Annual <span className="text-purple-400 font-semibold">(Lifetime Rate)</span>
+              </div>
             </div>
 
-            <h3 className="text-3xl md:text-4xl font-bold mb-2">Charter Member</h3>
-            <p className="text-white/60 text-sm mb-6">For accomplished professionals and frequent travelers</p>
-
-            <div className="mb-8">
-              <div className="text-4xl font-bold text-white mb-2">${charterPrice}</div>
-              <div className="text-white/60 text-sm">Annual Contribution <span className="text-purple-400 font-semibold">(Lifetime Rate)</span></div>
-            </div>
-
-            <div className="space-y-4 mb-10">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="font-semibold text-white">Limited ARC™ Access (Pre-Launch)</div>
-                  <div className="text-sm text-white/60">10 AI-powered briefs per month during beta</div>
+            <div className="space-y-3 mb-8 flex-grow">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Limited ARC™ Access</div>
+                  <div className="text-white/60 text-xs">10 AI-powered briefs per month during beta</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">AI-Curated Matches</div>
-                  <div className="text-sm text-white/60">Intelligent connection recommendations</div>
+                  <div className="text-white/60 text-xs">Intelligent connection recommendations</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Community Access</div>
-                  <div className="text-sm text-white/60">Full access to member directory and channels</div>
+                  <div className="text-white/60 text-xs">Full member directory access</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Lifetime Charter Rate</div>
-                  <div className="text-sm text-white/60">Lock in ${charterPrice}/year forever—never increases</div>
+                  <div className="text-white/60 text-xs">Lock in ${pricing.charter.formattedPrice}/year forever</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Priority Full Access</div>
-                  <div className="text-sm text-white/60">First in line when unlimited ARC™ launches</div>
+                  <div className="text-white/60 text-xs">First in line when unlimited ARC™ launches</div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
                   <div className="font-semibold text-white">Charter Badge</div>
-                  <div className="text-sm text-white/60">Permanent recognition as an early supporter</div>
+                  <div className="text-white/60 text-xs">Permanent recognition as early supporter</div>
                 </div>
               </div>
             </div>
 
             <Link
               href="/apply?tier=charter"
-              className="block w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 group"
+              className="block w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 mt-auto"
             >
-              <span className="flex items-center justify-center gap-2">
+              <span className="flex items-center justify-center gap-2 text-sm">
                 Become a Charter Member
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
 
-            <p className="text-xs text-white/50 mt-4 text-center">
-              Charter pricing ends when we reach capacity
+            <p className="text-xs text-white/50 mt-3 text-center">
+              Charter pricing ends at capacity
             </p>
+          </div>
+
+          {/* Professional Member */}
+          <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 border-zinc-700 rounded-3xl p-8 overflow-hidden group hover:border-zinc-600 transition-all duration-300 flex flex-col">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-zinc-500/10 rounded-full blur-3xl -z-10 group-hover:bg-zinc-500/20 transition-all" />
+            
+            <div className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs font-bold text-white/80 mb-4 self-start">
+              STANDARD
+            </div>
+
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">Professional Member</h3>
+            <p className="text-white/60 text-sm mb-6">For rising executives and entrepreneurs</p>
+
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${pricing.professional.formattedPrice}</div>
+              <div className="text-white/60 text-sm">Annual Contribution</div>
+            </div>
+
+            <div className="space-y-3 mb-8 flex-grow">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Standard ARC™ Access</div>
+                  <div className="text-white/60 text-xs">5 AI-powered briefs per month</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">AI-Curated Matches</div>
+                  <div className="text-white/60 text-xs">Smart connection recommendations</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Community Access</div>
+                  <div className="text-white/60 text-xs">Full member directory access</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Event Access</div>
+                  <div className="text-white/60 text-xs">Attend virtual and in-person events</div>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/apply?tier=professional"
+              className="block w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-center rounded-xl transition-all duration-300 border border-zinc-700 hover:border-zinc-600 mt-auto"
+            >
+              <span className="flex items-center justify-center gap-2 text-sm">
+                Join as Professional
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
           </div>
         </div>
 

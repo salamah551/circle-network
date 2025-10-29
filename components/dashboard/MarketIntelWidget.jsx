@@ -96,9 +96,19 @@ export default function MarketIntelWidget() {
         ))}
 
           {intel.length === 0 && (
-            <div className="text-center py-8 text-zinc-500">
-              <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">No market intel available</p>
+            <div className="text-center py-8">
+              <TrendingUp className="w-12 h-12 mx-auto mb-3 text-emerald-400/50" />
+              <p className="text-white font-medium mb-2">No intel yet</p>
+              <p className="text-sm text-zinc-400 mb-4">
+                Add competitors to watch in settings.
+              </p>
+              <a
+                href="/settings"
+                className="inline-flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 font-medium"
+              >
+                Add competitors
+                <ArrowUpRight className="w-3 h-3" />
+              </a>
             </div>
           )}
         </div>

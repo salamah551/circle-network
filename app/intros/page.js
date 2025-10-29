@@ -6,6 +6,8 @@ import {
   ArrowLeft, Check, X, User, MapPin, Briefcase, Target,
   Mail, Sparkles, TrendingUp, Users, Award, ExternalLink
 } from 'lucide-react';
+import { showToast } from '@/components/Toast';
+import { TOASTS, ARIA_LABELS } from '@/lib/copy';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -113,19 +115,45 @@ export default function IntrosPage() {
   };
 
   const handleAcceptIntro = async (introId) => {
-    // TODO: Implement accept intro logic
-    console.log('Accept intro:', introId);
+    // Optimistic update
     setIntros(intros.map(intro => 
       intro.id === introId ? { ...intro, status: 'accepted' } : intro
     ));
+    
+    // Show success toast
+    showToast(TOASTS.INTRO_ACCEPT, 'success');
+    
+    // TODO: Implement actual API call
+    try {
+      // await fetch(`/api/intros/${introId}/accept`, { method: 'POST' });
+    } catch (error) {
+      // Revert on error
+      setIntros(intros.map(intro => 
+        intro.id === introId ? { ...intro, status: 'pending' } : intro
+      ));
+      showToast('Failed to accept intro. Please try again.', 'error');
+    }
   };
 
   const handleDeclineIntro = async (introId) => {
-    // TODO: Implement decline intro logic
-    console.log('Decline intro:', introId);
+    // Optimistic update
     setIntros(intros.map(intro => 
       intro.id === introId ? { ...intro, status: 'declined' } : intro
     ));
+    
+    // Show success toast
+    showToast(TOASTS.INTRO_DECLINE, 'info');
+    
+    // TODO: Implement actual API call
+    try {
+      // await fetch(`/api/intros/${introId}/decline`, { method: 'POST' });
+    } catch (error) {
+      // Revert on error
+      setIntros(intros.map(intro => 
+        intro.id === introId ? { ...intro, status: 'pending' } : intro
+      ));
+      showToast('Failed to decline intro. Please try again.', 'error');
+    }
   };
 
   if (loading) {
@@ -150,6 +178,7 @@ export default function IntrosPage() {
             <button
               onClick={() => router.push('/dashboard')}
               className="p-2 hover:bg-zinc-900 rounded-lg transition-colors"
+              aria-label="Back to dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -306,14 +335,16 @@ export default function IntrosPage() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={() => handleAcceptIntro(intro.id)}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 min-h-[44px]"
+                      aria-label={`${ARIA_LABELS.ACCEPT} ${intro.member.full_name}`}
                     >
                       <Check className="w-5 h-5" />
                       Accept Introduction
                     </button>
                     <button
                       onClick={() => handleDeclineIntro(intro.id)}
-                      className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2"
+                      className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 min-h-[44px]"
+                      aria-label={`${ARIA_LABELS.DECLINE} ${intro.member.full_name}`}
                     >
                       <X className="w-5 h-5" />
                       Pass
