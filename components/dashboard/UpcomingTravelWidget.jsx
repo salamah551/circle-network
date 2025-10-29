@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Plane, MapPin, Calendar, Clock, Loader2, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
+import { formatDateRange } from '@/lib/dateUtils';
 
 /**
  * Upcoming Travel Widget
@@ -30,13 +31,6 @@ export default function UpcomingTravelWidget() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    return `${startDate.toLocaleDateString('en-US', options).replace(',', '')} - ${endDate.toLocaleDateString('en-US', options).replace(',', '')}`;
   };
 
   return (
@@ -90,7 +84,7 @@ export default function UpcomingTravelWidget() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-zinc-400">
                     <Calendar className="w-3 h-3" />
-                    <span>{formatDate(trip.start_date, trip.end_date)}</span>
+                    <span>{formatDateRange(trip.start_date, trip.end_date)}</span>
                   </div>
                 </div>
                 {trip.upgrade_available && (

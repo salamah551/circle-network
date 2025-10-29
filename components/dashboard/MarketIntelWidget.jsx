@@ -47,8 +47,8 @@ export default function MarketIntelWidget() {
   const getCategoryFromSource = (source) => {
     // Map source to category-like display
     if (source.includes('Market')) return 'Market Trend';
-    if (source.includes('Industry')) return 'Competition';
-    if (source.includes('Trend')) return 'Industry';
+    if (source.includes('Industry')) return 'Industry';
+    if (source.includes('Trend')) return 'Industry Trend';
     return source;
   };
 
