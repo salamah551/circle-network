@@ -17,7 +17,7 @@ export const TIER_NAMES = {
  * Form validation messages with premium voice
  */
 export const VALIDATION = {
-  EMAIL_REQUIRED: "Let's double-check your email address…",
+  EMAIL_REQUIRED: "Let's double-check your email address...",
   EMAIL_INVALID: "That doesn't look quite right. Please enter a valid email.",
   PASSWORD_REQUIRED: 'Please provide your password to continue.',
   FIELD_REQUIRED: 'This field is required to proceed.',
@@ -28,12 +28,12 @@ export const VALIDATION = {
  * Loading states with confident voice
  */
 export const LOADING = {
-  AUTHENTICATING: 'Authenticating your access…',
-  SENDING_MAGIC_LINK: 'Sending your secure link…',
-  PROCESSING: 'Processing your request…',
-  LOADING_PROFILE: 'Loading your profile…',
-  LOADING_DASHBOARD: 'Preparing your dashboard…',
-  SUBMITTING: 'Submitting…',
+  AUTHENTICATING: 'Authenticating your access...',
+  SENDING_MAGIC_LINK: 'Sending your secure link...',
+  PROCESSING: 'Processing your request...',
+  LOADING_PROFILE: 'Loading your profile...',
+  LOADING_DASHBOARD: 'Preparing your dashboard...',
+  SUBMITTING: 'Submitting...',
 } as const;
 
 /**
@@ -52,12 +52,12 @@ export const ERRORS = {
  * Success messages with celebration
  */
 export const SUCCESS = {
-  MAGIC_LINK_SENT: 'Check your email! We've sent your secure sign-in link.',
+  MAGIC_LINK_SENT: "Check your email! We've sent your secure sign-in link.",
   PROFILE_UPDATED: 'Your profile has been updated.',
   SETTINGS_SAVED: 'Your settings have been saved.',
-  INTRO_ACCEPTED: 'Intro accepted—We'll notify the other member.',
-  INTRO_DECLINED: 'Got it—We'll recalibrate future matches.',
-  ARC_SUBMITTED: 'ARC is on it—your brief is now processing.',
+  INTRO_ACCEPTED: "Intro accepted - We'll notify the other member.",
+  INTRO_DECLINED: "Got it - We'll recalibrate future matches.",
+  ARC_SUBMITTED: 'ARC is on it - your brief is now processing.',
 } as const;
 
 /**
@@ -66,11 +66,11 @@ export const SUCCESS = {
 export const EMPTY_STATES = {
   UPCOMING_TRAVEL: {
     title: 'No trips scheduled',
-    description: 'Forward your next itinerary and ARC™ will watch for upgrades.',
+    description: 'Forward your next itinerary and ARC will watch for upgrades.',
     cta: 'How to forward trips',
   },
   AI_MATCHES: {
-    title: 'We're calibrating your network',
+    title: "We're calibrating your network",
     description: 'Complete your profile to unlock smarter intros.',
     cta: 'Complete profile',
   },
@@ -90,9 +90,9 @@ export const EMPTY_STATES = {
  * Toast messages for optimistic UI
  */
 export const TOASTS = {
-  INTRO_ACCEPT: 'Intro accepted—We'll notify the other member.',
-  INTRO_DECLINE: 'Got it—We'll recalibrate future matches.',
-  ARC_REQUEST: 'ARC is on it—your brief is now processing.',
+  INTRO_ACCEPT: "Intro accepted - We'll notify the other member.",
+  INTRO_DECLINE: "Got it - We'll recalibrate future matches.",
+  ARC_REQUEST: 'ARC is on it - your brief is now processing.',
   PROFILE_SAVE: 'Profile updated successfully.',
   SETTINGS_SAVE: 'Settings saved.',
   COPY_SUCCESS: 'Copied to clipboard.',

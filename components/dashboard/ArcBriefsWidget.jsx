@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Briefcase, Clock, CheckCircle, AlertCircle, ChevronRight, Loader2 } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
+import { formatRelativeTime } from '@/lib/date-utils';
 
 /**
  * My ARC™ Briefs Widget
@@ -32,31 +33,6 @@ export default function ArcBriefsWidget() {
 
     fetchBriefs();
   }, []);
-
-  const formatTime = (isoString) => {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now - date;
-    
-    // Handle future dates
-    if (diffMs < 0) {
-      const diffDays = Math.floor(-diffMs / 86400000);
-      return `In ${diffDays} day${diffDays > 1 ? 's' : ''}`;
-    }
-    
-    // Handle past dates
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) {
-      return diffMins <= 1 ? 'Just now' : `${diffMins} minutes ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    } else {
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    }
-  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -126,7 +102,7 @@ export default function ArcBriefsWidget() {
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                   </span>
                   <span>•</span>
-                  <span>{formatTime(request.updated_at)}</span>
+                  <span>{formatRelativeTime(request.updated_at)}</span>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />

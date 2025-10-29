@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plane, MapPin, Calendar, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { Plane, MapPin, Calendar, Clock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
+import { formatDateRange } from '@/lib/date-utils';
 
 /**
  * Upcoming Travel Widget
@@ -32,21 +33,6 @@ export default function UpcomingTravelWidget() {
 
     fetchTrips();
   }, []);
-
-  const formatDateRange = (startDate, endDate) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
-    const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
-    const startDay = start.getDate();
-    const endDay = end.getDate();
-    const year = start.getFullYear();
-
-    if (startMonth === endMonth) {
-      return `${startMonth} ${startDay}-${endDay}, ${year}`;
-    }
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
-  };
 
   return (
     <DashboardWidget
