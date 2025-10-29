@@ -3,9 +3,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight } from 'lucide-react';
 import ROICalculator from '../components/ROICalculator';
+import { getCharterAnnualPrice } from '@/lib/pricing';
 
 export default function NewHomepage() {
   const [activeQuote, setActiveQuote] = useState(0);
+  const charterPrice = getCharterAnnualPrice();
 
   const quotes = [
     {
@@ -486,7 +488,7 @@ export default function NewHomepage() {
             <p className="text-white/60 text-sm mb-6">For accomplished professionals and frequent travelers</p>
 
             <div className="mb-8">
-              <div className="text-4xl font-bold text-white mb-2">$3,500</div>
+              <div className="text-4xl font-bold text-white mb-2">${charterPrice}</div>
               <div className="text-white/60 text-sm">Annual Contribution <span className="text-purple-400 font-semibold">(Lifetime Rate)</span></div>
             </div>
 
@@ -516,7 +518,7 @@ export default function NewHomepage() {
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="font-semibold text-white">Lifetime Charter Rate</div>
-                  <div className="text-sm text-white/60">Lock in $3,500/year forever—never increases</div>
+                  <div className="text-sm text-white/60">Lock in ${charterPrice}/year forever—never increases</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">

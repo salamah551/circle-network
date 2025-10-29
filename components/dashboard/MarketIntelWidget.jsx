@@ -1,38 +1,37 @@
 'use client';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Activity, Loader2, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 
 /**
  * Market Intel Widget
  * Shows competitive intelligence and market insights
+ * Fetches data from /api/market-intel endpoint
  */
 export default function MarketIntelWidget() {
-  const mockIntel = [
-    {
-      id: 1,
-      title: 'SaaS Market Growth',
-      insight: 'Enterprise SaaS expected to grow 23% in Q4',
-      trend: 'up',
-      category: 'Market Trend',
-      urgency: 'high'
-    },
-    {
-      id: 2,
-      title: 'Competitor Activity',
-      insight: 'Major competitor announced Series B funding',
-      trend: 'neutral',
-      category: 'Competition',
-      urgency: 'medium'
-    },
-    {
-      id: 3,
-      title: 'Industry Shift',
-      insight: 'AI adoption accelerating in target sector',
-      trend: 'up',
-      category: 'Industry',
-      urgency: 'high'
-    }
-  ];
+  const [intel, setIntel] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchIntel = async () => {
+      try {
+        const response = await fetch('/api/market-intel');
+        if (!response.ok) {
+          throw new Error('Failed to fetch market intel');
+        }
+        const data = await response.json();
+        setIntel(data);
+      } catch (err) {
+        console.error('Error fetching market intel:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIntel();
+  }, []);
 
   const getTrendIcon = (trend) => {
     if (trend === 'up') return <ArrowUpRight className="w-4 h-4 text-emerald-400" />;
@@ -54,8 +53,22 @@ export default function MarketIntelWidget() {
       iconColor="text-emerald-400"
       iconBg="bg-emerald-500/10"
     >
-      <div className="space-y-3">
-        {mockIntel.map((item) => (
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">Failed to load market intel. Please try again later.</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="space-y-3">
+          {intel.map((item) => (
           <div
             key={item.id}
             className={`bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 
@@ -82,13 +95,14 @@ export default function MarketIntelWidget() {
           </div>
         ))}
 
-        {mockIntel.length === 0 && (
-          <div className="text-center py-8 text-zinc-500">
-            <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">No market intel available</p>
-          </div>
-        )}
-      </div>
+          {intel.length === 0 && (
+            <div className="text-center py-8 text-zinc-500">
+              <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">No market intel available</p>
+            </div>
+          )}
+        </div>
+      )}
     </DashboardWidget>
   );
 }

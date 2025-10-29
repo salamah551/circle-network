@@ -88,19 +88,32 @@ export default function PersonalizedDashboard() {
         setWelcomeMessage(welcome);
       }
 
-      // Get stats - TODO: Replace with actual database queries
-      // For now using placeholder values
-      // Future implementation should query:
-      // - connections: COUNT from connections table
-      // - messages: COUNT from messages WHERE read=false
-      // - introsPending: COUNT from strategic_intros WHERE status='pending'
-      // - introsAccepted: COUNT from strategic_intros WHERE status='accepted'
-      setStats({
-        connections: 12,
-        messages: 5,
-        introsPending: 3,
-        introsAccepted: 8
-      });
+      // Get stats from API endpoint
+      try {
+        const statsResponse = await fetch('/api/dashboard/stats');
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
+        } else {
+          // Fallback to zeros on API error
+          console.error('Failed to fetch dashboard stats');
+          setStats({
+            connections: 0,
+            messages: 0,
+            introsPending: 0,
+            introsAccepted: 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        // Fallback to zeros on error
+        setStats({
+          connections: 0,
+          messages: 0,
+          introsPending: 0,
+          introsAccepted: 0
+        });
+      }
 
       setLoading(false);
     } catch (error) {
