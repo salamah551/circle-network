@@ -53,57 +53,37 @@ export default function IntrosPage() {
 
       setProfile(profileData);
 
-      // Get pending intros (mock data for now)
-      setIntros([
-        {
-          id: 1,
-          member: {
-            full_name: 'Sarah Martinez',
-            title: 'CEO',
-            company: 'TechVentures Inc',
-            location: 'San Francisco, CA',
-            photo_url: null,
-            expertise: ['AI/ML', 'SaaS', 'Healthcare Tech'],
-            looking_for: 'Series A investors, technical co-founders',
-            can_offer: 'Mentorship for early-stage founders, introductions to healthcare industry leaders'
-          },
-          match_score: 94,
-          match_reason: 'Sarah is raising a Series A for her healthcare AI startup. You\'ve invested in 3 healthcare AI companies and mentioned you\'re actively looking for Series A opportunities. Strong alignment on investment thesis and industry expertise.',
-          status: 'pending'
-        },
-        {
-          id: 2,
-          member: {
-            full_name: 'Michael Torres',
-            title: 'Managing Partner',
-            company: 'Summit Capital',
-            location: 'New York, NY',
-            photo_url: null,
-            expertise: ['Venture Capital', 'B2B SaaS', 'GTM Strategy'],
-            looking_for: 'B2B SaaS startups ($1M-$5M ARR) for Series A investment',
-            can_offer: 'Capital ($2M-$10M checks), operational support, LP introductions'
-          },
-          match_score: 87,
-          match_reason: 'Michael invests in B2B SaaS companies at the exact stage and ARR range you\'re currently at. He has operational experience scaling GTM teams, which aligns with your stated need for go-to-market guidance.',
-          status: 'pending'
-        },
-        {
-          id: 3,
-          member: {
-            full_name: 'Jennifer Kim',
-            title: 'VP of Product',
-            company: 'Stripe',
-            location: 'Seattle, WA',
-            photo_url: null,
-            expertise: ['Product Management', 'Fintech', 'Platform Strategy'],
-            looking_for: 'Advisory roles at early-stage fintech startups',
-            can_offer: 'Product strategy consulting, hiring support, platform architecture advice'
-          },
-          match_score: 76,
-          match_reason: 'Jennifer has deep fintech product experience and is looking for advisory roles. You mentioned exploring payment infrastructure for your platform, and her expertise at Stripe directly addresses this need.',
-          status: 'pending'
+      // Fetch intros from API
+      try {
+        const introsResponse = await fetch('/api/intros');
+        if (introsResponse.ok) {
+          const introsData = await introsResponse.json();
+          // Map the API response to match the expected structure
+          const mappedIntros = (introsData.intros || []).map(intro => ({
+            id: intro.id,
+            member: {
+              full_name: intro.partner_name || 'Unknown',
+              title: intro.partner_title || '',
+              company: intro.partner_company || '',
+              location: '',
+              photo_url: null,
+              expertise: [],
+              looking_for: '',
+              can_offer: ''
+            },
+            match_score: 85,
+            match_reason: intro.why || 'Strategic connection opportunity',
+            status: intro.status || 'pending'
+          }));
+          setIntros(mappedIntros);
+        } else {
+          // Fallback to empty array if API fails
+          setIntros([]);
         }
-      ]);
+      } catch (error) {
+        console.error('Error fetching intros:', error);
+        setIntros([]);
+      }
 
       setLoading(false);
     } catch (error) {
