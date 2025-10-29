@@ -119,7 +119,7 @@ export default function AiMatchesWidget() {
             {/* Action button (appears on hover) */}
             <div className="mt-3 pt-3 border-t border-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity">
               <Link
-                href={`/members/${match.id}`}
+                href={`/members/${match.member_id || match.id}`}
                 className="inline-flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 transition-colors"
               >
                 View Profile & Connect

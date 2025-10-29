@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import {
   Crown, Loader2, Menu, X, LogOut, Activity, Sparkles, Users, Target,
-  MessageSquare, TrendingUp, Shield, BarChart3, Lock, Mail, Settings,
+  MessageSquare, TrendingUp, Shield, BarChart3, Mail, Settings,
   Rss, UserCheck
 } from 'lucide-react';
 
@@ -129,7 +129,6 @@ export default function PersonalizedDashboard() {
 
   const isFoundingMember = profile?.membership_tier === 'founding' || profile?.is_founding_member;
   const isEliteMember = profile?.membership_tier === 'elite';
-  const canAccessEliteFeatures = isFoundingMember || isEliteMember;
 
   if (loading) {
     return (
@@ -219,51 +218,34 @@ export default function PersonalizedDashboard() {
 
           <div className="my-4 border-t border-zinc-800"></div>
 
-          {/* Elite AI Features */}
-          <Link
-            href="/deal-flow"
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
-              canAccessEliteFeatures
-                ? 'hover:bg-zinc-900 text-zinc-400 hover:text-white'
-                : 'text-zinc-600 cursor-not-allowed'
-            }`}
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span>Deal Flow Alerts</span>
-            {!canAccessEliteFeatures && (
-              <Lock className="w-4 h-4 ml-auto text-zinc-600" />
-            )}
-          </Link>
+          {/* Elite AI Features - Only visible to Inner Circle (founding) members */}
+          {isFoundingMember && (
+            <>
+              <Link
+                href="/deal-flow"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span>Deal Flow Alerts</span>
+              </Link>
 
-          <Link
-            href="/reputation"
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
-              canAccessEliteFeatures
-                ? 'hover:bg-zinc-900 text-zinc-400 hover:text-white'
-                : 'text-zinc-600 cursor-not-allowed'
-            }`}
-          >
-            <Shield className="w-5 h-5" />
-            <span>Reputation Guardian</span>
-            {!canAccessEliteFeatures && (
-              <Lock className="w-4 h-4 ml-auto text-zinc-600" />
-            )}
-          </Link>
+              <Link
+                href="/reputation"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+              >
+                <Shield className="w-5 h-5" />
+                <span>Reputation Guardian</span>
+              </Link>
 
-          <Link
-            href="/intelligence"
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
-              canAccessEliteFeatures
-                ? 'hover:bg-zinc-900 text-zinc-400 hover:text-white'
-                : 'text-zinc-600 cursor-not-allowed'
-            }`}
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span>Competitive Intel</span>
-            {!canAccessEliteFeatures && (
-              <Lock className="w-4 h-4 ml-auto text-zinc-600" />
-            )}
-          </Link>
+              <Link
+                href="/intelligence"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span>Competitive Intel</span>
+              </Link>
+            </>
+          )}
 
           <div className="my-4 border-t border-zinc-800"></div>
 
