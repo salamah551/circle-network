@@ -42,8 +42,8 @@ export const LOADING = {
 export const ERRORS = {
   GENERIC: 'Something unexpected happened. Please try again.',
   NETWORK: 'Connection issue. Please check your network and try again.',
-  AUTH_FAILED: 'We couldn't authenticate your session. Please sign in again.',
-  EMAIL_NOT_FOUND: 'We don't recognize that email. Do you need an invitation?',
+  AUTH_FAILED: "We couldn't authenticate your session. Please sign in again.",
+  EMAIL_NOT_FOUND: "We don't recognize that email. Do you need an invitation?",
   RATE_LIMIT: 'Too many attempts. Please wait a moment and try again.',
   SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
 } as const;
@@ -104,7 +104,7 @@ export const TOASTS = {
  */
 export const MAGIC_LINK = {
   CHECK_EMAIL_TITLE: 'Check Your Email',
-  CHECK_EMAIL_DESCRIPTION: 'We've sent a secure sign-in link to',
+  CHECK_EMAIL_DESCRIPTION: "We've sent a secure sign-in link to",
   CHECK_EMAIL_INSTRUCTION: 'Click the link in the email to access your account.',
   RESEND_LINK: 'Resend link',
   CHANGE_EMAIL: 'Use a different email',
@@ -117,9 +117,9 @@ export const MAGIC_LINK = {
  */
 export const CHECKOUT_SUCCESS = {
   TITLE: 'Welcome to The Circle! 🎉',
-  INNER_CIRCLE: 'You're now a founding Inner Circle member.',
-  CHARTER: 'You're now a Charter Member with lifetime rate locked in.',
-  PROFESSIONAL: 'You're now a Professional Member.',
+  INNER_CIRCLE: "You're now a founding Inner Circle member.",
+  CHARTER: "You're now a Charter Member with lifetime rate locked in.",
+  PROFESSIONAL: "You're now a Professional Member.",
   START_ONBOARDING: 'Start Onboarding',
   OPEN_DASHBOARD: 'Open Dashboard',
 } as const;
