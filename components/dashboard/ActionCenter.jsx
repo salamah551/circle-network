@@ -1,40 +1,51 @@
 'use client';
 import { useState } from 'react';
-import { Sparkles, Send, Loader2 } from 'lucide-react';
+import { Sparkles, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 
 /**
  * Action Center Widget
  * Central hub for ARC™ Engine requests and quick actions
+ * Posts requests to /api/arc/request endpoint
  */
 export default function ActionCenter() {
   const [arcInput, setArcInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!arcInput.trim()) return;
 
     setIsSubmitting(true);
+    setSuccessMessage('');
+    setErrorMessage('');
     
     try {
-      // TODO: Replace with actual ARC™ engine API integration
-      // For now, simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/arc/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request: arcInput })
+      });
       
-      // Future implementation:
-      // const response = await fetch('/api/arc/request', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ request: arcInput })
-      // });
-      // const data = await response.json();
+      const data = await response.json();
       
-      console.log('ARC™ Request submitted:', arcInput);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit request');
+      }
+      
+      setSuccessMessage('Request submitted successfully! Check My ARC Briefs for updates.');
       setArcInput('');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
       console.error('Failed to submit ARC™ request:', error);
-      // TODO: Add user-facing error notification
+      setErrorMessage(error.message || 'Failed to submit request. Please try again.');
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,6 +101,22 @@ export default function ActionCenter() {
               )}
             </button>
           </div>
+          
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mt-3 flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <p className="text-sm">{successMessage}</p>
+            </div>
+          )}
+          
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="mt-3 flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <p className="text-sm">{errorMessage}</p>
+            </div>
+          )}
         </form>
 
         {/* Quick Action Buttons */}

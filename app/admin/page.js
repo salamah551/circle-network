@@ -17,6 +17,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
+import { getMRRValues } from '@/lib/pricing';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -25,6 +26,7 @@ const supabase = createClient(
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { founding: foundingMRR, regular: regularMRR } = getMRRValues();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -125,9 +127,9 @@ export default function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open');
 
-      // Revenue model (founding: $199, regular: $249)
-      const foundingRevenue = (foundingMembers || 0) * 199;
-      const regularRevenue = Math.max((activeMembers || 0) - (foundingMembers || 0), 0) * 249;
+      // Revenue model (founding MRR and regular MRR from env)
+      const foundingRevenue = (foundingMembers || 0) * foundingMRR;
+      const regularRevenue = Math.max((activeMembers || 0) - (foundingMembers || 0), 0) * regularMRR;
 
       setStats({
         totalMembers: totalMembers || 0,
@@ -264,7 +266,7 @@ export default function AdminDashboard() {
             </div>
             <div className="text-sm text-zinc-500">Monthly Revenue</div>
             <div className="mt-2 text-xs text-amber-400">
-              {stats.foundingMembers} founding @ $199
+              {stats.foundingMembers} founding @ ${foundingMRR}
             </div>
           </div>
 
