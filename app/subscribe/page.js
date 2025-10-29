@@ -357,29 +357,20 @@ function SubscribePage() {
           </p>
         </div>
 
-        {/* Founding Member Availability Banner */}
+        {/* Inner Circle (Founding Member) Availability Banner */}
         {!isLaunched && !foundingMemberStatus.loading && !foundingMemberStatus.isFull && (
           <div className="max-w-md mx-auto mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
-            <p className="text-amber-400 font-bold mb-2">🔥 Founding 50 - Limited Availability</p>
+            <p className="text-amber-400 font-bold mb-2">🔥 Inner Circle (Founding Member) - Limited Availability</p>
             <div className="text-3xl font-bold text-white">{foundingMemberStatus.spotsAvailable}</div>
-            <p className="text-zinc-400 text-sm mt-2">spots remaining at $2,497/year (save $2,500)</p>
+            <p className="text-zinc-400 text-sm mt-2">spots remaining - Exclusive founding rate with full ARC™ access</p>
           </div>
         )}
 
-        {/* Founding Member Full Banner */}
+        {/* Inner Circle Full Banner */}
         {!isLaunched && !foundingMemberStatus.loading && foundingMemberStatus.isFull && (
-          <div className="max-w-md mx-auto mb-8 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
-            <p className="text-red-400 font-bold mb-2">❌ Founding 50 - SOLD OUT</p>
-            <p className="text-zinc-400 text-sm mt-2">All founding member spots claimed. Premium and Elite tiers available below.</p>
-          </div>
-        )}
-
-        {/* Countdown Timer - Only show before launch */}
-        {!isLaunched && countdown > 0 && (
-          <div className="max-w-md mx-auto mb-8 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
-            <p className="text-red-400 font-bold mb-2">⏰ Founding Rate Expires Soon</p>
-            <div className="text-3xl font-bold text-white">{countdown}s</div>
-            <p className="text-zinc-400 text-sm mt-2">Don't miss out on lifetime savings</p>
+          <div className="max-w-md mx-auto mb-8 bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
+            <p className="text-purple-400 font-bold mb-2">✓ Inner Circle (Founding Member) - Filled</p>
+            <p className="text-zinc-400 text-sm mt-2">All Inner Circle spots claimed. Core (Charter Member) tier available with limited ARC™ access.</p>
           </div>
         )}
 
