@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export function UpgradeButton({ lookupKey = 'founding_monthly', priceId, className = '', children }) {
+export function UpgradeButton({ lookupKey = 'founding_monthly', priceId, tier, className = '', children }) {
   const [loading, setLoading] = useState(false);
   const label = children || 'Upgrade';
 
@@ -17,10 +17,14 @@ export function UpgradeButton({ lookupKey = 'founding_monthly', priceId, classNa
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { alert('Please sign in'); return; }
 
-      const res = await fetch('/api/stripe/create-checkout-session', {
+      const res = await fetch('/api/payments/subscription/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': user.id },
-        body: JSON.stringify(priceId ? { priceId } : { lookupKey })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          priceId: priceId || undefined,
+          tier: tier || undefined
+        }),
+        credentials: 'include'
       });
       const json = await res.json();
       if (json?.url) window.location.href = json.url;

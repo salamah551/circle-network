@@ -193,16 +193,16 @@ function SubscribePage() {
         user_id: session.user.id
       });
 
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/payments/subscription/checkout', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           priceId: priceId,
           tier: selectedPlan,
         }),
+        credentials: 'include' // Include cookies for server-side auth
       });
 
       const data = await response.json();

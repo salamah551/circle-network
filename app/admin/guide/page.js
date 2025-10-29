@@ -630,28 +630,19 @@ Monitor for fraud:
     color: 'gray',
     subsections: [
       {
-        title: 'Launch Configuration',
-        content: `Control platform launch settings in lib/launch-config.js:
+        title: 'Feature Capabilities',
+        content: `Platform now uses tier-based capabilities instead of launch dates:
 
-Launch date: November 1, 2025
+Tier System:
+• Inner Circle (Founding Member) - Full ARC™ access
+• Core (Charter Member) - Limited ARC™ access
 
-Pre-launch restrictions:
-• Events - Locked until launch (shown with "Coming Nov 1" badge)
-• Requests - Locked until launch (shown with "Coming Nov 1" badge)
-• Members - Available now
-• Messages - Available now
-• Dashboard - Available now
+Capabilities are defined in lib/features.ts:
+• getTierCapabilities(tier) - Returns feature access for a tier
+• hasFeatureAccess(tier, feature) - Check if tier has specific feature
 
-Feature flags:
-• isFeatureAvailable('events') - Returns false until Nov 1
-• isFeatureAvailable('requests') - Returns false until Nov 1
-
-After November 1:
-• All features automatically unlock
-• Pre-launch banners disappear
-• Full platform access for all members
-
-To change launch date: Update LAUNCH_DATE in lib/launch-config.js`,
+All features are available immediately based on membership tier.
+No date-based gating - everything is controlled by tier capabilities.`,
         icon: Calendar
       },
       {
