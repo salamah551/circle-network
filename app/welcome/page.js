@@ -97,7 +97,8 @@ export default function WelcomePage() {
     );
   }
 
-  const isFoundingMember = profile?.is_founding_member || profile?.membership_tier === 'founding';
+  const isFoundingMember = profile?.is_founding_member || profile?.membership_tier === 'founding' || profile?.membership_tier === 'inner-circle';
+  const isCoreMember = profile?.membership_tier === 'core' || profile?.membership_tier === 'premium';
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4">
@@ -113,7 +114,13 @@ export default function WelcomePage() {
           {isFoundingMember && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-4">
               <Crown className="w-5 h-5 text-amber-400" />
-              <span className="text-amber-400 font-semibold">You're a Founding Member</span>
+              <span className="text-amber-400 font-semibold">You're an Inner Circle (Founding Member)</span>
+            </div>
+          )}
+          {isCoreMember && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
+              <Crown className="w-5 h-5 text-purple-400" />
+              <span className="text-purple-400 font-semibold">You're a Core (Charter Member)</span>
             </div>
           )}
           <p className="text-xl text-zinc-400">
@@ -129,7 +136,10 @@ export default function WelcomePage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 {isFoundingMember && (
-                  <div className="text-sm text-amber-400 font-semibold mb-1">FOUNDING MEMBER</div>
+                  <div className="text-sm text-amber-400 font-semibold mb-1">INNER CIRCLE (FOUNDING MEMBER)</div>
+                )}
+                {isCoreMember && (
+                  <div className="text-sm text-purple-400 font-semibold mb-1">CORE (CHARTER MEMBER)</div>
                 )}
                 <div className="text-2xl font-bold">{profile?.full_name || 'Member'}</div>
                 {profile?.title && profile?.company && (
@@ -234,7 +244,7 @@ export default function WelcomePage() {
           </div>
         </div>
 
-        {/* Founding Member Benefits (if applicable) */}
+        {/* Inner Circle (Founding Member) Benefits */}
         {isFoundingMember && (
           <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-8 mb-8">
             <div className="flex items-start gap-4 mb-6">
@@ -242,22 +252,53 @@ export default function WelcomePage() {
                 <Crown className="w-6 h-6 text-amber-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold mb-2">Your Founding Member Benefits</h2>
-                <p className="text-zinc-400">You've locked in exclusive advantages that last forever</p>
+                <h2 className="text-2xl font-bold mb-2">Your Inner Circle (Founding Member) Benefits</h2>
+                <p className="text-zinc-400">You've locked in exclusive advantages with full ARC™ access</p>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                'Lifetime rate of $2,497/year (never increases)',
-                'All Elite AI features included at no extra cost',
-                'Founding Member badge on your profile',
+                'Lifetime founding member rate (never increases)',
+                'Full ARC™ AI features included',
+                'Inner Circle (Founding Member) badge on profile',
                 'Priority in strategic intro matching',
                 'Direct input on platform development',
                 'Early access to all new features'
               ].map((benefit, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-zinc-300">{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Core (Charter Member) Benefits */}
+        {isCoreMember && (
+          <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-xl p-8 mb-8">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                <Crown className="w-6 h-6 text-purple-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Your Core (Charter Member) Benefits</h2>
+                <p className="text-zinc-400">Immediate but limited ARC™ access with exclusive features</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                'Immediate limited ARC™ AI access',
+                'Core (Charter Member) badge on profile',
+                'Strategic introductions weekly',
+                'Access to exclusive community events',
+                'Premium member directory',
+                'Early access to new features'
+              ].map((benefit, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                   <span className="text-sm text-zinc-300">{benefit}</span>
                 </div>
               ))}

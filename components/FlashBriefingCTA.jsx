@@ -25,7 +25,7 @@ export default function FlashBriefingCTA({ className = '', children }) {
 
     try {
       // Create checkout session
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/payments/flash-briefing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

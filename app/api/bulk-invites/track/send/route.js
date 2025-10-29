@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getCurrentLaunchPhase } from '@/lib/launch-phase';
 
 /**
  * Generate a unique invite code
@@ -548,11 +547,10 @@ export async function POST(request) {
 
     console.log(`✅ Sending to ${filteredRecipients.length} after suppression`);
 
-    // Get current launch phase to determine which email sequence to use
-    const launchPhase = await getCurrentLaunchPhase(supabaseAdmin);
-    const useFoundingSequence = launchPhase.phase === 'founding';
+    // Use Inner Circle (Founding Member) email sequence
+    const useFoundingSequence = true;
     
-    console.log(`📧 Using ${useFoundingSequence ? 'FOUNDING' : 'STANDARD'} member email sequence (phase: ${launchPhase.phase}, founding members: ${launchPhase.foundingMemberCount}/50)`);
+    console.log(`📧 Using Inner Circle (Founding Member) email sequence`);
 
     // Send emails
     let sentCount = 0;
