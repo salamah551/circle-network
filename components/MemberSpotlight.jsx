@@ -147,7 +147,7 @@ export default function MemberSpotlight() {
 
           {/* CTA */}
           <Link
-            href={`/profile/${spotlight.id}`}
+            href={`/members/${spotlight.id}`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg hover:bg-amber-400 transition-all group"
           >
             <span>View Full Profile</span>

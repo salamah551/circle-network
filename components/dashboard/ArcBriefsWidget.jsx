@@ -117,13 +117,29 @@ export default function ArcBriefsWidget() {
               <p className="text-sm text-zinc-400 mb-4">
                 Try asking ARC to analyze your next contract or trip.
               </p>
-              <a
-                href="/arc/request"
-                className="inline-flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-medium"
+              <button
+                onClick={() => {
+                  const input = document.getElementById('arc-action-input');
+                  if (input) {
+                    input.focus();
+                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Show a subtle toast notification
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 right-4 bg-purple-500/90 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                    toast.textContent = 'Type your brief and press Enter to submit.';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                      toast.style.opacity = '0';
+                      toast.style.transition = 'opacity 0.3s ease-out';
+                      setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                  }
+                }}
+                className="inline-flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-medium cursor-pointer"
               >
                 Request a brief
                 <ChevronRight className="w-3 h-3" />
-              </a>
+              </button>
             </div>
           )}
         </div>
