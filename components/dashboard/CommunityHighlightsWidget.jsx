@@ -37,13 +37,15 @@ export default function CommunityHighlightsWidget() {
     const date = new Date(isoString);
     const now = new Date();
     const diffMs = date - now;
-    const diffDays = Math.floor(Math.abs(diffMs) / 86400000);
 
     if (diffMs > 0) {
       // Future date
+      const diffDays = Math.floor(diffMs / 86400000);
       return `In ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
     } else {
       // Past date
+      const diffDays = Math.floor(-diffMs / 86400000);
+      if (diffDays === 0) return 'Today';
       return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
     }
   };

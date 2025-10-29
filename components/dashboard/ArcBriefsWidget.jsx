@@ -37,6 +37,14 @@ export default function ArcBriefsWidget() {
     const date = new Date(isoString);
     const now = new Date();
     const diffMs = now - date;
+    
+    // Handle future dates
+    if (diffMs < 0) {
+      const diffDays = Math.floor(-diffMs / 86400000);
+      return `In ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    }
+    
+    // Handle past dates
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);

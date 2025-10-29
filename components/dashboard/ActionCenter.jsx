@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 
@@ -13,6 +13,24 @@ export default function ActionCenter() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Cleanup timeouts on unmount to prevent memory leaks
+  useEffect(() => {
+    let successTimeoutId = null;
+    let errorTimeoutId = null;
+
+    if (successMessage) {
+      successTimeoutId = setTimeout(() => setSuccessMessage(''), 5000);
+    }
+    if (errorMessage) {
+      errorTimeoutId = setTimeout(() => setErrorMessage(''), 5000);
+    }
+
+    return () => {
+      if (successTimeoutId) clearTimeout(successTimeoutId);
+      if (errorTimeoutId) clearTimeout(errorTimeoutId);
+    };
+  }, [successMessage, errorMessage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,15 +55,9 @@ export default function ActionCenter() {
       
       setSuccessMessage('Request submitted successfully! Check My ARC Briefs for updates.');
       setArcInput('');
-      
-      // Clear success message after 5 seconds
-      setTimeout(() => setSuccessMessage(''), 5000);
     } catch (error) {
       console.error('Failed to submit ARC™ request:', error);
       setErrorMessage(error.message || 'Failed to submit request. Please try again.');
-      
-      // Clear error message after 5 seconds
-      setTimeout(() => setErrorMessage(''), 5000);
     } finally {
       setIsSubmitting(false);
     }
