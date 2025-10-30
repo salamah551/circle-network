@@ -1,22 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, MapPin, Building2, Briefcase, Star, 
   MessageSquare, Send, Linkedin, Globe, Mail,
   Loader2, Check, X, Users, Target, Lightbulb, User
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default function MemberProfilePage() {
   const router = useRouter();
   const params = useParams();
   const memberId = params?.id;
+  const supabase = getSupabaseBrowserClient();
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);

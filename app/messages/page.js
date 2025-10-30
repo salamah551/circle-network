@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Send, Search, User, MessageSquare, 
   Loader2, Check, CheckCheck, MoreVertical, Trash2,
@@ -11,10 +11,7 @@ import GlobalSearch from '@/components/GlobalSearch';
 import LockedFeature from '@/components/LockedFeature';
 import { getFeatureStatus } from '@/lib/feature-flags';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 function MessagesContent() {
   const router = useRouter();

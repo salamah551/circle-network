@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import {
   Crown, Loader2, Menu, X, LogOut, Activity, Sparkles, Users, Target,
@@ -20,10 +20,7 @@ import CommunityHighlightsWidget from '@/components/dashboard/CommunityHighlight
 // Personalization
 import { getPersonalizedLayout, getPersonalizedWelcome } from '@/lib/dashboardPersonalization';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 const widgetComponents = {
   ActionCenter,

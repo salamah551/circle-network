@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   ArrowLeft, Plus, Search, MessageSquare, CheckCircle, Clock,
   Send, X, Lightbulb, Target, Briefcase, Users, Loader2, Crown,
@@ -10,10 +10,7 @@ import {
 } from 'lucide-react';
 import { showToast } from '@/components/Toast.jsx';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 const CATEGORIES = [
   { value: 'all', label: 'All', icon: Target },
