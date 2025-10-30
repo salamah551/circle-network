@@ -2,12 +2,9 @@
 import { Crown, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-// Admin user IDs who can see preview callouts
-const ADMIN_USER_IDS = ['9f305857-cf9b-47bd-aca1-75263d22973d'];
-
 /**
  * LockedFeature renders a premium unlock panel for gated features.
- * - Shows admin preview callout for ADMIN_USER_IDS
+ * - Shows admin preview callout for admin users (based on profile.is_admin)
  * - Renders unlock panel when no meaningful children provided
  * - Panel includes feature title, description, and upgrade CTA
  */
@@ -20,11 +17,17 @@ export default function LockedFeature({
   children 
 }) {
   // Admin bypass - show preview callout but don't gate
-  const isAdmin = currentUser && ADMIN_USER_IDS.includes(currentUser.id);
+  // Check is_admin field from the user's profile
+  const isAdmin = currentUser && currentUser.is_admin === true;
   
   // Determine if we should show the unlock panel
-  // Show panel if: no children OR children is empty/whitespace only
-  const hasChildren = children && (typeof children === 'string' ? children.trim() : true);
+  // Show panel if: no children OR children is empty/whitespace only OR empty array
+  const hasChildren = children && 
+    (typeof children === 'string' 
+      ? children.trim().length > 0
+      : Array.isArray(children) 
+        ? children.length > 0 
+        : !!children);
   const displayTitle = featureTitle || featureName;
   
   return (
