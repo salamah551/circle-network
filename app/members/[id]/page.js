@@ -8,12 +8,11 @@ import {
   Loader2, Check, X, Users, Target, Lightbulb, User
 } from 'lucide-react';
 
-const supabase = getSupabaseBrowserClient();
-
 export default function MemberProfilePage() {
   const router = useRouter();
   const params = useParams();
   const memberId = params?.id;
+  const supabase = getSupabaseBrowserClient();
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
