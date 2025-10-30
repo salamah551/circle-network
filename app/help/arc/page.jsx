@@ -162,18 +162,26 @@ export default function ArcHelpPage() {
           <div className="space-y-3 text-sm text-zinc-400">
             <div className="flex items-start gap-3">
               <span className="text-amber-400 font-bold">1.</span>
-              <p>Go to your dashboard and find the ARC™ Action Center widget</p>
+              <p>Go to your dashboard and find the ARC™ Hub—the large central card with three tabs</p>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-amber-400 font-bold">2.</span>
-              <p>Type or paste your request—be as specific as possible for best results</p>
+              <p>Select the appropriate service type: <strong>Briefs</strong> (research/analysis), <strong>Travel</strong> (flight optimization), or <strong>Intel</strong> (market research)</p>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-amber-400 font-bold">3.</span>
-              <p>Submit and check "My ARC™ Briefs" for updates—most briefs complete within minutes</p>
+              <p>Type or paste your request—be as specific as possible for best results</p>
             </div>
             <div className="flex items-start gap-3">
               <span className="text-amber-400 font-bold">4.</span>
+              <p><strong>Optional:</strong> Attach files (documents, spreadsheets, images) up to 20MB each—perfect for contract analysis or data review</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-amber-400 font-bold">5.</span>
+              <p>Submit and check "My ARC™ Briefs" for updates—most briefs complete within minutes</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-amber-400 font-bold">6.</span>
               <p>Review your brief, ask follow-up questions, or request refinements</p>
             </div>
           </div>
@@ -186,7 +194,8 @@ export default function ArcHelpPage() {
             <li>• Be specific about what you need: context, goals, and constraints</li>
             <li>• Include deadlines if time-sensitive</li>
             <li>• For document analysis, mention what you're most concerned about</li>
-            <li>• You can submit multiple briefs simultaneously—no limits</li>
+            <li>• Attach relevant files directly—supports PDF, Word, Excel, images (up to 20MB)</li>
+            <li>• Monthly usage limits: Founding/Elite (100), Charter (10), Professional (5)</li>
             <li>• Use natural language; no special formatting required</li>
           </ul>
         </div>

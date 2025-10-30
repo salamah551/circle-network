@@ -31,10 +31,13 @@ export async function GET() {
       return Response.json([]);
     }
     
-    // Query arc_requests table for the authenticated user
+    // Query arc_requests table with attachments count
     const { data, error } = await supabase
       .from('arc_requests')
-      .select('*')
+      .select(`
+        *,
+        attachments:arc_request_attachments(count)
+      `)
       .eq('user_id', session.user.id)
       .order('updated_at', { ascending: false })
       .limit(10);
@@ -45,7 +48,14 @@ export async function GET() {
       return Response.json([]);
     }
     
-    return Response.json(data || []);
+    // Transform to include attachments_count for easier access
+    const briefs = (data || []).map(brief => ({
+      ...brief,
+      attachments_count: brief.attachments?.[0]?.count || 0,
+      type: brief.type || 'brief' // Default to brief if type is missing
+    }));
+    
+    return Response.json(briefs);
   } catch (error) {
     console.error('Error fetching ARC briefs:', error);
     // Return empty array instead of error
