@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   ArrowLeft, MapPin, Building2, Briefcase, Star, 
   MessageSquare, Send, Linkedin, Globe, Mail,
-  Loader2, Check, X, Users, Target, Lightbulb
+  Loader2, Check, X, Users, Target, Lightbulb, User
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -157,21 +157,32 @@ export default function MemberProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto mb-3" />
+          <p className="text-zinc-500 text-sm">Loading member profile...</p>
+        </div>
       </div>
     );
   }
 
   if (!member) {
     return (
-      <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white text-xl mb-4">Member not found</p>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <div className="mb-6 w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center border border-zinc-700">
+            <User className="w-12 h-12 text-zinc-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Member not found</h2>
+          <p className="text-zinc-400 mb-8 leading-relaxed">
+            This member profile doesn't exist or may have been removed. 
+            Check out our directory to discover other members.
+          </p>
           <button
             onClick={() => router.push('/members')}
-            className="text-emerald-400 hover:text-emerald-300"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-medium rounded-lg transition-all"
           >
+            <ArrowLeft className="w-5 h-5" />
             Back to Directory
           </button>
         </div>
@@ -180,9 +191,9 @@ export default function MemberProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F1E]">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="border-b border-white/10 bg-[#0A0F1E]/80 backdrop-blur-sm sticky top-0 z-40">
+      <header className="border-b border-white/10 bg-black/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
@@ -357,7 +368,7 @@ export default function MemberProfilePage() {
       {/* Request Introduction Modal */}
       {showIntroModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0A0F1E] border border-white/20 rounded-2xl max-w-lg w-full p-8">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-lg w-full p-8">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-white">Request Introduction</h3>
               <button
@@ -411,7 +422,7 @@ export default function MemberProfilePage() {
       {/* Direct Message Modal */}
       {showMessageModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0A0F1E] border border-white/20 rounded-2xl max-w-lg w-full p-8">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-lg w-full p-8">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-white">Send Message</h3>
               <button

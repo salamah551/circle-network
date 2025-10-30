@@ -286,7 +286,7 @@ export default function MembersPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-4 border-t border-zinc-800">
                   <Link
-                    href={`/profile/${member.id}`}
+                    href={`/members/${member.id}`}
                     className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-center rounded-lg transition-colors text-sm font-medium"
                   >
                     View Profile
