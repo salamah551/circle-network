@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Search, User, Building2, 
   MapPin, Briefcase, Loader2, Star, MessageSquare, Lock
@@ -12,10 +12,7 @@ import GlobalSearch from '@/components/GlobalSearch';
 import LockedFeature from '@/components/LockedFeature';
 import { getFeatureStatus } from '@/lib/feature-flags';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 export default function MembersPage() {
   const router = useRouter();
