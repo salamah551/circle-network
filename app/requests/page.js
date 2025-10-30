@@ -281,16 +281,20 @@ export default function RequestsPage() {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('requests')
-        .insert({
-          user_id: me.id,
+      const response = await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           title: newReq.title.trim(),
           description: newReq.description.trim(),
-          category: newReq.category,
-          status: 'open'
-        });
-      if (error) throw error;
+          category: newReq.category
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create request');
+      }
 
       setShowNewRequestModal(false);
       setNewReq({ title: '', description: '', category: 'advice' });
@@ -298,7 +302,7 @@ export default function RequestsPage() {
       await loadRequests();
     } catch (e) {
       console.error('Create request error:', e);
-      alert('Failed to create request');
+      alert(e.message || 'Failed to create request');
     } finally {
       setSubmitting(false);
     }

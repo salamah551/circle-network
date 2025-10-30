@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Activity, Loader2, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
+import Link from 'next/link';
 
 /**
  * Market Intel Widget
@@ -102,13 +103,13 @@ export default function MarketIntelWidget() {
               <p className="text-sm text-zinc-400 mb-4">
                 Add competitors to watch in settings.
               </p>
-              <a
+              <Link
                 href="/settings"
                 className="inline-flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 font-medium"
               >
                 Add competitors
                 <ArrowUpRight className="w-3 h-3" />
-              </a>
+              </Link>
             </div>
           )}
         </div>

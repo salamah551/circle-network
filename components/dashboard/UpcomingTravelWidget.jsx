@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Plane, MapPin, Calendar, Clock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 import { formatDateRange } from '@/lib/date-utils';
+import Link from 'next/link';
 
 /**
  * Upcoming Travel Widget
@@ -93,13 +94,13 @@ export default function UpcomingTravelWidget() {
               <p className="text-sm text-zinc-400 mb-4">
                 Forward your next itinerary and ARC™ will watch for upgrades.
               </p>
-              <a
+              <Link
                 href="/help/forward-trips"
                 className="inline-flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 font-medium"
               >
                 How to forward trips
                 <ArrowRight className="w-3 h-3" />
-              </a>
+              </Link>
             </div>
           )}
         </div>
