@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 // Tier-based monthly limits (configurable via env)
 const USAGE_LIMITS = {
   founding: parseInt(process.env.ARC_LIMIT_FOUNDING || '100', 10),
-  elite: parseInt(process.env.ARC_LIMIT_ELITE || '100', 10),
+  elite: parseInt(process.env.ARC_LIMIT_ELITE || '50', 10),
   charter: parseInt(process.env.ARC_LIMIT_CHARTER || '10', 10),
   professional: parseInt(process.env.ARC_LIMIT_PROFESSIONAL || '5', 10),
 };
