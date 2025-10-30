@@ -8,6 +8,16 @@ import Link from 'next/link';
  * - Renders unlock panel when no meaningful children provided
  * - Panel includes feature title, description, and upgrade CTA
  */
+/**
+ * Helper to check if children contains valid content
+ */
+function hasValidChildren(children) {
+  if (!children) return false;
+  if (typeof children === 'string') return children.trim().length > 0;
+  if (Array.isArray(children)) return children.length > 0;
+  return true;
+}
+
 export default function LockedFeature({ 
   featureName = 'Premium Feature', 
   featureTitle,
@@ -18,16 +28,10 @@ export default function LockedFeature({
 }) {
   // Admin bypass - show preview callout but don't gate
   // Check is_admin field from the user's profile
-  const isAdmin = currentUser && currentUser.is_admin === true;
+  const isAdmin = currentUser?.is_admin;
   
   // Determine if we should show the unlock panel
-  // Show panel if: no children OR children is empty/whitespace only OR empty array
-  const hasChildren = children && 
-    (typeof children === 'string' 
-      ? children.trim().length > 0
-      : Array.isArray(children) 
-        ? children.length > 0 
-        : !!children);
+  const hasChildren = hasValidChildren(children);
   const displayTitle = featureTitle || featureName;
   
   return (
