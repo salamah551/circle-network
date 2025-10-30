@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
+import Link from 'next/link';
 
 /**
  * Action Center Widget
@@ -77,10 +78,18 @@ export default function ActionCenter() {
       
       <div className="relative z-10 space-y-6">
         {/* Explanatory copy */}
-        <p className="text-zinc-400 text-sm leading-relaxed max-w-3xl">
-          This is your direct line to our AI concierge. Use it to request research, analyze documents, 
-          find travel options, or get strategic insights. Your briefs are private and will be processed promptly.
-        </p>
+        <div>
+          <p className="text-zinc-400 text-sm leading-relaxed max-w-3xl mb-2">
+            This is your direct line to our AI concierge. Use it to request research, analyze documents, 
+            find travel options, or get strategic insights. Your briefs are private and will be processed promptly.
+          </p>
+          <Link
+            href="/help/arc"
+            className="text-sm text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            Learn more →
+          </Link>
+        </div>
 
         {/* ARC™ Engine Input */}
         <form onSubmit={handleSubmit} className="relative">
