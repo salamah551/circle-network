@@ -225,6 +225,24 @@ export class GitHubConnector extends BaseConnector {
    */
   async createPR(title: string, body: string, files: Array<{ path: string; content: string }>): Promise<{ success: boolean; message: string; prUrl?: string }> {
     try {
+      // Validate file paths to prevent path traversal and request forgery
+      for (const file of files) {
+        // Only allow specific safe paths
+        if (!file.path.match(/^(supabase\/migrations|ops\/config|docs)\/[a-zA-Z0-9_\-\.\/]+\.(sql|yaml|yml|md)$/)) {
+          return {
+            success: false,
+            message: `Invalid file path: ${file.path}. Only supabase/migrations/, ops/config/, and docs/ are allowed.`,
+          };
+        }
+        // Prevent path traversal
+        if (file.path.includes('..') || file.path.startsWith('/')) {
+          return {
+            success: false,
+            message: `Invalid file path: ${file.path}. Path traversal not allowed.`,
+          };
+        }
+      }
+
       // Get default branch
       const repoUrl = `${this.baseUrl}/repos/${this.owner}/${this.repo}`;
       const repoResponse = await fetch(repoUrl, {

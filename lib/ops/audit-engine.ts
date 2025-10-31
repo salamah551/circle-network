@@ -65,11 +65,13 @@ export class AuditEngine {
           const scopeChecks = await connector.audit();
           return scopeChecks;
         } catch (error: any) {
-          console.error(`Error auditing ${scope}:`, error);
+          // Sanitize scope for logging to prevent format string injection
+          const sanitizedScope = String(scope).replace(/[^\w-]/g, '_');
+          console.error('Error auditing scope:', sanitizedScope, error.message);
           return [{
-            id: `${scope}-error`,
-            scope,
-            name: `${scope} Audit`,
+            id: `${sanitizedScope}-error`,
+            scope: sanitizedScope,
+            name: `${sanitizedScope} Audit`,
             status: 'error' as const,
             message: `Audit failed: ${error.message}`,
           }];
