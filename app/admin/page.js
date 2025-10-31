@@ -16,6 +16,7 @@ import {
   Play,
   CheckCircle,
   AlertCircle,
+  Shield,
 } from 'lucide-react';
 import { getMRRValues } from '@/lib/pricing';
 
@@ -423,6 +424,29 @@ export default function AdminDashboard() {
             <p className="text-zinc-500 text-sm mb-3">View detailed analytics</p>
             <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
           </button>
+        </div>
+
+        {/* AI Ops Control Plane */}
+        <div className="bg-gradient-to-br from-amber-900/20 to-amber-800/10 border border-amber-500/30 rounded-xl p-6 mb-8">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <Shield className="w-6 h-6 text-amber-400" />
+                AI Ops Control Plane
+              </h2>
+              <p className="text-zinc-400 text-sm mb-4">
+                Knowledge-aware operations console for infrastructure management. Ingest documentation, ask questions using RAG, and audit infrastructure against desired state.
+              </p>
+              <button
+                onClick={() => router.push('/admin/ops')}
+                className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Shield className="w-5 h-5" />
+                Open Ops Console
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Recent Activity */}
