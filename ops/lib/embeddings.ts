@@ -31,7 +31,7 @@ export function getEmbeddingsConfig(): EmbeddingConfig {
     provider,
     model,
     apiKey,
-    dimensions: 1536, // OpenAI text-embedding-3-large default
+    dimensions: 1536, // Using 1536 dimensions (can be 3072 with text-embedding-3-large)
   };
 }
 

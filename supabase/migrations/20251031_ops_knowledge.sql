@@ -31,6 +31,8 @@ CREATE INDEX IF NOT EXISTS ix_ops_knowledge_keywords
 ON public.ops_knowledge USING GIN (keywords);
 
 -- HNSW index for vector similarity search (approximate nearest neighbor)
+-- Note: lists parameter should be adjusted as data grows (recommended: rows/1000)
+-- For initial deployment, 100 lists is reasonable for up to 100k rows
 CREATE INDEX IF NOT EXISTS ix_ops_knowledge_embedding 
 ON public.ops_knowledge USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
@@ -164,6 +166,19 @@ CREATE POLICY "System can insert ops audit log"
 ON public.ops_audit_log
 FOR INSERT
 WITH CHECK (true); -- Allow inserts from service role
+
+-- ============================================================================
+-- Index Maintenance Notes
+-- ============================================================================
+-- As the ops_knowledge table grows, consider rebuilding the ivfflat index:
+--   DROP INDEX IF EXISTS ix_ops_knowledge_embedding;
+--   CREATE INDEX ix_ops_knowledge_embedding 
+--   ON public.ops_knowledge USING ivfflat (embedding vector_cosine_ops)
+--   WITH (lists = CEIL(row_count / 1000));
+-- 
+-- Monitor index performance with:
+--   SELECT count(*) FROM ops_knowledge;
+-- ============================================================================
 
 -- ============================================================================
 -- Helper function for vector similarity search
