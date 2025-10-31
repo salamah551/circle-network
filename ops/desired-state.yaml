@@ -1,0 +1,167 @@
+# Desired State Configuration for AI Ops Control Plane
+# This file defines the expected configuration across all services
+
+supabase:
+  tables:
+    - name: profiles
+      columns:
+        - name: id
+          type: uuid
+          nullable: false
+        - name: email
+          type: text
+          nullable: false
+        - name: name
+          type: text
+          nullable: true
+        - name: created_at
+          type: timestamptz
+          nullable: false
+          defaultValue: now()
+        - name: needs_assessment
+          type: jsonb
+          nullable: true
+        - name: needs_assessment_completed_at
+          type: timestamptz
+          nullable: true
+      indices:
+        - name: profiles_email_idx
+          columns: [email]
+          unique: true
+      rlsPolicies:
+        - name: Users can view own profile
+          operation: SELECT
+          using: auth.uid() = id
+        - name: Users can update own profile
+          operation: UPDATE
+          using: auth.uid() = id
+
+    - name: invites
+      columns:
+        - name: id
+          type: uuid
+          nullable: false
+        - name: code
+          type: text
+          nullable: false
+        - name: email
+          type: text
+          nullable: false
+        - name: status
+          type: text
+          nullable: false
+        - name: expires_at
+          type: timestamptz
+          nullable: false
+        - name: created_at
+          type: timestamptz
+          nullable: false
+          defaultValue: now()
+      indices:
+        - name: invites_code_idx
+          columns: [code]
+          unique: true
+        - name: invites_email_idx
+          columns: [email]
+      rlsPolicies:
+        - name: Public can read pending invites
+          operation: SELECT
+          using: status = 'pending'
+
+  storage:
+    buckets:
+      - name: arc-uploads
+        public: false
+        fileSizeLimit: 20971520  # 20MB
+        allowedMimeTypes:
+          - application/pdf
+          - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+          - application/msword
+          - text/plain
+          - image/jpeg
+          - image/png
+          - image/gif
+    policies:
+      - name: Authenticated users can upload
+        bucket: arc-uploads
+        operation: INSERT
+        using: auth.role() = 'authenticated'
+      - name: Users can view own uploads
+        bucket: arc-uploads
+        operation: SELECT
+        using: auth.uid()::text = (storage.foldername(name))[1]
+
+vercel:
+  envVars:
+    - key: NEXT_PUBLIC_SUPABASE_URL
+      environments: [production, preview]
+      required: true
+    - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+      environments: [production, preview]
+      required: true
+    - key: SUPABASE_SERVICE_ROLE_KEY
+      environments: [production, preview]
+      required: true
+    - key: STRIPE_SECRET_KEY
+      environments: [production, preview]
+      required: true
+    - key: STRIPE_WEBHOOK_SECRET
+      environments: [production]
+      required: true
+    - key: SENDGRID_API_KEY
+      environments: [production, preview]
+      required: true
+    - key: NEXT_PUBLIC_POSTHOG_KEY
+      environments: [production, preview]
+      required: false
+    - key: CRON_SECRET
+      environments: [production]
+      required: true
+  crons:
+    - path: /api/admin/run-invites
+      schedule: "0 9 * * 1"  # Every Monday at 9am
+
+stripe:
+  priceIds:
+    - name: Charter Annual
+      id: price_charter_annual_prod
+      environment: production
+    - name: Inner Circle
+      id: price_inner_circle_prod
+      environment: production
+    - name: Professional
+      id: price_professional_prod
+      environment: production
+  webhooks:
+    - url: https://thecirclenetwork.org/api/stripe/webhook
+      events:
+        - checkout.session.completed
+        - customer.subscription.created
+        - customer.subscription.updated
+        - customer.subscription.deleted
+        - invoice.payment_succeeded
+        - invoice.payment_failed
+      environment: production
+
+github:
+  requiredLabels:
+    - bug
+    - enhancement
+    - documentation
+    - security
+  branchProtection:
+    branch: main
+    requiredReviews: 1
+    requireStatusChecks: true
+
+sendgrid:
+  verifiedDomains:
+    - thecirclenetwork.org
+  senderIdentities:
+    - email: invite@thecirclenetwork.org
+      name: Circle Network
+    - email: support@thecirclenetwork.org
+      name: Circle Network Support
+
+posthog:
+  keyPresent: true
