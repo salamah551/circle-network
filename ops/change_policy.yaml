@@ -3,34 +3,29 @@
 
 # Default behavior for database changes
 database:
-  default_action: generate_pr
+  default_action: generate_migration_pr
   direct_apply_allowed: false  # Override with OPS_ALLOW_DIRECT_APPLY=true env var
   
   change_types:
     create_table:
       risk_level: high
       requires_approval: true
-      action: generate_migration_pr
     
     add_column:
       risk_level: medium
       requires_approval: true
-      action: generate_migration_pr
     
     create_index:
       risk_level: low
       requires_approval: false
-      action: generate_migration_pr
     
     enable_rls:
       risk_level: medium
       requires_approval: true
-      action: generate_migration_pr
     
     create_policy:
       risk_level: medium
       requires_approval: true
-      action: generate_migration_pr
 
 # Vercel environment variable changes
 vercel:
