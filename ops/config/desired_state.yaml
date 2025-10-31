@@ -1,0 +1,482 @@
+# ============================================================================
+# Circle Network AI Ops - Desired State Configuration
+# ============================================================================
+# This file defines the complete desired state for the Circle Network
+# platform across all environments and services.
+# ============================================================================
+
+version: "1.0"
+last_updated: "2025-10-31"
+
+# ============================================================================
+# Application Routes & Pages
+# ============================================================================
+app_routes:
+  public:
+    - path: "/"
+      name: "Landing Page"
+      description: "Public homepage with funnel"
+    - path: "/login"
+      name: "Login"
+      description: "Authentication page"
+    - path: "/invite"
+      name: "Invite Flow"
+      description: "Invitation acceptance and signup"
+    - path: "/apply"
+      name: "Application"
+      description: "Membership application"
+    - path: "/legal/*"
+      name: "Legal Pages"
+      description: "Terms, privacy, etc."
+    - path: "/contact"
+      name: "Contact"
+      description: "Contact form"
+
+  authenticated:
+    - path: "/dashboard"
+      name: "Member Dashboard"
+      description: "Main member dashboard"
+      requires: ["authenticated"]
+    - path: "/onboarding"
+      name: "Onboarding Flow"
+      description: "New member onboarding with needs assessment"
+      requires: ["authenticated", "needs_assessment_gate"]
+    - path: "/briefpoint"
+      name: "BriefPoint"
+      description: "AI briefing service"
+      requires: ["authenticated", "briefpoint_access"]
+    - path: "/requests"
+      name: "ARC Requests"
+      description: "ARC request management"
+      requires: ["authenticated", "arc_access"]
+    - path: "/members"
+      name: "Member Directory"
+      description: "Browse and connect with members"
+      requires: ["authenticated"]
+    - path: "/messages"
+      name: "Messages"
+      description: "Direct messaging"
+      requires: ["authenticated"]
+    - path: "/intros"
+      name: "Strategic Intros"
+      description: "AI-curated introductions"
+      requires: ["authenticated"]
+    - path: "/exchange"
+      name: "Value Exchange"
+      description: "Marketplace for member services"
+      requires: ["authenticated"]
+    - path: "/intelligence"
+      name: "Market Intelligence"
+      description: "Competitive signals and insights"
+      requires: ["authenticated"]
+    - path: "/settings"
+      name: "Account Settings"
+      description: "User preferences and profile"
+      requires: ["authenticated"]
+    - path: "/billing"
+      name: "Billing"
+      description: "Subscription and payment management"
+      requires: ["authenticated"]
+
+  admin:
+    - path: "/admin"
+      name: "Admin Dashboard"
+      description: "Admin control panel"
+      requires: ["authenticated", "admin_role"]
+    - path: "/admin/members"
+      name: "Member Management"
+      description: "Manage members and applications"
+      requires: ["authenticated", "admin_role"]
+    - path: "/admin/invites"
+      name: "Invite Management"
+      description: "Bulk invite campaigns"
+      requires: ["authenticated", "admin_role"]
+
+# ============================================================================
+# Onboarding Rules
+# ============================================================================
+onboarding:
+  needs_assessment:
+    enabled: true
+    gate_type: "required" # "required" | "optional" | "disabled"
+    redirect_incomplete: "/onboarding"
+    required_profile_fields:
+      - "full_name"
+      - "company"
+      - "role"
+      - "linkedin_url"
+    assessment_questions:
+      - id: "primary_goal"
+        type: "single_select"
+        required: true
+      - id: "industry_focus"
+        type: "multi_select"
+        required: true
+      - id: "network_size"
+        type: "single_select"
+        required: false
+      - id: "deal_stage"
+        type: "single_select"
+        required: false
+
+  onboarding_flow:
+    steps:
+      - step: "profile_setup"
+        order: 1
+        required: true
+      - step: "needs_assessment"
+        order: 2
+        required: true
+      - step: "preferences"
+        order: 3
+        required: false
+      - step: "welcome"
+        order: 4
+        required: false
+
+# ============================================================================
+# Pricing Tiers & Capabilities
+# ============================================================================
+pricing:
+  tiers:
+    - id: "core"
+      name: "Core"
+      monthly_price: 179
+      annual_price: 1908 # 10% discount
+      stripe_price_id_monthly: "price_core_monthly"
+      stripe_price_id_annual: "price_core_annual"
+      capabilities:
+        arc_requests_per_month: 10
+        briefpoint_requests_per_month: 5
+        strategic_intros: true
+        member_directory: true
+        value_exchange: true
+        market_intelligence: "basic"
+        priority_support: false
+
+    - id: "pro"
+      name: "Pro"
+      monthly_price: 299
+      annual_price: 3188 # 10% discount
+      stripe_price_id_monthly: "price_pro_monthly"
+      stripe_price_id_annual: "price_pro_annual"
+      capabilities:
+        arc_requests_per_month: 30
+        briefpoint_requests_per_month: 10
+        strategic_intros: true
+        member_directory: true
+        value_exchange: true
+        market_intelligence: "advanced"
+        priority_support: true
+        expert_sessions: "2_per_quarter"
+
+    - id: "elite"
+      name: "Elite"
+      monthly_price: 499
+      annual_price: 5338 # 10% discount
+      stripe_price_id_monthly: "price_elite_monthly"
+      stripe_price_id_annual: "price_elite_annual"
+      capabilities:
+        arc_requests_per_month: 50
+        briefpoint_requests_per_month: 20
+        strategic_intros: true
+        member_directory: true
+        value_exchange: true
+        market_intelligence: "premium"
+        priority_support: true
+        expert_sessions: "unlimited"
+        concierge_service: true
+
+    # Legacy tiers (maintain for existing members)
+    - id: "founding"
+      name: "Founding Member"
+      monthly_price: 199
+      stripe_price_id_monthly: "price_founding"
+      legacy: true
+      capabilities:
+        arc_requests_per_month: 100
+        briefpoint_requests_per_month: 25
+        strategic_intros: true
+        member_directory: true
+        value_exchange: true
+        market_intelligence: "premium"
+        priority_support: true
+        expert_sessions: "unlimited"
+        concierge_service: true
+
+# ============================================================================
+# Feature Flags
+# ============================================================================
+feature_flags:
+  briefpoint_enabled: true
+  arc_enabled: true
+  strategic_intros_enabled: true
+  value_exchange_enabled: true
+  market_intelligence_enabled: true
+  expert_sessions_enabled: true
+  needs_assessment_required: true
+  charter_urgency_badge: true
+
+# ============================================================================
+# Environment Variables (Required)
+# ============================================================================
+environment:
+  required:
+    all_environments:
+      - NEXT_PUBLIC_SUPABASE_URL
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - SUPABASE_SERVICE_ROLE_KEY
+      - NEXT_PUBLIC_APP_URL
+      - CRON_SECRET
+
+    production:
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      - STRIPE_SECRET_KEY
+      - STRIPE_WEBHOOK_SECRET
+      - SENDGRID_API_KEY
+      - SENDGRID_FROM_EMAIL
+      - NEXT_PUBLIC_POSTHOG_KEY
+      - NEXT_PUBLIC_STRIPE_PRICE_CORE
+      - NEXT_PUBLIC_STRIPE_PRICE_PRO
+      - NEXT_PUBLIC_STRIPE_PRICE_ELITE
+
+    preview:
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      - STRIPE_SECRET_KEY
+      - SENDGRID_API_KEY
+      - SENDGRID_FROM_EMAIL
+
+    development:
+      - NEXT_PUBLIC_SUPABASE_URL
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - SUPABASE_SERVICE_ROLE_KEY
+
+  optional:
+    - NEXT_PUBLIC_POSTHOG_HOST
+    - NEXT_PUBLIC_CALENDLY_URL
+    - NEXT_PUBLIC_THREAT_SCAN_TALLY_URL
+    - RESEND_API_KEY
+    - OPS_EMBEDDINGS_PROVIDER
+    - OPS_EMBEDDINGS_MODEL
+    - OPS_ALLOW_DIRECT_APPLY
+    - SLACK_WEBHOOK_URL
+    - SLACK_OPS_CHANNEL
+
+# ============================================================================
+# Database Schema - Required Tables
+# ============================================================================
+database:
+  tables:
+    - name: "profiles"
+      description: "User profiles and member data"
+      required_columns:
+        - id
+        - email
+        - full_name
+        - role
+        - tier
+        - created_at
+        - updated_at
+
+    - name: "arc_requests"
+      description: "ARC (AI Research Concierge) requests"
+      required_columns:
+        - id
+        - user_id
+        - type
+        - title
+        - description
+        - status
+        - created_at
+        - updated_at
+
+    - name: "arc_request_attachments"
+      description: "File attachments for ARC requests"
+      required_columns:
+        - id
+        - request_id
+        - user_id
+        - file_name
+        - storage_path
+        - created_at
+
+    - name: "requests"
+      description: "Legacy request system"
+      required_columns:
+        - id
+        - user_id
+        - title
+        - description
+        - status
+
+    - name: "referrals"
+      description: "Member referral tracking"
+      required_columns:
+        - id
+        - referrer_id
+        - referred_email
+        - status
+
+    - name: "invites"
+      description: "Individual invitations"
+      required_columns:
+        - id
+        - inviter_id
+        - email
+        - token
+        - status
+
+    - name: "bulk_invite_campaigns"
+      description: "Bulk invite campaigns"
+      required_columns:
+        - id
+        - admin_id
+        - name
+        - status
+
+    - name: "bulk_invite_recipients"
+      description: "Recipients in bulk campaigns"
+      required_columns:
+        - id
+        - campaign_id
+        - email
+        - status
+
+    - name: "ops_knowledge"
+      description: "AI Ops knowledge base with embeddings"
+      required_columns:
+        - id
+        - source_type
+        - source_path
+        - content
+        - embedding
+        - keywords
+
+    - name: "ops_plans"
+      description: "Infrastructure change plans"
+      required_columns:
+        - id
+        - title
+        - plan_type
+        - status
+        - desired_state
+        - created_at
+
+    - name: "ops_audit_log"
+      description: "Audit log for ops operations"
+      required_columns:
+        - id
+        - operation
+        - user_id
+        - success
+        - created_at
+
+# ============================================================================
+# Storage Buckets
+# ============================================================================
+storage:
+  buckets:
+    - name: "arc-uploads"
+      public: false
+      file_size_limit_mb: 20
+      allowed_mime_types:
+        - "application/pdf"
+        - "image/jpeg"
+        - "image/png"
+        - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        - "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      rls_policies:
+        - name: "Users can upload their own files"
+          operation: "INSERT"
+          check: "bucket_id = 'arc-uploads' AND auth.uid()::text = (storage.foldername(name))[1]"
+        - name: "Users can read their own files"
+          operation: "SELECT"
+          check: "bucket_id = 'arc-uploads' AND auth.uid()::text = (storage.foldername(name))[1]"
+
+# ============================================================================
+# Vercel Cron Jobs
+# ============================================================================
+vercel:
+  cron_jobs:
+    - name: "invite-sequence"
+      path: "/api/cron/invite-sequence"
+      schedule: "0 9 * * *" # Daily at 09:00 UTC
+      description: "Process bulk invite campaigns"
+
+    - name: "strategic-intros"
+      path: "/api/cron/strategic-intros"
+      schedule: "0 6 * * 1" # Weekly on Monday at 06:00 UTC
+      description: "Generate weekly strategic introductions"
+
+# ============================================================================
+# Stripe Configuration
+# ============================================================================
+stripe:
+  products:
+    - id: "core"
+      name: "Core Membership"
+      prices:
+        - interval: "month"
+          amount: 17900 # $179.00
+          currency: "usd"
+        - interval: "year"
+          amount: 190800 # $1,908.00
+          currency: "usd"
+
+    - id: "pro"
+      name: "Pro Membership"
+      prices:
+        - interval: "month"
+          amount: 29900 # $299.00
+          currency: "usd"
+        - interval: "year"
+          amount: 318800 # $3,188.00
+          currency: "usd"
+
+    - id: "elite"
+      name: "Elite Membership"
+      prices:
+        - interval: "month"
+          amount: 49900 # $499.00
+          currency: "usd"
+        - interval: "year"
+          amount: 533800 # $5,338.00
+          currency: "usd"
+
+  webhooks:
+    - endpoint: "/api/stripe/webhook"
+      events:
+        - "checkout.session.completed"
+        - "customer.subscription.created"
+        - "customer.subscription.updated"
+        - "customer.subscription.deleted"
+        - "invoice.payment_succeeded"
+        - "invoice.payment_failed"
+
+# ============================================================================
+# GitHub Integration
+# ============================================================================
+github:
+  repository: "salamah551/circle-network"
+  auto_pr_labels:
+    - "ops-generated"
+    - "infrastructure"
+  migration_path: "supabase/migrations"
+  require_approval_for:
+    - "schema_changes"
+    - "rls_policy_changes"
+    - "production_env_changes"
+
+# ============================================================================
+# Slack Integration (Optional)
+# ============================================================================
+slack:
+  enabled: false
+  approval_workflow:
+    enabled: false
+    channel: "#ops-approvals"
+    require_approval_for:
+      - "database_schema"
+      - "rls_policies"
+      - "production_changes"
+  notification_channel: "#ops-notifications"
