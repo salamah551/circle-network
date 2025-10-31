@@ -157,7 +157,7 @@ function SubscribePage() {
         planName = 'Core';
         console.log('Using core price ID:', priceId);
       } else if (selectedPlan === 'pro' || selectedPlan === 'premium') {
-        // Pro tier price (premium for backwards compatibility)
+        // Pro tier price (premium for backwards compatibility - TODO: remove 'premium' fallback after migration)
         priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM;
         planName = 'Pro';
         console.log('Using pro price ID:', priceId);
