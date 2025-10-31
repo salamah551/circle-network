@@ -1,0 +1,148 @@
+# Change Policy Configuration
+# Defines approval requirements and risk levels for different types of changes
+
+approvalRules:
+  # Supabase changes
+  supabase.table.drop:
+    requiresApproval: true
+    approvers: ["admin", "dba"]
+    method: slack
+  
+  supabase.table.create:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  supabase.column.drop:
+    requiresApproval: true
+    approvers: ["admin", "dba"]
+    method: slack
+  
+  supabase.column.add:
+    requiresApproval: false
+  
+  supabase.index.create:
+    requiresApproval: false
+  
+  supabase.rls.create:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  supabase.rls.update:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  supabase.storage.bucket.create:
+    requiresApproval: false
+  
+  supabase.storage.policy.create:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  # Vercel changes
+  vercel.env.add:
+    requiresApproval: false
+  
+  vercel.env.update:
+    requiresApproval: true
+    approvers: ["admin", "devops"]
+    method: github
+  
+  vercel.env.delete:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: slack
+  
+  vercel.cron.add:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  vercel.cron.update:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  # Stripe changes (mostly read-only)
+  stripe.price.verify:
+    requiresApproval: false
+  
+  stripe.webhook.verify:
+    requiresApproval: false
+  
+  # GitHub changes
+  github.label.create:
+    requiresApproval: false
+  
+  github.protection.update:
+    requiresApproval: true
+    approvers: ["admin"]
+    method: github
+  
+  # SendGrid changes (verification only)
+  sendgrid.domain.verify:
+    requiresApproval: false
+  
+  # PostHog changes (verification only)
+  posthog.key.verify:
+    requiresApproval: false
+
+# Auto-apply settings by service
+autoApplyAllowed:
+  supabase: false  # Never auto-apply DB changes
+  vercel: true     # Can auto-apply low-risk env var additions
+  stripe: false    # Read-only, no apply
+  github: true     # Can auto-apply labels
+  sendgrid: false  # Read-only verification
+  posthog: false   # Read-only verification
+  slack: true      # Can send notifications
+
+# Risk levels
+riskLevels:
+  destructive:
+    - supabase.table.drop
+    - supabase.column.drop
+    - vercel.env.delete
+  
+  high:
+    - supabase.table.create
+    - supabase.rls.create
+    - supabase.rls.update
+    - vercel.cron.add
+    - vercel.cron.update
+    - github.protection.update
+  
+  medium:
+    - supabase.column.add
+    - supabase.storage.policy.create
+    - vercel.env.add
+    - vercel.env.update
+  
+  low:
+    - supabase.index.create
+    - supabase.storage.bucket.create
+    - github.label.create
+    - stripe.price.verify
+    - stripe.webhook.verify
+    - sendgrid.domain.verify
+    - posthog.key.verify
+
+# Logging configuration
+logging:
+  enabled: true
+  destination: supabase  # Log to ops_audit_log table
+  retentionDays: 90
+
+# Notification configuration
+notifications:
+  slack:
+    enabled: true
+    channels:
+      alerts: "#ops-alerts"
+      approvals: "#ops-approvals"
+  github:
+    enabled: true
+    createIssues: true
