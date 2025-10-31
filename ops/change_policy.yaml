@@ -1,0 +1,139 @@
+# ops/change_policy.yaml
+# Change policy configuration for AI Ops Control Plane
+
+# Default behavior for database changes
+database:
+  default_action: generate_pr
+  direct_apply_allowed: false  # Override with OPS_ALLOW_DIRECT_APPLY=true env var
+  
+  change_types:
+    create_table:
+      risk_level: high
+      requires_approval: true
+      action: generate_migration_pr
+    
+    add_column:
+      risk_level: medium
+      requires_approval: true
+      action: generate_migration_pr
+    
+    create_index:
+      risk_level: low
+      requires_approval: false
+      action: generate_migration_pr
+    
+    enable_rls:
+      risk_level: medium
+      requires_approval: true
+      action: generate_migration_pr
+    
+    create_policy:
+      risk_level: medium
+      requires_approval: true
+      action: generate_migration_pr
+
+# Vercel environment variable changes
+vercel:
+  default_action: auto_apply_if_allowed
+  direct_apply_allowed: true  # Can auto-apply low-risk changes
+  
+  change_types:
+    set_env_var:
+      risk_level: low
+      requires_approval: false
+      action: auto_apply
+    
+    update_env_var:
+      risk_level: medium
+      requires_approval: false
+      action: auto_apply
+    
+    delete_env_var:
+      risk_level: high
+      requires_approval: true
+      action: generate_pr_with_docs
+
+# Storage bucket changes
+storage:
+  default_action: auto_apply
+  direct_apply_allowed: true
+  
+  change_types:
+    create_bucket:
+      risk_level: low
+      requires_approval: false
+      action: auto_apply
+    
+    update_bucket_policy:
+      risk_level: medium
+      requires_approval: true
+      action: generate_pr_with_docs
+    
+    delete_bucket:
+      risk_level: high
+      requires_approval: true
+      action: manual_only
+
+# Stripe configuration changes
+stripe:
+  default_action: read_only
+  direct_apply_allowed: false
+  
+  change_types:
+    verify_price:
+      risk_level: low
+      requires_approval: false
+      action: report_only
+
+# GitHub operations
+github:
+  pr_template:
+    title_prefix: "[AI Ops]"
+    branch_prefix: "ai-ops/"
+    labels:
+      - automated
+      - ai-ops
+    reviewers: []  # Add default reviewers if needed
+    
+  migration_pr:
+    create_separate_branch: true
+    include_rollback: true
+    request_review: true
+
+# Approval workflow
+approval:
+  enabled: false  # Stub implementation
+  
+  slack:
+    enabled: false
+    command_prefix: "/ops"
+    commands:
+      - approve
+      - reject
+      - review
+    
+    approval_required_for:
+      - high_risk_changes
+      - database_schema_changes
+      - production_env_changes
+
+# Safety checks
+safety:
+  dry_run_default: true
+  max_changes_per_apply: 50
+  
+  pre_apply_checks:
+    - verify_backup_exists
+    - validate_sql_syntax
+    - check_for_destructive_operations
+  
+  post_apply_checks:
+    - verify_migration_success
+    - check_application_health
+    - validate_data_integrity
+
+# Rollback policy
+rollback:
+  auto_rollback_on_error: false
+  keep_rollback_scripts: true
+  rollback_timeout_seconds: 300

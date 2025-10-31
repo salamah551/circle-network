@@ -1,0 +1,186 @@
+# ops/desired_state.yaml
+# Desired state configuration for AI Ops Control Plane
+
+# Onboarding rules
+onboarding:
+  needs_assessment_gate:
+    enabled: true
+    redirect_on_incomplete: /onboarding/needs-assessment
+  
+  required_profile_columns:
+    - subscription_status
+    - status
+    - is_admin
+    - needs_assessment
+    - needs_assessment_completed_at
+
+# Pricing configuration
+pricing:
+  tiers:
+    core:
+      price: 179
+      arc_cap: 10
+      briefpoint_cap: 5
+    pro:
+      price: 299
+      arc_cap: 30
+      briefpoint_cap: 10
+    elite:
+      price: 499
+      arc_cap: 50
+      briefpoint_cap: 20
+
+# Database schema requirements
+database:
+  tables:
+    - name: arc_requests
+      rls_enabled: true
+      required_columns:
+        - id
+        - user_id
+        - status
+        - created_at
+    
+    - name: arc_request_attachments
+      rls_enabled: true
+      required_columns:
+        - id
+        - request_id
+        - file_path
+        - created_at
+    
+    - name: requests
+      rls_enabled: true
+      required_columns:
+        - id
+        - user_id
+        - created_at
+    
+    - name: profiles
+      rls_enabled: true
+      required_columns:
+        - id
+        - subscription_status
+        - status
+        - is_admin
+        - needs_assessment
+        - needs_assessment_completed_at
+    
+    - name: referrals
+      rls_enabled: false
+      optional: true
+      required_columns:
+        - id
+        - referrer_id
+        - created_at
+    
+    - name: invites
+      rls_enabled: false
+      optional: true
+      required_columns:
+        - id
+        - email
+        - created_at
+    
+    - name: bulk_invites
+      rls_enabled: false
+      optional: true
+      required_columns:
+        - id
+        - batch_id
+        - created_at
+    
+    - name: ops_knowledge
+      rls_enabled: false
+      required_columns:
+        - id
+        - content
+        - embedding
+        - metadata
+        - created_at
+      indexes:
+        - name: ops_knowledge_embedding_idx
+          type: ivfflat
+          column: embedding
+        - name: ops_knowledge_metadata_idx
+          type: gin
+          column: metadata
+
+# Storage configuration
+storage:
+  buckets:
+    - name: arc-uploads
+      public: false
+      file_size_limit: 20971520  # 20MB in bytes
+      allowed_mime_types:
+        - application/pdf
+        - image/jpeg
+        - image/png
+        - application/msword
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      policies:
+        - operation: INSERT
+          check: "(bucket_id = 'arc-uploads'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)"
+        - operation: SELECT
+          check: "(bucket_id = 'arc-uploads'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)"
+        - operation: UPDATE
+          check: "(bucket_id = 'arc-uploads'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)"
+        - operation: DELETE
+          check: "(bucket_id = 'arc-uploads'::text) AND ((storage.foldername(name))[1] = (auth.uid())::text)"
+
+# Environment variables requirements
+environment:
+  required:
+    supabase:
+      - NEXT_PUBLIC_SUPABASE_URL
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - SUPABASE_SERVICE_ROLE_KEY
+    
+    arc:
+      - ARC_LIMIT_FOUNDING
+      - ARC_LIMIT_ELITE
+      - ARC_LIMIT_CHARTER
+      - ARC_LIMIT_PROFESSIONAL
+      - ARC_STORAGE_BUCKET
+      - ARC_MAX_FILE_SIZE_MB
+    
+    stripe:
+      - STRIPE_SECRET_KEY
+      - STRIPE_WEBHOOK_SECRET
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    
+    app:
+      - NEXT_PUBLIC_APP_URL
+    
+    ops:
+      - OPS_EMBEDDINGS_PROVIDER  # Default: openai
+      - OPS_EMBEDDINGS_MODEL     # Default: text-embedding-3-large
+      - OPENAI_API_KEY           # Required if using OpenAI embeddings
+  
+  optional:
+    stripe_prices:
+      - NEXT_PUBLIC_STRIPE_PRICE_CORE
+      - NEXT_PUBLIC_STRIPE_PRICE_PRO
+      - NEXT_PUBLIC_STRIPE_PRICE_ELITE
+    
+    github:
+      - GITHUB_TOKEN             # Required for PR creation
+      - GITHUB_REPO_OWNER
+      - GITHUB_REPO_NAME
+    
+    slack:
+      - SLACK_SIGNING_SECRET
+      - SLACK_BOT_TOKEN
+      - SLACK_OPS_CHANNEL_ID
+
+# Vercel configuration
+vercel:
+  check_env_completeness: true
+  check_cron_existence: true
+  # Note: cron creation not automated unless explicitly flagged
+
+# Stripe configuration
+stripe:
+  read_only_checks:
+    - verify_price_ids_exist
+    - verify_price_mapping_to_tiers
