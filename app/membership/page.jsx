@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, CheckCircle, Shield, Clock, Users, Zap, TrendingUp } from 'lucide-react';
+import { ArrowRight, CheckCircle, Shield, Clock, Users, Zap, TrendingUp, Crown } from 'lucide-react';
 
 export const metadata = {
   title: 'Membership Pricing | Circle Network',
