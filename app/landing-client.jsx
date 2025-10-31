@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight } from 'lucide-react';
+import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield } from 'lucide-react';
 import ROICalculator from '../components/ROICalculator';
 import { getThreeTierPricing, shouldShowCharterUrgencyBadge } from '@/lib/pricing';
 
