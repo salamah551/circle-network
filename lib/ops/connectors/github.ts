@@ -225,7 +225,8 @@ export class GitHubConnector extends BaseConnector {
    */
   async createPR(title: string, body: string, files: Array<{ path: string; content: string }>): Promise<{ success: boolean; message: string; prUrl?: string }> {
     try {
-      // Validate file paths to prevent path traversal and request forgery
+      // Validate and sanitize file paths to prevent path traversal and request forgery
+      const sanitizedFiles: Array<{ path: string; content: string }> = [];
       for (const file of files) {
         // Only allow specific safe paths
         if (!file.path.match(/^(supabase\/migrations|ops\/config|docs)\/[a-zA-Z0-9_\-\.\/]+\.(sql|yaml|yml|md)$/)) {
@@ -241,6 +242,11 @@ export class GitHubConnector extends BaseConnector {
             message: `Invalid file path: ${file.path}. Path traversal not allowed.`,
           };
         }
+        // Create sanitized copy with validated path
+        sanitizedFiles.push({
+          path: file.path,
+          content: file.content,
+        });
       }
 
       // Get default branch
@@ -306,8 +312,8 @@ export class GitHubConnector extends BaseConnector {
         };
       }
 
-      // Create/update files
-      for (const file of files) {
+      // Create/update files using sanitized paths
+      for (const file of sanitizedFiles) {
         const fileUrl = `${this.baseUrl}/repos/${this.owner}/${this.repo}/contents/${file.path}`;
         
         // Check if file exists
