@@ -78,8 +78,11 @@ ${generatePlan ? '\nIf the question involves making changes, provide a structure
     
     const userPrompt = `Context from codebase:\n\n${context}\n\nQuestion: ${question}\n\nPlease provide a detailed answer with citations.`;
     
+    // Use configurable model, defaulting to gpt-4-turbo-preview
+    const model = process.env.OPS_CHAT_MODEL || 'gpt-4-turbo-preview';
+    
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }

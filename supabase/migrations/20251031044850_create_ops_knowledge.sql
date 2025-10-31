@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS public.ops_knowledge (
 );
 
 -- Create indexes for efficient retrieval
+-- IVF-Flat index with lists=100 is suitable for small to medium datasets (<100k vectors)
+-- For larger datasets, consider increasing lists to sqrt(row_count)/10
+-- See: https://github.com/pgvector/pgvector#ivfflat
 CREATE INDEX IF NOT EXISTS ops_knowledge_embedding_idx 
   ON public.ops_knowledge 
   USING ivfflat (embedding vector_cosine_ops)
