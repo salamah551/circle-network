@@ -7,6 +7,9 @@ const OPS_API_TOKEN = process.env.OPS_API_TOKEN;
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Base URL for internal API calls (port 5000 is configured in package.json for this project)
+const getBaseUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000';
+
 // Verify admin access
 async function verifyAdmin(userId: string): Promise<boolean> {
   if (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -31,7 +34,7 @@ export async function ingestKnowledge(userId: string, mode: 'priority' | 'full' 
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/ops/ingest`, {
+    const response = await fetch(`${getBaseUrl()}/api/ops/ingest`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPS_API_TOKEN}`,
@@ -67,7 +70,7 @@ export async function askQuestion(userId: string, question: string) {
       return { success: false, error: 'Question is required' };
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/ops/ask`, {
+    const response = await fetch(`${getBaseUrl()}/api/ops/ask`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPS_API_TOKEN}`,
@@ -96,7 +99,7 @@ export async function auditInfrastructure(userId: string, scope: 'all' | 'supaba
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/ops/audit?scope=${scope}&mode=plan`,
+      `${getBaseUrl()}/api/ops/audit?scope=${scope}&mode=plan`,
       {
         method: 'GET',
         headers: {
@@ -128,7 +131,7 @@ export async function applyChanges(userId: string, changeIds: string[], generate
       return { success: false, error: 'No changes selected' };
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/ops/apply`, {
+    const response = await fetch(`${getBaseUrl()}/api/ops/apply`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPS_API_TOKEN}`,
@@ -162,7 +165,7 @@ export async function getIngestionStats(userId: string) {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/ops/ingest`, {
+    const response = await fetch(`${getBaseUrl()}/api/ops/ingest`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${OPS_API_TOKEN}`,
