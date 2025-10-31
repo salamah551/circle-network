@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase-browser';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   Database, MessageSquare, Search, Settings, 
   Loader2, CheckCircle, AlertCircle, ArrowLeft,
@@ -18,7 +18,7 @@ import {
 
 export default function OpsConsolePage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = getSupabaseBrowserClient();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
