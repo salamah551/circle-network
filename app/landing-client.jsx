@@ -32,10 +32,10 @@ export default function NewHomepage() {
                 Sign In
               </Link>
               <Link 
-                href="/apply"
+                href="/subscribe"
                 className="text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg shadow-purple-500/20"
               >
-                Request an Invitation
+                Subscribe
               </Link>
             </div>
           </div>
@@ -67,18 +67,25 @@ export default function NewHomepage() {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            An exclusive community where elite founders, executives, and accomplished professionals 
-            gain an unfair advantage through our proprietary <span className="text-purple-400 font-semibold">ARC™</span> AI engine 
-            and a network designed for the few who understand that being exceptional requires exceptional resources.
+            Never walk into a meeting or decision cold again. Get <span className="text-purple-400 font-semibold">ARC™</span> competitive intelligence 
+            and <span className="text-purple-400 font-semibold">BriefPoint</span> meeting briefs—plus an exclusive community 
+            where elite professionals share insights and opportunities.
           </p>
 
           {/* Primary CTA */}
-          <div className="flex justify-center mb-12">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
             <Link 
-              href="/apply"
-              className="group px-10 py-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 flex items-center gap-3"
+              href="/subscribe"
+              className="group px-10 py-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-3"
             >
-              Request an Invitation
+              View Membership Tiers
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link 
+              href="/briefpoint"
+              className="group px-10 py-5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
+            >
+              Learn About BriefPoint
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -306,6 +313,82 @@ export default function NewHomepage() {
         </div>
       </section>
 
+      {/* BriefPoint Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-sm font-semibold text-purple-400 mb-4">
+              ⚡ Never Walk Into a Meeting Cold
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Introducing BriefPoint
+            </h2>
+            <p className="text-xl text-white/60 max-w-3xl mx-auto">
+              Automated meeting briefs delivered before every conversation. Get participant intelligence, 
+              strategic talking points, and context—so you're always the most prepared person in the room.
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-8 md:p-12">
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-2xl font-bold mb-4">What You Get</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">Sunday weekly prep packs for the week ahead</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">T-120 minute pre-meeting briefs with talking points</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">Participant intel and company background</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">Strategic angles and opportunity identification</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-bold mb-4">Your Privacy Matters</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">No raw email storage—metadata only</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">30-day automatic data purge</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">Read-only calendar access (Calendar Mode)</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80">Ghost Mode available (no calendar access)</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="text-center pt-6 border-t border-purple-500/20">
+              <Link
+                href="/briefpoint"
+                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+              >
+                Learn more about BriefPoint
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* The ROI Calculator */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
@@ -481,11 +564,11 @@ export default function NewHomepage() {
             </div>
 
             <Link
-              href="/apply?tier=inner-circle"
+              href="/subscribe"
               className="block w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 mt-auto"
             >
               <span className="flex items-center justify-center gap-2 text-sm">
-                Apply for Inner Circle
+                Subscribe Now
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
@@ -559,11 +642,11 @@ export default function NewHomepage() {
             </div>
 
             <Link
-              href="/apply?tier=charter"
+              href="/subscribe"
               className="block w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 mt-auto"
             >
               <span className="flex items-center justify-center gap-2 text-sm">
-                Become a Charter Member
+                Subscribe Now
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
@@ -622,11 +705,11 @@ export default function NewHomepage() {
             </div>
 
             <Link
-              href="/apply?tier=professional"
+              href="/subscribe"
               className="block w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-center rounded-xl transition-all duration-300 border border-zinc-700 hover:border-zinc-600 mt-auto"
             >
               <span className="flex items-center justify-center gap-2 text-sm">
-                Join as Professional
+                Subscribe Now
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Link>
@@ -635,7 +718,7 @@ export default function NewHomepage() {
 
         <div className="mt-12 text-center">
           <p className="text-white/60 text-sm">
-            Not sure which tier is right for you? <Link href="/apply" className="text-purple-400 hover:text-purple-300 font-semibold">Apply now</Link> and we'll help you decide.
+            Compare all features on the <Link href="/membership" className="text-purple-400 hover:text-purple-300 font-semibold">membership page</Link> or learn about <Link href="/briefpoint" className="text-purple-400 hover:text-purple-300 font-semibold">BriefPoint</Link>.
           </p>
         </div>
       </section>
@@ -665,13 +748,13 @@ export default function NewHomepage() {
               <h4 className="font-semibold mb-4">Community</h4>
               <ul className="space-y-2 text-sm text-white/60">
                 <li>
-                  <Link href="/apply" className="hover:text-white transition-colors">Apply to Join</Link>
-                </li>
-                <li>
-                  <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
+                  <Link href="/subscribe" className="hover:text-white transition-colors">Subscribe</Link>
                 </li>
                 <li>
                   <Link href="/membership" className="hover:text-white transition-colors">Membership</Link>
+                </li>
+                <li>
+                  <Link href="/briefpoint" className="hover:text-white transition-colors">BriefPoint</Link>
                 </li>
               </ul>
             </div>

@@ -151,11 +151,16 @@ function SubscribePage() {
         priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING || process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID;
         planName = 'Founding Member';
         console.log('Using founding price ID:', priceId);
-      } else if (selectedPlan === 'premium') {
-        // Premium price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM;
-        planName = 'Premium';
-        console.log('Using premium price ID:', priceId);
+      } else if (selectedPlan === 'core') {
+        // Core tier price
+        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_CORE;
+        planName = 'Core';
+        console.log('Using core price ID:', priceId);
+      } else if (selectedPlan === 'pro' || selectedPlan === 'premium') {
+        // Pro tier price (premium for backwards compatibility)
+        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM;
+        planName = 'Pro';
+        console.log('Using pro price ID:', priceId);
       } else if (selectedPlan === 'elite') {
         // Elite price
         priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE;
@@ -466,7 +471,7 @@ function SubscribePage() {
                 </div>
                 
                 <div className="inline-block bg-blue-500/10 border border-blue-500/30 rounded-full px-3 py-1 mb-4">
-                  <span className="text-blue-400 text-xs font-bold uppercase">Premium</span>
+                  <span className="text-blue-400 text-xs font-bold uppercase">Pro</span>
                 </div>
                 
                 <div className="mb-6">
@@ -480,6 +485,14 @@ function SubscribePage() {
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span><strong>30 ARC™ requests per month</strong></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <span><strong>10 BriefPoint briefs per day</strong> (email + Slack)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                     <span>Complete platform access</span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -488,15 +501,7 @@ function SubscribePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>Member directory & messaging</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>Events and expert sessions</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>Deal flow marketplace</span>
+                    <span>Priority support</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
@@ -544,23 +549,23 @@ function SubscribePage() {
                   <ul className="space-y-3 text-sm">
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>Everything in Premium</strong></span>
+                      <span><strong>50 ARC™ requests per month</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>AI Deal Flow Alerts (Q1 2026)</span>
+                      <span><strong>20 BriefPoint briefs per day</strong> (email + Slack)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>AI Reputation Guardian (Q1 2026)</span>
+                      <span><strong>Everything in Pro</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>AI Competitive Intelligence (Q1 2026)</span>
+                      <span>White-glove concierge service</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Priority support & concierge service</span>
+                      <span>Dedicated account manager</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
