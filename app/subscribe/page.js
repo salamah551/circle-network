@@ -406,10 +406,10 @@ function SubscribePage() {
                   </div>
                   
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-emerald-400">$2,497</span>
-                    <span className="text-zinc-400 text-lg">/year</span>
+                    <span className="text-5xl font-bold text-emerald-400">$179</span>
+                    <span className="text-zinc-400 text-lg">/mo</span>
                     <div className="text-zinc-500 text-sm mt-1">
-                      <span className="line-through">$4,997/year</span> • Save $2,500
+                      Early access pricing
                     </div>
                     <div className="text-amber-400 font-semibold text-sm mt-2">
                       FOUNDING 50 EXCLUSIVE
@@ -424,7 +424,7 @@ function SubscribePage() {
                   <ul className="space-y-3 text-sm">
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>Lifetime price lock</strong> at $2,497/year (50% off forever)</span>
+                      <span><strong>Founding member price lock</strong> at $179/mo</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -471,12 +471,12 @@ function SubscribePage() {
                 </div>
                 
                 <div className="inline-block bg-blue-500/10 border border-blue-500/30 rounded-full px-3 py-1 mb-4">
-                  <span className="text-blue-400 text-xs font-bold uppercase">Pro</span>
+                  <span className="text-blue-400 text-xs font-bold uppercase">Premium</span>
                 </div>
                 
                 <div className="mb-6">
-                  <span className="text-5xl font-bold text-blue-400">$4,997</span>
-                  <span className="text-zinc-400 text-lg">/year</span>
+                  <span className="text-5xl font-bold text-blue-400">$299</span>
+                  <span className="text-zinc-400 text-lg">/mo</span>
                   <div className="text-zinc-500 text-sm mt-1">
                     Full platform access
                   </div>
@@ -539,8 +539,8 @@ function SubscribePage() {
                   </div>
                   
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-purple-400">$9,997</span>
-                    <span className="text-zinc-400 text-lg">/year</span>
+                    <span className="text-5xl font-bold text-purple-400">$499</span>
+                    <span className="text-zinc-400 text-lg">/mo</span>
                     <div className="text-purple-400 text-sm mt-1 font-semibold">
                       VIP access + AI tools
                     </div>

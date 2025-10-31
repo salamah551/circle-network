@@ -121,8 +121,8 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
           You're being invited during our founding member phase, which means:
         </p>
         <ul style="margin:0 0 16px 0;padding:0 0 0 20px;color:#f5f5f5;">
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Lifetime Founding Member Status</strong><br/>Lock in $2,497/year forever (regular pricing will be $4,997+ after January 15, 2026)</li>
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ ALL Elite AI Features INCLUDED—Forever</strong><br/>While future Premium members must pay $4,997-$8,994 to access AI features, you get them all at no additional cost: AI Deal Flow Alerts ($1,997 value) + Reputation Guardian ($1,497 value) + AI Competitive Intelligence ($1,497 value)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Lifetime Founding Member Status</strong><br/>Lock in $179/mo forever (Premium pricing $299/mo, Elite $499/mo)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Priority Access to Features</strong><br/>Get early access to all new platform features and AI tools as they launch</li>
           <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original founding members</li>
           <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
           <li style="margin:0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Unlimited Access to All Core Features</strong><br/>Strategic Intros, Member Directory, Private Messaging, and more—no paywalls, no limits</li>
@@ -144,7 +144,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
         <div style="font-size:14px;line-height:1.8;color:#333;">
           <p style="margin:0 0 8px 0;"><strong>📅 November 10, 2025:</strong> Soft Launch (Invitation-Only Early Access)<br/><span style="color:#666;">Platform goes live for founding members. Core features available immediately.</span></p>
           <p style="margin:0 0 8px 0;"><strong>📅 December 1, 2025:</strong> Official Public Launch<br/><span style="color:#666;">Full platform launch with all features. Founding member pricing still available.</span></p>
-          <p style="margin:0;"><strong>📅 January 15, 2026:</strong> Founding Member Window Closes<br/><span style="color:#666;">Pricing increases to $4,997/year (Premium) or $9,997/year (Elite)</span></p>
+          <p style="margin:0;"><strong>📅 January 15, 2026:</strong> Founding Member Window Closes<br/><span style="color:#666;">Pricing increases to $299/mo (Premium) or $499/mo (Elite)</span></p>
         </div>
         <p style="margin:16px 0 0 0;font-size:14px;line-height:1.6;color:#666;font-style:italic;">
           Founding member pricing ends when we reach capacity OR January 15, 2026—whichever comes first.
@@ -209,11 +209,11 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </p>
 
       <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
-        You're among a highly selective group being invited during our <strong>founding member phase</strong>—and there are only <strong>11 days left</strong> to claim your spot at the locked-in price of $2,497/year.
+        You're among a highly selective group being invited during our <strong>founding member phase</strong>—and there are only <strong>11 days left</strong> to claim your spot at the locked-in price of $179/mo.
       </p>
 
       <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
-        After January 15, 2026, this same membership will cost $4,997-$9,997/year.
+        After January 15, 2026, this same membership will cost $299-$499/mo.
       </p>
 
       <div style="background:#f8f9fa;border-left:4px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:4px;">
@@ -294,10 +294,10 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:#fff;padding:24px;margin:0 0 24px 0;border-radius:8px;">
         <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#E5C77E;">THE MATH IS SIMPLE</h2>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
-          Circle Network costs $2,497/year as a founding member.
+          Circle Network costs $179/mo as a founding member ($2,148/year).
         </p>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
-          If just <strong style="color:#E5C77E;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#E5C77E;">20x</strong>.
+          If just <strong style="color:#E5C77E;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#E5C77E;">23x</strong>.
         </p>
         <p style="margin:0;font-size:14px;line-height:1.6;color:#e0e0e0;font-style:italic;">
           Most members make multiple valuable connections per year.
@@ -305,7 +305,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </div>
 
       <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
-        You have <strong>7 days left</strong> to join at founding member pricing before it increases to $4,997-$9,997/year.
+        You have <strong>7 days left</strong> to join at founding member pricing before it increases to $299-$499/mo.
       </p>
 
       <div style="background:#FEF3C7;border:2px solid #D4AF37;padding:20px;margin:0 0 24px 0;border-radius:8px;text-align:center;">
@@ -362,14 +362,14 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </p>
 
       <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
-        Your invitation code expires in <strong style="color:#DC143C;">72 hours</strong>, and after that, you'll miss the founding member pricing of $2,497/year—locked in for life.
+        Your invitation code expires in <strong style="color:#DC143C;">72 hours</strong>, and after that, you'll miss the founding member pricing of $179/mo—locked in for life.
       </p>
 
       <div style="background:#FEE2E2;border-left:4px solid #DC143C;padding:20px;margin:0 0 24px 0;border-radius:4px;">
         <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#991B1B;">WHAT YOU'RE ABOUT TO LOSE:</h2>
         <ul style="margin:0;padding:0 0 0 20px;">
-          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>$2,500/year savings</strong> (forever)</li>
-          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>$4,991/year</strong> in Elite AI features (included free for founding members)</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>$120/mo savings</strong> vs Premium tier (forever)</li>
+          <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>Priority access</strong> to new features and AI tools</li>
           <li style="margin:0 0 8px 0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>Founding Member Badge</strong> and priority matching</li>
           <li style="margin:0;font-size:15px;line-height:1.6;color:#991B1B;"><strong>First choice</strong> of connections in the network</li>
         </ul>

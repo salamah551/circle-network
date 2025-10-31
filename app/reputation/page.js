@@ -263,7 +263,7 @@ export default function ReputationPage() {
                     </div>
                     <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700 mb-4">
                       <p className="text-sm italic text-zinc-400">
-                        "Exclusive Networks Under Fire: Are They Worth the Cost? Circle Network charges up to $9,997/year..."
+                        "Exclusive Networks Under Fire: Are They Worth the Cost? Circle Network charges up to $499/mo..."
                       </p>
                     </div>
                     <div className="space-y-2 text-sm">
