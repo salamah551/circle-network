@@ -9,6 +9,7 @@ import { SupabaseConnector } from '@/ops/connectors/supabase';
 import { StorageConnector } from '@/ops/connectors/storage';
 import { VercelConnector } from '@/ops/connectors/vercel';
 import { StripeConnector } from '@/ops/connectors/stripe';
+import { GitHubConnector } from '@/ops/connectors/github';
 import yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
     // Parse request body
     const body = await request.json().catch(() => ({}));
     const { 
-      connectors = ['supabase', 'storage', 'vercel', 'stripe'],
+      connectors = ['supabase', 'storage', 'vercel', 'stripe', 'github'],
       saveToDatabase = true
     } = body;
 
@@ -100,6 +101,12 @@ export async function POST(request: NextRequest) {
 
     if (connectors.includes('stripe')) {
       const connector = new StripeConnector({});
+      const plan = await connector.plan(desiredState);
+      plans.push(plan);
+    }
+
+    if (connectors.includes('github')) {
+      const connector = new GitHubConnector({ repository: desiredState.github?.repository });
       const plan = await connector.plan(desiredState);
       plans.push(plan);
     }
