@@ -9,7 +9,7 @@ The AI Ops Control Plane is now immediately usable end-to-end through the admin 
 ### Required Environment Variables
 
 ```bash
-# Supabase (Required)
+# Supabase (Required - must be set in production, gracefully handled in dev)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
@@ -19,6 +19,14 @@ OPENAI_API_KEY=sk-...
 
 # AI Ops API Security (Required)
 OPS_API_TOKEN=your-secret-token-for-ops-api
+
+# Enable Ops Console Access (Required to access /admin/ops)
+OPS_ADMIN_ENABLED=true
+
+# Stripe Price IDs (checked by audit - use FOUNDING/PREMIUM/ELITE names)
+NEXT_PUBLIC_STRIPE_PRICE_FOUNDING=price_...
+NEXT_PUBLIC_STRIPE_PRICE_PREMIUM=price_...
+NEXT_PUBLIC_STRIPE_PRICE_ELITE=price_...
 ```
 
 ### Optional Environment Variables

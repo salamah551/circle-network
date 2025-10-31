@@ -1,5 +1,14 @@
 # Circle Network Email Templates
 
+> **⚠️ ARCHIVED - OUTDATED PRICING**
+> 
+> This document contains historical pricing information that is no longer current.
+> The pricing mentioned here ($2,497/year, $4,997/year, $9,997/year) has been superseded.
+> 
+> **Current pricing:** Founding $179/mo, Premium $299/mo, Elite $499/mo
+> 
+> This file is kept for historical reference only and should not be used for customer-facing content.
+
 **Updated:** October 17, 2025  
 **Founder:** Shehab Salamah  
 **Timeline:** Nov 10 (Soft Launch) → Dec 1 (Official Launch) → Jan 15 (Founding Window Closes)
