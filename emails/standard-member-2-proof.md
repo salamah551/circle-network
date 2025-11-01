@@ -14,7 +14,7 @@ Hi {{first_name}},
 
 Wanted to follow up on your Circle Network invitation with some context from members who've already joined.
 
-One SaaS founder told me their first intro led to a strategic partnership worth $180K in the first year. ROI was 72x on their membership.
+One SaaS founder told me their first intro led to a strategic partnership worth $180K in the first year. ROI was over 80x on their membership.
 
 A fintech CEO found their Series A lead investor through the platform. The AI matched them at 94% based on investment focus.
 
@@ -26,10 +26,11 @@ Current members include people from Y Combinator, Fortune 500 C-suites, Andreess
 
 You have {{deadline}} days left to use your invitation code ({{invite_code}}).
 
-Premium is $4,997/year (strategic introductions, member directory, events).
-Elite is $9,997/year (Premium plus AI Deal Flow, Reputation Guardian, Competitive Intelligence coming Q1 2026).
+Founding is $179/mo (lock in early access pricing).
+Premium is $299/mo (strategic introductions, member directory, events).
+Elite is $499/mo (Premium plus AI Deal Flow, Reputation Guardian, Competitive Intelligence coming Q1 2026).
 
-Both include 30-day money-back guarantee and our "3 wins in 90 days" performance guarantee.
+All tiers include 30-day money-back guarantee and our "3 wins in 90 days" performance guarantee.
 
 Think this could be valuable for you? {{apply_url}}
 

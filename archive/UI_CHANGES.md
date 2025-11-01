@@ -1,5 +1,14 @@
 # UI Changes Documentation
 
+> **⚠️ ARCHIVED - OUTDATED PRICING**
+> 
+> This document contains historical pricing information that is no longer current.
+> The pricing mentioned here ($2,497/year, $4,997/year, $9,997/year) has been superseded.
+> 
+> **Current pricing:** Founding $179/mo, Premium $299/mo, Elite $499/mo
+> 
+> This file is kept for historical reference only and should not be used for customer-facing content.
+
 ## Subscribe Page - Before and After
 
 ### New Features Added:

@@ -306,7 +306,7 @@ export default function IntelligencePage() {
                     <p>• LinkedIn Premium: G2 rating down to 3.8/5 (from 4.1 last quarter)</p>
                     <p>• Chief increased pricing to $12,000/year → 15% churn spike</p>
                     <p className="text-xs text-amber-400">
-                      <strong>Opportunity:</strong> Your Elite tier ($9,997) is now cheaper than Chief
+                      <strong>Opportunity:</strong> Your Elite tier ($499/mo) is now significantly cheaper than Chief
                     </p>
                   </div>
                 </div>

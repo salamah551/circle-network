@@ -70,13 +70,13 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-light text-white mb-4">4. Payment Terms</h2>
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.1 Subscription Fees</h3>
             <p>
-              Founding members (joining before January 15, 2026) pay $2,497/year with a lifetime rate lock guarantee. After the founding member window closes, 
-              pricing increases to $4,997/year (Premium) or $9,997/year (Elite, including advanced AI features). Annual billing only.
+              Membership is billed monthly. Current pricing: Founding $179/mo, Premium $299/mo, Elite $499/mo. Founding member pricing is locked in 
+              for the lifetime of the membership. Premium and Elite tier pricing is subject to change with 30 days notice. Monthly billing cycle.
             </p>
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.2 Billing</h3>
             <p>
-              Subscriptions are billed annually in advance. Payment is processed securely through Stripe. By subscribing, you authorize 
+              Subscriptions are billed monthly in advance. Payment is processed securely through Stripe. By subscribing, you authorize 
               us to charge your payment method for the subscription fee and any applicable taxes.
             </p>
 
@@ -89,9 +89,9 @@ export default function TermsOfService() {
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.4 Founding Member Rate Lock</h3>
             <p>
-              Founding members who join before January 15, 2026, receive a guaranteed lifetime rate of $2,497/year. This rate will not increase, 
+              Founding members receive a guaranteed lifetime rate of $179/mo. This rate will not increase, 
               even if you pause and later resume your membership, provided your account remains in good standing. Founding members also receive 
-              access to all Elite AI features at no additional cost (a $4,991/year value).
+              priority access to new features and exclusive member benefits.
             </p>
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.5 Performance Guarantee</h3>
