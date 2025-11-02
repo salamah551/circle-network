@@ -2,15 +2,18 @@
 // GET /api/arc/usage - Returns current user's ARC usage stats
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { getUsageLimits } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
-// Tier-based monthly limits (configurable via env)
+// Tier-based monthly limits from pricing source of truth
 const USAGE_LIMITS = {
-  founding: parseInt(process.env.ARC_LIMIT_FOUNDING || '100', 10),
-  elite: parseInt(process.env.ARC_LIMIT_ELITE || '100', 10),
-  charter: parseInt(process.env.ARC_LIMIT_CHARTER || '10', 10),
-  professional: parseInt(process.env.ARC_LIMIT_PROFESSIONAL || '5', 10),
+  professional: 10,
+  pro: 30,
+  elite: 100,
+  // Legacy tier mappings for backwards compatibility
+  founding: 100, // Maps to elite tier limits
+  charter: 30,   // Maps to pro tier limits
 };
 
 function createClient() {

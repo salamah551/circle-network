@@ -35,9 +35,10 @@ The system uses `ops/desired_state.yaml` to declare infrastructure requirements:
 - Required profile columns: `subscription_status`, `status`, `is_admin`, `needs_assessment`, `needs_assessment_completed_at`
 
 **Pricing Tiers:**
-- Core: $179/month, 10 ARC requests, 5 BriefPoint caps
-- Pro: $299/month, 30 ARC requests, 10 BriefPoint caps
-- Elite: $499/month, 50 ARC requests, 20 BriefPoint caps
+- Professional: $199/month, 10 ARC requests, 5 BriefPoint briefs/day, 1 Intro/week
+- Pro: $299/month, 30 ARC requests, 10 BriefPoint briefs/day, 3 Intros/week
+- Elite: $499/month, 100 ARC requests, 25 BriefPoint briefs/day, 5+ Intros/week, Deep Dive
+- Founding Members: Pro tier at $219/month for 24 months
 
 **Database Tables:**
 - `arc_requests`, `arc_request_attachments`, `requests`, `profiles`
