@@ -103,7 +103,7 @@ export default function PersonalizedDashboard() {
   const isFoundingMember = profile?.membership_tier === 'founding' || profile?.is_founding_member;
   const isEliteMember = profile?.membership_tier === 'elite';
 
-  if (authLoading || !user) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
@@ -115,6 +115,11 @@ export default function PersonalizedDashboard() {
         </div>
       </div>
     );
+  }
+
+  // If not loading and no user, the useEffect will handle redirect to login
+  if (!user) {
+    return null;
   }
 
   return (

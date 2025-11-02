@@ -74,8 +74,7 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      setUser(null);
-      setProfile(null);
+      // The onAuthStateChange listener will handle state updates
     } catch (error) {
       console.error('Error signing out:', error);
     }
