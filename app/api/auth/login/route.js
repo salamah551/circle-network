@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { getSupabaseServerClient } from '@/lib/supabase';
 import { getAuthCallbackUrl, formatAuthError } from '@/lib/auth-redirect';
 
 export async function POST(request) {
   let supabaseAdmin;
-  let supabaseServer;
   
   try {
     supabaseAdmin = getSupabaseAdmin();
-    supabaseServer = getSupabaseServerClient();
   } catch (error) {
-    console.error('Failed to initialize Supabase clients:', error.message);
+    console.error('Failed to initialize Supabase admin client:', error.message);
     return NextResponse.json(
       { error: 'Server configuration error. Please contact support.' },
       { status: 500 }
@@ -55,10 +52,9 @@ export async function POST(request) {
     // Compute redirect URL with fallback to request origin
     const { url: emailRedirectTo, origin: redirectOrigin } = getAuthCallbackUrl(request);
     
-    // Send magic link using Supabase Auth server client (with anon key)
-    // Note: Use server client for OTP operations as it properly handles email sending
-    // The admin client is used above for checking user existence and admin status
-    const { error: magicLinkError } = await supabaseServer.auth.signInWithOtp({
+    // Send magic link using Supabase Admin client (with service role key)
+    // The admin client is required for sending magic links from the server
+    const { error: magicLinkError } = await supabaseAdmin.auth.signInWithOtp({
       email: emailLower,
       options: {
         emailRedirectTo,
