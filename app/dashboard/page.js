@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { useAuth } from '@/app/auth-provider';
 import Link from 'next/link';
 import {
   Crown, Loader2, Menu, X, LogOut, Activity, Sparkles, Users, Target,
@@ -20,8 +20,6 @@ import CommunityHighlightsWidget from '@/components/dashboard/CommunityHighlight
 // Personalization
 import { getPersonalizedLayout, getPersonalizedWelcome } from '@/lib/dashboardPersonalization';
 
-const supabase = getSupabaseBrowserClient();
-
 const widgetComponents = {
   ActionCenter,
   ArcBriefsWidget,
@@ -33,9 +31,7 @@ const widgetComponents = {
 
 export default function PersonalizedDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, profile, loading: authLoading, signOut } = useAuth();
   const [widgetLayout, setWidgetLayout] = useState([]);
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,63 +43,39 @@ export default function PersonalizedDashboard() {
   });
 
   useEffect(() => {
-    checkUser();
-  }, []);
+    // Only redirect if auth state is fully resolved (not loading)
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
-  const checkUser = async () => {
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  useEffect(() => {
+    if (profile) {
+      // Get personalized layout based on needs assessment
+      const layout = getPersonalizedLayout(profile?.needs_assessment);
+      setWidgetLayout(layout.widgets);
       
-      if (sessionError || !session) {
-        router.push('/login');
-        return;
-      }
-
-      setUser(session.user);
-
-      // Get user profile with needs assessment
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Profile error:', profileError);
-      } else {
-        setProfile(profileData);
-        
-        // Get personalized layout based on needs assessment
-        const layout = getPersonalizedLayout(profileData?.needs_assessment);
-        setWidgetLayout(layout.widgets);
-        
-        // Get personalized welcome message
-        const welcome = getPersonalizedWelcome(
-          profileData?.needs_assessment, 
-          profileData?.first_name || 'Member'
-        );
-        setWelcomeMessage(welcome);
-      }
+      // Get personalized welcome message
+      const welcome = getPersonalizedWelcome(
+        profile?.needs_assessment, 
+        profile?.first_name || 'Member'
+      );
+      setWelcomeMessage(welcome);
 
       // Get stats from API endpoint
-      try {
-        const statsResponse = await fetch('/api/dashboard/stats');
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          setStats(statsData);
-        } else {
-          // Fallback to zeros on API error
-          console.error('Failed to fetch dashboard stats');
-          setStats({
-            connections: 0,
-            messages: 0,
-            introsPending: 0,
-            introsAccepted: 0
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        // Fallback to zeros on error
+      fetchStats();
+    }
+  }, [profile]);
+
+  const fetchStats = async () => {
+    try {
+      const statsResponse = await fetch('/api/dashboard/stats');
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      } else {
+        // Fallback to zeros on API error
+        console.error('Failed to fetch dashboard stats');
         setStats({
           connections: 0,
           messages: 0,
@@ -111,23 +83,27 @@ export default function PersonalizedDashboard() {
           introsAccepted: 0
         });
       }
-
-      setLoading(false);
     } catch (error) {
-      console.error('Error:', error);
-      setLoading(false);
+      console.error('Error fetching dashboard stats:', error);
+      // Fallback to zeros on error
+      setStats({
+        connections: 0,
+        messages: 0,
+        introsPending: 0,
+        introsAccepted: 0
+      });
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push('/login');
   };
 
   const isFoundingMember = profile?.membership_tier === 'founding' || profile?.is_founding_member;
   const isEliteMember = profile?.membership_tier === 'elite';
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
@@ -139,6 +115,11 @@ export default function PersonalizedDashboard() {
         </div>
       </div>
     );
+  }
+
+  // If not loading and no user, the useEffect will handle redirect to login
+  if (!user) {
+    return null;
   }
 
   return (

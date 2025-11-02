@@ -1,44 +1,27 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { VALIDATION, LOADING, ERRORS } from '@/lib/copy';
+import { useAuth } from '@/app/auth-provider';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, profile, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    checkExistingSession();
-  }, []);
-
-  const checkExistingSession = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (profile?.is_admin) {
-          router.push('/admin');
-        } else {
-          router.push('/dashboard');
-        }
+    // Only redirect if auth state is fully resolved (not loading)
+    if (!loading && user) {
+      if (profile?.is_admin) {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
       }
-    } catch (error) {
-      console.error('Session check error:', error);
-    } finally {
-      setIsCheckingAuth(false);
     }
-  };
+  }, [user, profile, loading, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +49,7 @@ export default function LoginPage() {
     }
   };
 
-  if (isCheckingAuth) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
