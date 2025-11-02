@@ -12,9 +12,20 @@ variables:
 
 Hi {{first_name}},
 
-Wanted to help you choose between Premium and Elite by breaking down what each includes.
+Wanted to help you choose between our membership tiers by breaking down what each includes.
 
-Premium ($4,997/year):
+Founding ($179/month):
+- AI-powered strategic introductions (3/week)
+- Member directory and advanced search
+- Direct messaging
+- Events and expert sessions
+- Deal flow marketplace access
+- 30-day money-back guarantee
+- Limited availability for founding members
+
+This is best for early adopters who want to lock in the lowest rate. If 1-2 connections create value this year, your ROI is substantial.
+
+Premium ($299/month):
 - AI-powered strategic introductions (3/week)
 - Member directory and advanced search
 - Direct messaging
@@ -22,14 +33,14 @@ Premium ($4,997/year):
 - Deal flow marketplace access
 - 30-day money-back guarantee
 
-This is best for professionals focused on expanding their network and making strategic connections. If 1-2 connections create $100K in value this year, your ROI is 20x.
+This is best for professionals focused on expanding their network and making strategic connections. If 1-2 connections create significant value this year, your investment pays for itself.
 
-Elite ($9,997/year):
+Elite ($499/month):
 Everything in Premium, plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
 
-Best for active investors looking for deal flow, executives who need reputation protection, and strategic thinkers who want competitive intelligence. If the AI suite prevents one $500K mistake or surfaces one 10x investment, your ROI is 50-500x.
+Best for active investors looking for deal flow, executives who need reputation protection, and strategic thinkers who want competitive intelligence. If the AI suite prevents one major mistake or surfaces one valuable opportunity, your ROI is exceptional.
 
-About 60% join as Premium—they value strategic introductions and community access. About 40% join as Elite—they want the full AI suite. Many Premium members upgrade to Elite within 3-6 months once they see the value.
+Most members start with Founding or Premium—they value strategic introductions and community access. Many upgrade to Elite within 3-6 months once they see the value.
 
 You have {{deadline}} days to use your invitation code ({{invite_code}}).
 

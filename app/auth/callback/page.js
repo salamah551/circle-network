@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase'; // ✅ Use existing singleton
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { Loader2 } from 'lucide-react';
 import { identifyUser, trackEvent } from '@/lib/posthog';
 
@@ -16,6 +16,7 @@ export default function AuthCallback() {
 
     const handleCallback = async () => {
       try {
+        const supabase = getSupabaseBrowserClient();
         const { data, error } = await supabase.auth.getSession();
         
         if (error || !data.session) {

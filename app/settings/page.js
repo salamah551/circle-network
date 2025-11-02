@@ -1,17 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { 
   ArrowLeft, Save, Loader2, User, Briefcase, MapPin,
   Building2, Linkedin, Mail, Target, Lightbulb, FileText,
   Bell, Lock, CreditCard, LogOut, Check, X
 } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 const EXPERTISE_OPTIONS = [
   'Fundraising', 'Sales', 'Marketing', 'Product', 'Engineering',
@@ -52,6 +47,7 @@ export default function SettingsPage() {
 
   const checkAuthAndLoadProfile = async () => {
     try {
+      const supabase = getSupabaseBrowserClient();
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error || !session) {
@@ -70,6 +66,7 @@ export default function SettingsPage() {
 
   const loadProfile = async (userId) => {
     try {
+      const supabase = getSupabaseBrowserClient();
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -109,6 +106,7 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
+      const supabase = getSupabaseBrowserClient();
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -138,6 +136,7 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
+    const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
     router.push('/');
   };
