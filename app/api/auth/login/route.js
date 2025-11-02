@@ -68,10 +68,7 @@ export async function POST(request) {
       const { message: errorMessage, statusCode } = formatAuthError(magicLinkError, redirectOrigin);
       
       return NextResponse.json(
-        { 
-          error: errorMessage,
-          details: magicLinkError.message 
-        },
+        { error: errorMessage },
         { status: statusCode }
       );
     }

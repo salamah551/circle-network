@@ -60,10 +60,7 @@ export async function POST(request) {
       const { message: errorMessage, statusCode } = formatAuthError(error, redirectOrigin);
       
       return NextResponse.json(
-        { 
-          error: errorMessage,
-          details: error.message 
-        },
+        { error: errorMessage },
         { status: statusCode }
       );
     }
