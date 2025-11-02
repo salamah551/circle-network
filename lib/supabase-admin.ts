@@ -9,29 +9,25 @@ let supabaseAdminInstance: SupabaseClient | null = null;
 /**
  * Get or create a singleton Supabase admin client with service role permissions
  * 
- * Environment variables (in order of precedence):
- * - SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL for the Supabase project URL
- * - SUPABASE_SERVICE_ROLE_KEY (required) for admin operations
+ * Required environment variables:
+ * - SUPABASE_URL: The Supabase project URL (server-side only, not NEXT_PUBLIC_*)
+ * - SUPABASE_SERVICE_ROLE_KEY: Service role key for admin operations
  * 
- * @throws Error if SUPABASE_SERVICE_ROLE_KEY is not set
+ * @throws Error if either SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set
  */
 export function getSupabaseAdmin(): SupabaseClient {
   if (!supabaseAdminInstance) {
-    // Try SUPABASE_URL first, fallback to NEXT_PUBLIC_SUPABASE_URL
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    // Use SUPABASE_URL for admin operations (no fallback to public URL)
+    const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl) {
       throw new Error(
-        'Missing Supabase URL configuration.\n' +
-        'Set either SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in your environment variables.\n' +
+        'Missing SUPABASE_URL environment variable.\n' +
+        'This is required for server-side admin operations.\n' +
+        'Set SUPABASE_URL in your environment variables (not NEXT_PUBLIC_SUPABASE_URL).\n' +
         'Example: SUPABASE_URL=https://your-project.supabase.co'
       );
-    }
-    
-    // Log when using fallback URL to ensure proper configuration
-    if (!process.env.SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      console.warn('⚠️ Using NEXT_PUBLIC_SUPABASE_URL fallback for admin operations. Set SUPABASE_URL for better security.');
     }
 
     if (!supabaseServiceRoleKey) {

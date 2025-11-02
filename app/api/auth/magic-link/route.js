@@ -1,18 +1,15 @@
 // app/api/auth/magic-link/route.js
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { getSupabaseServerClient } from '@/lib/supabase';
 import { getAuthRedirectOrigin, formatAuthError } from '@/lib/auth-redirect';
 
 export async function POST(request) {
   let supabaseAdmin;
-  let supabaseServer;
   
   try {
     supabaseAdmin = getSupabaseAdmin();
-    supabaseServer = getSupabaseServerClient();
   } catch (error) {
-    console.error('Failed to initialize Supabase clients:', error.message);
+    console.error('Failed to initialize Supabase admin client:', error.message);
     return NextResponse.json(
       { error: 'Server configuration error. Please contact support.' },
       { status: 500 }
@@ -47,9 +44,9 @@ export async function POST(request) {
     
     console.log('Redirect URL:', redirectUrl);
 
-    // Send magic link with redirect using server client (with anon key)
-    // Note: Use server client for OTP operations as it properly handles email sending
-    const { data, error } = await supabaseServer.auth.signInWithOtp({
+    // Send magic link with redirect using admin client (with service role key)
+    // The admin client is required for sending magic links from the server
+    const { data, error } = await supabaseAdmin.auth.signInWithOtp({
       email: email.toLowerCase(),
       options: {
         emailRedirectTo: redirectUrl,
