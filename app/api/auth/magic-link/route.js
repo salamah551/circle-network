@@ -1,6 +1,7 @@
 // app/api/auth/magic-link/route.js
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getAuthRedirectOrigin } from '@/lib/auth-redirect';
 
 export async function POST(request) {
   let supabaseAdmin;
@@ -36,26 +37,8 @@ export async function POST(request) {
     });
 
     // Compute redirect URL with fallback to request origin
-    const headers = request.headers;
-    let redirectOrigin = process.env.NEXT_PUBLIC_APP_URL;
+    const redirectOrigin = getAuthRedirectOrigin(request);
     
-    // If NEXT_PUBLIC_APP_URL is not set or doesn't match deployment, use request origin
-    if (!redirectOrigin) {
-      const proto = headers.get('x-forwarded-proto') || 'http';
-      const host = headers.get('host') || 'localhost:5000';
-      redirectOrigin = `${proto}://${host}`;
-    }
-    
-    // Validate HTTPS in production
-    if (process.env.NODE_ENV === 'production' && !redirectOrigin.startsWith('https://')) {
-      console.warn('⚠️  Non-HTTPS redirect in production, using request origin');
-      const proto = headers.get('x-forwarded-proto') || 'https';
-      const host = headers.get('host');
-      if (host) {
-        redirectOrigin = `${proto}://${host}`;
-      }
-    }
-
     // Build redirect URL - Supabase will handle auth automatically via hash params
     const redirectUrl = `${redirectOrigin}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
     

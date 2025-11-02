@@ -49,7 +49,7 @@ export function getSupabaseAdmin(): SupabaseClient {
     if (process.env.NODE_ENV !== 'production') {
       console.log('✓ Supabase Admin client initialized');
       console.log(`  URL: ${supabaseUrl}`);
-      console.log(`  Key: ${supabaseServiceRoleKey.substring(0, 20)}...`);
+      console.log('  Key: service_role_***');
     }
   }
 
