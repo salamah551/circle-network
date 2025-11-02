@@ -19,7 +19,6 @@ export function AuthProvider({ children }) {
   const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
-
     // Fetch profile for a given user
     const fetchProfile = async (userId) => {
       try {
@@ -84,7 +83,8 @@ export function AuthProvider({ children }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const signOut = async () => {
     try {
