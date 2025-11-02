@@ -22,11 +22,11 @@ Everyone in the network is vetted—tech founders, investors, executives, adviso
 
 We have three membership tiers:
 
-Founding ($179/month): AI-powered introductions, member directory, messaging, events, deal flow marketplace access. Limited availability.
+**Founding ($179/month):** AI-powered introductions, member directory, messaging, events, deal flow marketplace access. Limited availability.
 
-Premium ($299/month): AI-powered introductions, member directory, messaging, events, deal flow marketplace access.
+**Premium ($299/month):** AI-powered introductions, member directory, messaging, events, deal flow marketplace access.
 
-Elite ($499/month): Everything in Premium plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
+**Elite ($499/month):** Everything in Premium plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
 
 All tiers include a 30-day money-back guarantee.
 

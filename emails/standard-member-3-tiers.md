@@ -14,7 +14,7 @@ Hi {{first_name}},
 
 Wanted to help you choose between our membership tiers by breaking down what each includes.
 
-Founding ($179/month):
+**Founding ($179/month):**
 - AI-powered strategic introductions (3/week)
 - Member directory and advanced search
 - Direct messaging
@@ -25,7 +25,7 @@ Founding ($179/month):
 
 This is best for early adopters who want to lock in the lowest rate. If 1-2 connections create value this year, your ROI is substantial.
 
-Premium ($299/month):
+**Premium ($299/month):**
 - AI-powered strategic introductions (3/week)
 - Member directory and advanced search
 - Direct messaging
@@ -35,7 +35,7 @@ Premium ($299/month):
 
 This is best for professionals focused on expanding their network and making strategic connections. If 1-2 connections create significant value this year, your investment pays for itself.
 
-Elite ($499/month):
+**Elite ($499/month):**
 Everything in Premium, plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
 
 Best for active investors looking for deal flow, executives who need reputation protection, and strategic thinkers who want competitive intelligence. If the AI suite prevents one major mistake or surfaces one valuable opportunity, your ROI is exceptional.
