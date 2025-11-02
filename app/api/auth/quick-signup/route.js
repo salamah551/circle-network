@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseServerClient } from '@/lib/supabase';
 
 export async function POST(request) {
   let supabaseAdmin;
+  let supabaseServer;
   
   try {
     supabaseAdmin = getSupabaseAdmin();
+    supabaseServer = getSupabaseServerClient();
   } catch (error) {
-    console.error('Failed to initialize Supabase admin client:', error.message);
+    console.error('Failed to initialize Supabase clients:', error.message);
     return NextResponse.json(
       { error: 'Server configuration error. Please contact support.' },
       { status: 500 }
@@ -46,7 +49,8 @@ export async function POST(request) {
       );
     }
 
-    const { error: magicLinkError } = await supabaseAdmin.auth.signInWithOtp({
+    // Send magic link using server client (with anon key) for proper email handling
+    const { error: magicLinkError } = await supabaseServer.auth.signInWithOtp({
       email: emailLower,
       options: {
         emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe?email=${encodeURIComponent(emailLower)}&code=${encodeURIComponent(normalizedCode)}&validated=true`,
