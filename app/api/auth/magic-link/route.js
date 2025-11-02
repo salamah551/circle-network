@@ -1,15 +1,20 @@
 // app/api/auth/magic-link/route.js
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getAuthRedirectOrigin, formatAuthError } from '@/lib/auth-redirect';
 
 export async function POST(request) {
-  // Initialize at runtime
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  let supabaseAdmin;
+  
+  try {
+    supabaseAdmin = getSupabaseAdmin();
+  } catch (error) {
+    console.error('Failed to initialize Supabase admin client:', error.message);
+    return NextResponse.json(
+      { error: 'Server configuration error. Please contact support.' },
+      { status: 500 }
+    );
+  }
   try {
     const { email, inviteCode } = await request.json();
 
@@ -31,8 +36,11 @@ export async function POST(request) {
       code: normalizedCode
     });
 
+    // Compute redirect URL with fallback to request origin
+    const redirectOrigin = getAuthRedirectOrigin(request);
+    
     // Build redirect URL - Supabase will handle auth automatically via hash params
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
+    const redirectUrl = `${redirectOrigin}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
     
     console.log('Redirect URL:', redirectUrl);
 
@@ -47,9 +55,13 @@ export async function POST(request) {
 
     if (error) {
       console.error('Supabase Auth error:', error);
+      
+      // Return descriptive error from Supabase
+      const { message: errorMessage, statusCode } = formatAuthError(error, redirectOrigin);
+      
       return NextResponse.json(
-        { error: `Failed to send magic link: ${error.message}` },
-        { status: 500 }
+        { error: errorMessage },
+        { status: statusCode }
       );
     }
 

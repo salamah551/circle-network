@@ -3,17 +3,15 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   Activity, ArrowLeft, User, Calendar, Filter,
   Search, Loader2, Eye, Trash2, UserCheck, Mail,
   CreditCard, FileText
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// Use singleton browser client to prevent "Multiple GoTrueClient instances" warning
+const supabase = getSupabaseBrowserClient();
 
 const ACTION_ICONS = {
   'subscription_cancelled': CreditCard,

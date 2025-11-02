@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getAuthCallbackUrl, formatAuthError } from '@/lib/auth-redirect';
 
 export async function POST(request) {
-  // Initialize at runtime
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  let supabaseAdmin;
+  
+  try {
+    supabaseAdmin = getSupabaseAdmin();
+  } catch (error) {
+    console.error('Failed to initialize Supabase admin client:', error.message);
+    return NextResponse.json(
+      { error: 'Server configuration error. Please contact support.' },
+      { status: 500 }
+    );
+  }
   try {
     const { email } = await request.json();
 
@@ -44,20 +49,27 @@ export async function POST(request) {
       }
     }
 
+    // Compute redirect URL with fallback to request origin
+    const { url: emailRedirectTo, origin: redirectOrigin } = getAuthCallbackUrl(request);
+    
     // Send magic link using Supabase Auth
     const { error: magicLinkError } = await supabaseAdmin.auth.signInWithOtp({
       email: emailLower,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        emailRedirectTo,
         shouldCreateUser: isAdminEmail // ✅ Auto-create for admin emails
       }
     });
 
     if (magicLinkError) {
       console.error('Magic link error:', magicLinkError);
+      
+      // Return descriptive error from Supabase
+      const { message: errorMessage, statusCode } = formatAuthError(magicLinkError, redirectOrigin);
+      
       return NextResponse.json(
-        { error: 'Failed to send magic link' },
-        { status: 500 }
+        { error: errorMessage },
+        { status: statusCode }
       );
     }
 
