@@ -10,6 +10,11 @@
 export type TierId = 'professional' | 'pro' | 'elite';
 
 /**
+ * Tier identifier including special founding offer
+ */
+export type TierIdWithFounding = TierId | 'founding';
+
+/**
  * Usage limits for each tier
  */
 export interface UsageLimits {
@@ -125,7 +130,7 @@ export const FOUNDING_OFFER: FoundingOffer = {
  * @param tierId - Tier identifier (professional, pro, elite, or 'founding' for special offer)
  * @returns Stripe price ID from environment variables
  */
-export function getStripePriceIdByTier(tierId: string): string | undefined {
+export function getStripePriceIdByTier(tierId: TierIdWithFounding): string | undefined {
   switch (tierId) {
     case 'professional':
       return process.env.NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL;
@@ -145,7 +150,7 @@ export function getStripePriceIdByTier(tierId: string): string | undefined {
  * @param tierId - Tier identifier
  * @returns Usage limits object
  */
-export function getUsageLimits(tierId: string): UsageLimits {
+export function getUsageLimits(tierId: TierId): UsageLimits {
   const tier = TIERS.find(t => t.id === tierId);
   if (!tier) {
     // Default to professional tier limits if tier not found
@@ -159,7 +164,7 @@ export function getUsageLimits(tierId: string): UsageLimits {
  * @param tierId - Tier identifier or 'founding'
  * @returns Formatted price string (e.g., "$199/mo")
  */
-export function formatPriceMonthly(tierId: string): string {
+export function formatPriceMonthly(tierId: TierIdWithFounding): string {
   if (tierId === 'founding') {
     return `$${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo`;
   }
@@ -177,7 +182,7 @@ export function formatPriceMonthly(tierId: string): string {
  * @param tierId - Tier identifier
  * @returns Tier object or undefined
  */
-export function getTierById(tierId: string): MembershipTier | undefined {
+export function getTierById(tierId: TierId): MembershipTier | undefined {
   return TIERS.find(t => t.id === tierId);
 }
 

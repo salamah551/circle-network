@@ -2,19 +2,30 @@
 // GET /api/arc/usage - Returns current user's ARC usage stats
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { getUsageLimits } from '@/lib/pricing';
+import { TIERS } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
-// Tier-based monthly limits from pricing source of truth
-const USAGE_LIMITS = {
-  professional: 10,
-  pro: 30,
-  elite: 100,
-  // Legacy tier mappings for backwards compatibility
-  founding: 100, // Maps to elite tier limits
-  charter: 30,   // Maps to pro tier limits
-};
+/**
+ * Get ARC monthly limit for a tier with legacy tier mapping
+ * @param {string} tier - Tier identifier (professional, pro, elite, founding, charter, etc.)
+ * @returns {number} Monthly ARC limit
+ */
+function getArcLimit(tier) {
+  // Map legacy tier names to new standardized tiers
+  const tierMapping = {
+    'founding': 'elite',    // Founding members get elite limits
+    'charter': 'pro',       // Charter members get pro limits
+    'inner-circle': 'elite',
+    'core': 'pro',
+    'premium': 'pro'
+  };
+  
+  const normalizedTier = tierMapping[tier?.toLowerCase()] || tier?.toLowerCase() || 'professional';
+  const tierConfig = TIERS.find(t => t.id === normalizedTier);
+  
+  return tierConfig?.limits.arcMonthly || TIERS[0].limits.arcMonthly; // Default to professional
+}
 
 function createClient() {
   const cookieStore = cookies();
@@ -53,7 +64,7 @@ export async function GET() {
       .single();
     
     const tier = profile?.membership_tier || 'professional';
-    const limit = USAGE_LIMITS[tier] || 5;
+    const limit = getArcLimit(tier);
 
     // Get current month's usage
     const now = new Date();
