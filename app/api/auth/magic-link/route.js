@@ -1,15 +1,19 @@
 // app/api/auth/magic-link/route.js
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request) {
-  // Initialize at runtime
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  let supabaseAdmin;
+  
+  try {
+    supabaseAdmin = getSupabaseAdmin();
+  } catch (error) {
+    console.error('Failed to initialize Supabase admin client:', error.message);
+    return NextResponse.json(
+      { error: 'Server configuration error. Please contact support.' },
+      { status: 500 }
+    );
+  }
   try {
     const { email, inviteCode } = await request.json();
 
@@ -31,8 +35,29 @@ export async function POST(request) {
       code: normalizedCode
     });
 
+    // Compute redirect URL with fallback to request origin
+    const headers = request.headers;
+    let redirectOrigin = process.env.NEXT_PUBLIC_APP_URL;
+    
+    // If NEXT_PUBLIC_APP_URL is not set or doesn't match deployment, use request origin
+    if (!redirectOrigin) {
+      const proto = headers.get('x-forwarded-proto') || 'http';
+      const host = headers.get('host') || 'localhost:5000';
+      redirectOrigin = `${proto}://${host}`;
+    }
+    
+    // Validate HTTPS in production
+    if (process.env.NODE_ENV === 'production' && !redirectOrigin.startsWith('https://')) {
+      console.warn('⚠️  Non-HTTPS redirect in production, using request origin');
+      const proto = headers.get('x-forwarded-proto') || 'https';
+      const host = headers.get('host');
+      if (host) {
+        redirectOrigin = `${proto}://${host}`;
+      }
+    }
+
     // Build redirect URL - Supabase will handle auth automatically via hash params
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
+    const redirectUrl = `${redirectOrigin}/apply?code=${normalizedCode}&email=${encodeURIComponent(email)}`;
     
     console.log('Redirect URL:', redirectUrl);
 
@@ -47,9 +72,25 @@ export async function POST(request) {
 
     if (error) {
       console.error('Supabase Auth error:', error);
+      
+      // Return descriptive error from Supabase
+      let errorMessage = 'Failed to send magic link';
+      let statusCode = 500;
+      
+      // Handle specific Supabase error cases
+      if (error.message?.includes('redirect')) {
+        errorMessage = `Email redirect URL not allowed by Supabase Auth. Please add ${redirectOrigin}/** to your Supabase Auth Redirect URLs allowlist.`;
+        statusCode = 400;
+      } else if (error.message) {
+        errorMessage = `Failed to send magic link: ${error.message}`;
+      }
+      
       return NextResponse.json(
-        { error: `Failed to send magic link: ${error.message}` },
-        { status: 500 }
+        { 
+          error: errorMessage,
+          details: error.message 
+        },
+        { status: statusCode }
       );
     }
 

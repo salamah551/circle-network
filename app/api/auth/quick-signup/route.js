@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request) {
-  // Initialize at runtime
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  let supabaseAdmin;
+  
+  try {
+    supabaseAdmin = getSupabaseAdmin();
+  } catch (error) {
+    console.error('Failed to initialize Supabase admin client:', error.message);
+    return NextResponse.json(
+      { error: 'Server configuration error. Please contact support.' },
+      { status: 500 }
+    );
+  }
   try {
     const { email, inviteCode } = await request.json();
 

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   Users,
   DollarSign,
@@ -20,10 +20,8 @@ import {
 } from 'lucide-react';
 import { getMRRValues } from '@/lib/pricing';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// Use singleton browser client to prevent "Multiple GoTrueClient instances" warning
+const supabase = getSupabaseBrowserClient();
 
 export default function AdminDashboard() {
   const router = useRouter();
