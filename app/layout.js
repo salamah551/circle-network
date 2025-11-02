@@ -1,7 +1,7 @@
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import PostHogProvider from '@/components/PostHogProvider'
-import { AuthProvider } from './auth-provider'
+import { AuthProvider } from '@/components/AuthProvider'
 
 export const metadata = {
   title: 'The Circle Network — The World\'s First AI-Enhanced Private Network',
