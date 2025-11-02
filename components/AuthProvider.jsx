@@ -14,9 +14,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get singleton supabase client once
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
-    const supabase = getSupabaseBrowserClient();
 
     // Fetch profile for a given user
     const fetchProfile = async (userId) => {
@@ -82,10 +84,9 @@ export function AuthProvider({ children }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const signOut = async () => {
-    const supabase = getSupabaseBrowserClient();
     try {
       await supabase.auth.signOut();
       // The onAuthStateChange listener will handle state updates
