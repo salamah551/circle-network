@@ -1,18 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import {
   ArrowLeft, Lock, Crown, Shield, AlertTriangle, Eye, 
   Bell, CheckCircle, Clock, ArrowRight, Zap, TrendingUp,
   MessageSquare, Twitter, Linkedin, Globe
 } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export default function ReputationPage() {
   const router = useRouter();
@@ -26,6 +21,7 @@ export default function ReputationPage() {
 
   const checkUser = async () => {
     try {
+      const supabase = getSupabaseBrowserClient();
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {

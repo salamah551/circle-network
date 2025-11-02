@@ -20,13 +20,15 @@ Here's how it works: every Monday, our AI analyzes your goals and expertise to r
 
 Everyone in the network is vetted—tech founders, investors, executives, advisors. It's not LinkedIn. It's a curated group of people who can actually help you achieve your goals.
 
-We have two membership tiers:
+We have three membership tiers:
 
-Premium ($4,997/year): AI-powered introductions, member directory, messaging, events, deal flow marketplace access.
+Founding ($179/month): AI-powered introductions, member directory, messaging, events, deal flow marketplace access. Limited availability.
 
-Elite ($9,997/year): Everything in Premium plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
+Premium ($299/month): AI-powered introductions, member directory, messaging, events, deal flow marketplace access.
 
-Both include a 30-day money-back guarantee.
+Elite ($499/month): Everything in Premium plus AI Deal Flow Alerts, Reputation Guardian, and Competitive Intelligence (launching Q1 2026).
+
+All tiers include a 30-day money-back guarantee.
 
 Your invitation code is {{invite_code}} and expires in {{deadline}} days.
 

@@ -34,7 +34,7 @@ export function initPostHog() {
 ```javascript
 // Track checkout initiation
 trackEvent('checkout_initiated', {
-  plan: 'Founding Member',
+  plan: 'Founding',
   plan_type: 'founding',
   user_email: session.user.email,
   user_id: session.user.id
@@ -180,15 +180,15 @@ useEffect(() => {
   <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
     <p className="text-amber-400 font-bold">🔥 Founding 50 - Limited Availability</p>
     <div className="text-3xl font-bold">{foundingMemberStatus.spotsAvailable}</div>
-    <p className="text-zinc-400">spots remaining at $2,497/year (save $2,500)</p>
+    <p className="text-zinc-400">spots remaining at $179/month</p>
   </div>
 )}
 
 {/* Show sold out banner when full */}
 {!isLaunched && !foundingMemberStatus.loading && foundingMemberStatus.isFull && (
   <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-    <p className="text-red-400 font-bold">❌ Founding 50 - SOLD OUT</p>
-    <p className="text-zinc-400">Premium and Elite tiers available below.</p>
+    <p className="text-red-400 font-bold">❌ Founding Tier - SOLD OUT</p>
+    <p className="text-zinc-400">Premium ($299/month) and Elite ($499/month) tiers available below.</p>
   </div>
 )}
 
@@ -231,8 +231,8 @@ export const sendFoundingMemberWelcomeEmail = async ({ to, name, isFoundingMembe
           <p>Welcome to The Circle Network! 🎉</p>
           
           ${isFoundingMember ? `
-            <div class="badge">🏆 FOUNDING 50 MEMBER</div>
-            <p>Your lifetime price of $2,497/year is locked in forever.</p>
+            <div class="badge">🏆 FOUNDING MEMBER</div>
+            <p>Your lifetime price of $179/month is locked in forever.</p>
           ` : ''}
           
           <div class="guarantee-box">
@@ -271,32 +271,34 @@ if (!profileError) {
 }
 ```
 
-## Updated ROI Calculator
+## ROI Calculator
 
 ```javascript
+// Note: Historical pricing examples - adjust values for current monthly model
+// Founding: $179/month, Premium: $299/month, Elite: $499/month
 const scenarios = {
   intro: {
     title: 'One warm intro to investor',
-    cost: 2497,
+    cost: 179, // Monthly founding cost
     value: 250000,
     description: 'Skip 6 months of cold outreach.',
   },
   hire: {
     title: 'One quality hire referral',
-    cost: 2497,
+    cost: 299, // Monthly premium cost
     value: 50000,
     description: 'Save $50K+ in recruiter fees.',
   },
   deal: {
     title: 'One partnership closed',
-    cost: 2497,
+    cost: 499, // Monthly elite cost
     value: 500000,
     description: 'Average first-year value.',
   },
 };
 
 const roi = Math.round((current.value / current.cost - 1) * 100);
-// Returns ROI like: 100x, 20x, 200x, etc.
+// Returns ROI like: 1000x+, based on monthly subscription cost
 ```
 
 ## Environment Variable Setup
@@ -307,7 +309,7 @@ const roi = Math.round((current.value / current.cost - 1) * 100);
 NEXT_PUBLIC_POSTHOG_KEY=phc_your_project_key_here
 NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 
-# Stripe - Three Price IDs
+# Stripe Price IDs for membership tiers ($179/$299/$499 monthly)
 NEXT_PUBLIC_STRIPE_PRICE_FOUNDING=price_1234567890founding
 NEXT_PUBLIC_STRIPE_PRICE_PREMIUM=price_1234567890premium
 NEXT_PUBLIC_STRIPE_PRICE_ELITE=price_1234567890elite
