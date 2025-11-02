@@ -1,6 +1,7 @@
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import PostHogProvider from '@/components/PostHogProvider'
+import { AuthProvider } from './auth-provider'
 
 export const metadata = {
   title: 'The Circle Network — The World\'s First AI-Enhanced Private Network',
@@ -24,8 +25,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body suppressHydrationWarning>
         <PostHogProvider>
-          {children}
-          <ToastContainer />
+          <AuthProvider>
+            {children}
+            <ToastContainer />
+          </AuthProvider>
         </PostHogProvider>
       </body>
     </html>
