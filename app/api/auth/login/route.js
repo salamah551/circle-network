@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { getAuthCallbackUrl } from '@/lib/auth-redirect';
+import { getAuthCallbackUrl, formatAuthError } from '@/lib/auth-redirect';
 
 export async function POST(request) {
   let supabaseAdmin;
@@ -50,8 +50,7 @@ export async function POST(request) {
     }
 
     // Compute redirect URL with fallback to request origin
-    const emailRedirectTo = getAuthCallbackUrl(request);
-    const redirectOrigin = emailRedirectTo.replace('/auth/callback', '');
+    const { url: emailRedirectTo, origin: redirectOrigin } = getAuthCallbackUrl(request);
     
     // Send magic link using Supabase Auth
     const { error: magicLinkError } = await supabaseAdmin.auth.signInWithOtp({
@@ -66,16 +65,7 @@ export async function POST(request) {
       console.error('Magic link error:', magicLinkError);
       
       // Return descriptive error from Supabase
-      let errorMessage = 'Failed to send magic link';
-      let statusCode = 500;
-      
-      // Handle specific Supabase error cases
-      if (magicLinkError.message?.includes('redirect')) {
-        errorMessage = `Email redirect URL not allowed by Supabase Auth. Please add ${redirectOrigin}/** to your Supabase Auth Redirect URLs allowlist.`;
-        statusCode = 400;
-      } else if (magicLinkError.message) {
-        errorMessage = `Failed to send magic link: ${magicLinkError.message}`;
-      }
+      const { message: errorMessage, statusCode } = formatAuthError(magicLinkError, redirectOrigin);
       
       return NextResponse.json(
         { 

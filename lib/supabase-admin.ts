@@ -28,6 +28,11 @@ export function getSupabaseAdmin(): SupabaseClient {
         'Example: SUPABASE_URL=https://your-project.supabase.co'
       );
     }
+    
+    // Log when using fallback URL to ensure proper configuration
+    if (!process.env.SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      console.warn('⚠️ Using NEXT_PUBLIC_SUPABASE_URL fallback for admin operations. Set SUPABASE_URL for better security.');
+    }
 
     if (!supabaseServiceRoleKey) {
       throw new Error(
