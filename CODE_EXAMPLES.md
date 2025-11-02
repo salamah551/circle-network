@@ -274,24 +274,24 @@ if (!profileError) {
 ## ROI Calculator
 
 ```javascript
-// Note: Historical pricing examples - adjust values for current monthly model
+// Current monthly pricing model
 // Founding: $179/month, Premium: $299/month, Elite: $499/month
 const scenarios = {
   intro: {
     title: 'One warm intro to investor',
-    cost: 179, // Monthly founding cost
+    cost: 179, // Monthly Founding tier cost
     value: 250000,
     description: 'Skip 6 months of cold outreach.',
   },
   hire: {
     title: 'One quality hire referral',
-    cost: 299, // Monthly premium cost
+    cost: 299, // Monthly Premium tier cost
     value: 50000,
     description: 'Save $50K+ in recruiter fees.',
   },
   deal: {
     title: 'One partnership closed',
-    cost: 499, // Monthly elite cost
+    cost: 499, // Monthly Elite tier cost
     value: 500000,
     description: 'Average first-year value.',
   },
