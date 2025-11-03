@@ -22,13 +22,32 @@ export default function ResetPasswordPage() {
     const checkSession = async () => {
       try {
         const supabase = getSupabaseBrowserClient();
-        const { data: { session } } = await supabase.auth.getSession();
         
-        // Check if this is a recovery session (from password reset email)
-        if (session) {
-          setValidSession(true);
+        // Check the URL hash for access_token and type=recovery
+        // Supabase sends password reset with type=recovery in the hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const tokenType = hashParams.get('type');
+        
+        // Verify this is a recovery session
+        if (accessToken && tokenType === 'recovery') {
+          // Exchange the token for a session
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (session && !error) {
+            setValidSession(true);
+          } else {
+            setError('Invalid or expired reset link. Please request a new password reset.');
+          }
         } else {
-          setError('Invalid or expired reset link. Please request a new password reset.');
+          // Check if user already has an active session (shouldn't be here)
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            // User is logged in but didn't come from reset link - redirect to settings
+            router.push('/settings');
+          } else {
+            setError('Invalid or expired reset link. Please request a new password reset.');
+          }
         }
       } catch (err) {
         console.error('Session check error:', err);
@@ -39,7 +58,7 @@ export default function ResetPasswordPage() {
     };
 
     checkSession();
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

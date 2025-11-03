@@ -14,8 +14,16 @@ export async function POST(request) {
       );
     }
 
-    // Get app URL for redirect
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000';
+    // Get app URL for redirect - required in production
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    
+    if (!appUrl) {
+      console.error('NEXT_PUBLIC_APP_URL is not configured');
+      return NextResponse.json(
+        { error: 'Server configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
     
     // Create Supabase client with cookie support
     const cookieStore = cookies();
