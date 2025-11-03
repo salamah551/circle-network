@@ -14,27 +14,42 @@
 - Tone: decisive, respectful, specific outcomes (no fluff).
 
 ## 3) Membership Tiers
-**Two primary tiers:**
-- **Inner Circle (Founding Member)** – Exclusive, high-touch for founders/VCs
-  - Full ARC™ AI access
-  - 3+ strategic intros per week
-  - Priority matching and concierge sourcing
-  - Curated salons and deal flow preview
-  - Locked-in founding rate
+**Three standardized tiers:**
+- **Professional** – $199/mo – Individual operators/founders
+  - 5 BriefPoint briefs per day
+  - 10 ARC requests per month
+  - 1 Strategic Intro per week
+  - Email delivery
+  - Community & event access
   
-- **Core (Charter Member)** – Immediate but limited ARC™ access
-  - Limited ARC™ access
-  - 2 strategic intros per week
-  - Access to community events
-  - Premium member directory
+- **Pro** – $299/mo – Power users, sales leaders, VCs
+  - 10 BriefPoint briefs per day
+  - 30 ARC requests per month
+  - 3 Strategic Intros per week
+  - Slack & Email delivery
+  - Priority support
+  - AI-curated matches
+  
+- **Elite** – $499/mo – Top-tier executives/investors
+  - 25 BriefPoint briefs per day
+  - 100 ARC requests per month
+  - 5+ Strategic Intros per week
+  - 1 monthly "Deep Dive" brief
+  - Slack & Email delivery
+  - White-glove concierge
+  - Dedicated account manager
+
+**Special Offer:**
+- **Founding Members** – Pro tier at $219/mo, locked for 24 months
 
 ## 4) Monetization (Ethical, Premium)
 **Pricing (config via env):**
-- **Inner Circle** – `NEXT_PUBLIC_STRIPE_PRICE_FOUNDING` (founding member rate, locked-in)
-- **Core** – `NEXT_PUBLIC_STRIPE_PRICE_PREMIUM` (charter member rate)
-- **Elite** (optional) – `NEXT_PUBLIC_STRIPE_PRICE_ELITE` (premium tier with expanded features)
+- **Professional** – `NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL` ($199/mo)
+- **Pro** – `NEXT_PUBLIC_STRIPE_PRICE_PRO` ($299/mo)
+- **Elite** – `NEXT_PUBLIC_STRIPE_PRICE_ELITE` ($499/mo)
+- **Founding** – `NEXT_PUBLIC_STRIPE_PRICE_FOUNDING` ($219/mo, Pro tier features for 24 months)
 
-Pricing intentionally premium to signal quality; value is evidenced by weekly tangible connections.
+Pricing intentionally premium to signal quality; value is evidenced by weekly tangible connections and AI-powered intelligence.
 
 ## 5) Strategic Intros AI – Matching Design (V1)
 Signals used:

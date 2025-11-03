@@ -8,6 +8,11 @@
  * Canonical tier names - use these consistently throughout the app
  */
 export const TIER_NAMES = {
+  PROFESSIONAL: 'Professional',
+  PRO: 'Pro',
+  ELITE: 'Elite',
+  FOUNDING: 'Founding Member',
+  // Legacy tier names (deprecated - for backwards compatibility)
   INNER_CIRCLE: 'Inner Circle',
   CHARTER_MEMBER: 'Charter Member',
   PROFESSIONAL_MEMBER: 'Professional Member',
@@ -117,9 +122,13 @@ export const MAGIC_LINK = {
  */
 export const CHECKOUT_SUCCESS = {
   TITLE: 'Welcome to The Circle! 🎉',
+  PROFESSIONAL: "You're now a Professional member at $199/mo.",
+  PRO: "You're now a Pro member at $299/mo.",
+  ELITE: "You're now an Elite member at $499/mo.",
+  FOUNDING: "You're now a Founding Member with Pro tier at $219/mo locked for 24 months.",
+  // Legacy messages (deprecated)
   INNER_CIRCLE: "You're now a founding Inner Circle member.",
   CHARTER: "You're now a Charter Member with lifetime rate locked in.",
-  PROFESSIONAL: "You're now a Professional Member.",
   START_ONBOARDING: 'Start Onboarding',
   OPEN_DASHBOARD: 'Open Dashboard',
 } as const;

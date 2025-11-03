@@ -1,17 +1,15 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Loader2, Shield, Lock, Crown, Zap, Mail } from 'lucide-react';
+import { Check, Loader2, Shield, Lock, Crown, Zap, Mail, Star } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import ROICalculator from '@/components/ROICalculator';
 import MoneyBackGuarantee from '@/components/MoneyBackGuarantee';
 import { trackEvent } from '@/lib/posthog';
+import { TIERS, FOUNDING_OFFER, getStripePriceIdByTier, formatPriceMonthly } from '@/lib/pricing';
 
 // Use singleton Supabase browser client to prevent "Multiple GoTrueClient instances" warning
 const supabase = getSupabaseBrowserClient();
-
-// Launch date: November 1, 2025
-const LAUNCH_DATE = new Date('2025-11-01T00:00:00').getTime();
 
 function SubscribePage() {
   const router = useRouter();
@@ -22,56 +20,10 @@ function SubscribePage() {
   const [email, setEmail] = useState('');
   const [session, setSession] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [countdown, setCountdown] = useState(30);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [foundingMemberStatus, setFoundingMemberStatus] = useState({
-    isFull: false,
-    spotsAvailable: 50,
-    count: 0,
-    loading: true
-  });
-
-  const isLaunched = new Date().getTime() >= LAUNCH_DATE;
-  const [selectedPlan, setSelectedPlan] = useState(isLaunched ? 'monthly' : 'founding');
-
-  // Countdown timer for founding member urgency
-  useEffect(() => {
-    if (!isLaunched && countdown > 0) {
-      const timer = setInterval(() => {
-        setCountdown(prev => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [countdown, isLaunched]);
-
-  // Fetch founding member availability
-  useEffect(() => {
-    async function fetchFoundingMemberStatus() {
-      try {
-        const response = await fetch('/api/founding-members/count');
-        if (response.ok) {
-          const data = await response.json();
-          setFoundingMemberStatus({
-            isFull: data.isFull,
-            spotsAvailable: data.spotsAvailable,
-            count: data.count,
-            loading: false
-          });
-          
-          // If founding member slots are full, automatically switch to premium
-          if (data.isFull && selectedPlan === 'founding') {
-            setSelectedPlan('premium');
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching founding member status:', err);
-        setFoundingMemberStatus(prev => ({ ...prev, loading: false }));
-      }
-    }
-    
-    fetchFoundingMemberStatus();
-  }, []);
+  const [selectedPlan, setSelectedPlan] = useState('pro'); // Default to Pro tier
+  const [showFoundingOffer, setShowFoundingOffer] = useState(false);
 
   useEffect(() => {
     const emailParam = searchParams.get('email');
@@ -79,11 +31,14 @@ function SubscribePage() {
       setEmail(emailParam);
     }
 
+    // Check if founding offer should be shown (based on env config)
+    const foundingPriceId = getStripePriceIdByTier('founding');
+    setShowFoundingOffer(!!foundingPriceId);
+
     // Check authentication
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('Session error:', error);
-        // Don't set error here - just log it and allow user to request magic link
       }
 
       if (session) {
@@ -132,7 +87,7 @@ function SubscribePage() {
     }
   };
 
- const handleCheckout = async () => {
+  const handleCheckout = async () => {
     if (!session) {
       setError('Not authenticated. Please use the magic link from your email.');
       return;
@@ -142,58 +97,17 @@ function SubscribePage() {
     setError('');
 
     try {
-      // Determine which price ID to use based on selection
-      let priceId;
-      let planName;
-      
-      if (selectedPlan === 'founding') {
-        // Founding member price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING || process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID;
-        planName = 'Founding Member';
-        console.log('Using founding price ID:', priceId);
-      } else if (selectedPlan === 'core') {
-        // Core tier price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_CORE;
-        planName = 'Core';
-        console.log('Using core price ID:', priceId);
-      } else if (selectedPlan === 'pro' || selectedPlan === 'premium') {
-        // Pro tier price (premium for backwards compatibility - TODO: remove 'premium' fallback after migration)
-        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM;
-        planName = 'Pro';
-        console.log('Using pro price ID:', priceId);
-      } else if (selectedPlan === 'elite') {
-        // Elite price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE;
-        planName = 'Elite';
-        console.log('Using elite price ID:', priceId);
-      } else if (selectedPlan === 'monthly') {
-        // Regular monthly price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
-        planName = 'Monthly';
-        console.log('Using monthly price ID:', priceId);
-      } else if (selectedPlan === 'annual') {
-        // Annual price
-        priceId = process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID;
-        planName = 'Annual';
-        console.log('Using annual price ID:', priceId);
-      }
+      const priceId = getStripePriceIdByTier(selectedPlan);
       
       if (!priceId) {
-        console.error('Price ID missing for plan:', selectedPlan);
-        console.error('Available env vars:', {
-          founding: process.env.NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID ? 'SET' : 'MISSING',
-          monthly: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID ? 'SET' : 'MISSING',
-          annual: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID ? 'SET' : 'MISSING'
-        });
-        throw new Error(`Price ID not configured for ${planName} plan. Please contact support at support@thecirclenetwork.org`);
+        throw new Error(`Price ID not configured for ${selectedPlan} plan. Please contact support.`);
       }
 
-      console.log('Creating checkout session for:', planName);
+      console.log('Creating checkout session for:', selectedPlan, priceId);
 
-      // Track checkout initiation with PostHog
+      // Track checkout initiation
       trackEvent('checkout_initiated', {
-        plan: planName,
-        plan_type: selectedPlan,
+        plan: selectedPlan,
         user_email: session.user.email,
         user_id: session.user.id
       });
@@ -207,22 +121,20 @@ function SubscribePage() {
           priceId: priceId,
           tier: selectedPlan,
         }),
-        credentials: 'include' // Include cookies for server-side auth
+        credentials: 'include'
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         console.error('Checkout session error:', data);
-        throw new Error(data.error || `Failed to create checkout session for ${planName} plan`);
+        throw new Error(data.error || `Failed to create checkout session`);
       }
 
       if (!data.url) {
-        console.error('No checkout URL returned:', data);
         throw new Error('Failed to get checkout URL. Please try again.');
       }
 
-      console.log('Redirecting to Stripe checkout...');
       // Redirect to Stripe checkout
       window.location.href = data.url;
 
@@ -236,7 +148,7 @@ function SubscribePage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
       </div>
     );
   }
@@ -245,10 +157,10 @@ function SubscribePage() {
   if (!session) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-zinc-900 border border-amber-500/30 rounded-2xl p-8">
+        <div className="max-w-md w-full bg-zinc-900 border border-purple-500/30 rounded-2xl p-8">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-8 h-8 text-amber-400" />
+            <div className="w-16 h-16 bg-purple-500/10 border border-purple-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="w-8 h-8 text-purple-400" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Sign In Required</h2>
             <p className="text-zinc-400">
@@ -289,7 +201,7 @@ function SubscribePage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
               </div>
@@ -303,7 +215,7 @@ function SubscribePage() {
               <button
                 type="submit"
                 disabled={sendingMagicLink}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {sendingMagicLink ? (
                   <>
@@ -335,360 +247,174 @@ function SubscribePage() {
 
   return (
     <div className="min-h-screen bg-black text-white py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <circle cx="24" cy="24" r="22" stroke="url(#gold)" strokeWidth="2.5" fill="none"/>
-              <circle cx="24" cy="24" r="14" stroke="url(#amber)" strokeWidth="2" fill="none"/>
-              <circle cx="24" cy="24" r="7" fill="url(#gold)"/>
-              <defs>
-                <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#D4AF37" />
-                  <stop offset="100%" stopColor="#F59E0B" />
-                </linearGradient>
-                <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FBBF24" />
-                  <stop offset="100%" stopColor="#D97706" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            {!isLaunched ? 'Secure Your Founding Member Spot' : 'Choose Your Membership'}
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Choose Your Membership Tier
           </h1>
-          <p className="text-zinc-400">
-            {!isLaunched ? 'Lock in exclusive founding member benefits' : 'Select the plan that works best for you'}
+          <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
+            Select the plan that matches your needs. All tiers include access to our AI-powered platform and vetted community.
           </p>
         </div>
 
-        {/* Inner Circle (Founding Member) Availability Banner */}
-        {!isLaunched && !foundingMemberStatus.loading && !foundingMemberStatus.isFull && (
-          <div className="max-w-md mx-auto mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
-            <p className="text-amber-400 font-bold mb-2">🔥 Inner Circle (Founding Member) - Limited Availability</p>
-            <div className="text-3xl font-bold text-white">{foundingMemberStatus.spotsAvailable}</div>
-            <p className="text-zinc-400 text-sm mt-2">spots remaining - Exclusive founding rate with full ARC™ access</p>
+        {/* Founding Member Special Offer Banner */}
+        {showFoundingOffer && (
+          <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Star className="w-5 h-5 text-purple-400" />
+              <h3 className="text-xl font-bold text-purple-400">Special Founding Member Offer</h3>
+              <Star className="w-5 h-5 text-purple-400" />
+            </div>
+            <p className="text-zinc-300 mb-2">
+              Get Pro tier features at <strong className="text-white">${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo</strong> — locked for 24 months
+            </p>
+            <p className="text-sm text-zinc-400">
+              Save $80/mo compared to regular Pro pricing. Limited availability.
+            </p>
           </div>
         )}
 
-        {/* Inner Circle Full Banner */}
-        {!isLaunched && !foundingMemberStatus.loading && foundingMemberStatus.isFull && (
-          <div className="max-w-md mx-auto mb-8 bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
-            <p className="text-purple-400 font-bold mb-2">✓ Inner Circle (Founding Member) - Filled</p>
-            <p className="text-zinc-400 text-sm mt-2">All Inner Circle spots claimed. Core (Charter Member) tier available with limited ARC™ access.</p>
-          </div>
-        )}
-
-        {/* Pricing Options */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {/* Founding Member - Only show before launch OR if selected */}
-          {!isLaunched && (
-            <div 
-              onClick={() => setSelectedPlan('founding')}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === 'founding' 
-                  ? 'ring-2 ring-emerald-500 scale-105' 
-                  : 'hover:scale-102'
-              }`}
-            >
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-amber-500 rounded-2xl blur opacity-30"></div>
-                <div className="relative bg-zinc-900 border-2 border-emerald-500/50 rounded-2xl p-8">
+        {/* Pricing Tiers */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12 max-w-7xl mx-auto">
+          {TIERS.map((tier, index) => {
+            const isPopular = tier.id === 'pro';
+            const isSelected = selectedPlan === tier.id;
+            
+            return (
+              <div
+                key={tier.id}
+                onClick={() => setSelectedPlan(tier.id)}
+                className={`cursor-pointer transition-all relative ${
+                  isSelected
+                    ? 'ring-2 ring-purple-500 scale-105'
+                    : 'hover:scale-102'
+                } ${isPopular ? 'md:scale-105' : ''}`}
+              >
+                {isPopular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1 rounded-full">
+                    MOST POPULAR
+                  </div>
+                )}
+                
+                <div className={`bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 ${
+                  isPopular ? 'border-purple-500/50' : 'border-zinc-700'
+                } rounded-2xl p-8 h-full flex flex-col`}>
                   <div className="flex items-center justify-between mb-4">
-                    <Crown className="w-8 h-8 text-amber-400" />
-                    {selectedPlan === 'founding' && (
+                    {tier.id === 'elite' ? (
+                      <Crown className="w-8 h-8 text-purple-400" />
+                    ) : (
+                      <Zap className="w-8 h-8 text-purple-400" />
+                    )}
+                    {isSelected && (
                       <Check className="w-6 h-6 text-emerald-400" />
                     )}
                   </div>
-                  
-                  <div className="inline-block bg-amber-500/10 border border-amber-500/30 rounded-full px-3 py-1 mb-4">
-                    <span className="text-amber-400 text-xs font-bold uppercase">Founding Member</span>
-                  </div>
-                  
+
+                  <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                  <p className="text-sm text-zinc-400 mb-6">{tier.target}</p>
+
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-emerald-400">$179</span>
-                    <span className="text-zinc-400 text-lg">/mo</span>
-                    <div className="text-zinc-500 text-sm mt-1">
-                      Early access pricing
+                    <div className="text-5xl font-bold text-white mb-1">
+                      ${(tier.priceMonthlyCents / 100).toFixed(0)}
                     </div>
-                    <div className="text-amber-400 font-semibold text-sm mt-2">
-                      FOUNDING 50 EXCLUSIVE
-                    </div>
-                    {!foundingMemberStatus.loading && (
-                      <div className="text-emerald-400 font-semibold text-xs mt-1">
-                        {foundingMemberStatus.spotsAvailable} of 50 spots left
-                      </div>
-                    )}
+                    <div className="text-zinc-400 text-sm">/month</div>
                   </div>
 
-                  <ul className="space-y-3 text-sm">
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>Founding member price lock</strong> at $179/mo</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Exclusive founding member badge & recognition</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Priority access to all new features</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>5 priority invites to bring your network</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Founding member strategy sessions</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>All platform features + AI tools</span>
-                    </li>
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    {tier.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                          isPopular ? 'text-purple-400' : 'text-zinc-400'
+                        }`} />
+                        <span className="text-sm text-zinc-300">{feature}</span>
+                      </li>
+                    ))}
                   </ul>
+
+                  <button
+                    onClick={() => setSelectedPlan(tier.id)}
+                    className={`w-full py-3 rounded-lg font-bold transition-all ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
+                    }`}
+                  >
+                    {isSelected ? 'Selected' : 'Select Plan'}
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Premium Plan - Show when founding is full or after launch */}
-          {(foundingMemberStatus.isFull || isLaunched) && (
-            <div 
-              onClick={() => setSelectedPlan('premium')}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === 'premium' 
-                  ? 'ring-2 ring-blue-500 scale-105' 
-                  : 'hover:scale-102'
-              }`}
-            >
-              <div className="bg-zinc-900 border border-blue-500/50 rounded-2xl p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <Zap className="w-8 h-8 text-blue-400" />
-                  {selectedPlan === 'premium' && (
-                    <Check className="w-6 h-6 text-blue-400" />
-                  )}
-                </div>
-                
-                <div className="inline-block bg-blue-500/10 border border-blue-500/30 rounded-full px-3 py-1 mb-4">
-                  <span className="text-blue-400 text-xs font-bold uppercase">Premium</span>
-                </div>
-                
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-blue-400">$299</span>
-                  <span className="text-zinc-400 text-lg">/mo</span>
-                  <div className="text-zinc-500 text-sm mt-1">
-                    Full platform access
-                  </div>
-                </div>
-
-                <ul className="space-y-3 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span><strong>30 ARC™ requests per month</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span><strong>10 BriefPoint briefs per day</strong> (email + Slack)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>Complete platform access</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>AI-powered strategic introductions</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>Priority support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <span>30-day money-back guarantee</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Elite Plan - Show when founding is full or after launch */}
-          {(foundingMemberStatus.isFull || isLaunched) && (
-            <div 
-              onClick={() => setSelectedPlan('elite')}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === 'elite' 
-                  ? 'ring-2 ring-purple-500 scale-105' 
-                  : 'hover:scale-102'
-              }`}
-            >
-              <div className="relative">
-                <div className="absolute top-4 right-4 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  BEST VALUE
-                </div>
-                <div className="bg-zinc-900 border border-purple-500/50 rounded-2xl p-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <Crown className="w-8 h-8 text-purple-400" />
-                    {selectedPlan === 'elite' && (
-                      <Check className="w-6 h-6 text-purple-400" />
-                    )}
-                  </div>
-                  
-                  <div className="inline-block bg-purple-500/10 border border-purple-500/30 rounded-full px-3 py-1 mb-4">
-                    <span className="text-purple-400 text-xs font-bold uppercase">Elite</span>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <span className="text-5xl font-bold text-purple-400">$499</span>
-                    <span className="text-zinc-400 text-lg">/mo</span>
-                    <div className="text-purple-400 text-sm mt-1 font-semibold">
-                      VIP access + AI tools
-                    </div>
-                  </div>
-
-                  <ul className="space-y-3 text-sm">
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>50 ARC™ requests per month</strong></span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>20 BriefPoint briefs per day</strong> (email + Slack)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span><strong>Everything in Pro</strong></span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>White-glove concierge service</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Dedicated account manager</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Elite member badge & status</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Monthly Plan - Only show after launch */}
-          {isLaunched && (
-            <div 
-              onClick={() => setSelectedPlan('monthly')}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === 'monthly' 
-                  ? 'ring-2 ring-blue-500 scale-105' 
-                  : 'hover:scale-102'
-              }`}
-            >
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <Zap className="w-8 h-8 text-blue-400" />
-                  {selectedPlan === 'monthly' && (
-                    <Check className="w-6 h-6 text-blue-400" />
-                  )}
-                </div>
-                
-                <h3 className="text-xl font-bold mb-4">Monthly</h3>
-                
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-white">$249</span>
-                  <span className="text-zinc-400 text-lg">/month</span>
-                  <div className="text-zinc-500 text-sm mt-1">
-                    Billed monthly
-                  </div>
-                </div>
-
-                <ul className="space-y-3 text-sm text-zinc-300">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                    <span>Full platform access</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                    <span>Member directory</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                    <span>Direct messaging</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                    <span>Events access</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                    <span>Cancel anytime</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Annual Plan - Only show after launch */}
-          {isLaunched && (
-            <div 
-              onClick={() => setSelectedPlan('annual')}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === 'annual' 
-                  ? 'ring-2 ring-purple-500 scale-105' 
-                  : 'hover:scale-102'
-              }`}
-            >
-              <div className="relative">
-                <div className="absolute top-4 right-4 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  SAVE $588
-                </div>
-                <div className="bg-zinc-900 border border-purple-500/50 rounded-2xl p-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <Crown className="w-8 h-8 text-purple-400" />
-                    {selectedPlan === 'annual' && (
-                      <Check className="w-6 h-6 text-purple-400" />
-                    )}
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-4">Annual</h3>
-                  
-                  <div className="mb-6">
-                    <span className="text-5xl font-bold text-purple-400">$2,400</span>
-                    <span className="text-zinc-400 text-lg">/year</span>
-                    <div className="text-emerald-400 text-sm mt-1 font-semibold">
-                      Save $588/year vs monthly
-                    </div>
-                    <div className="text-zinc-500 text-sm">
-                      ($200/month effective rate)
-                    </div>
-                  </div>
-
-                  <ul className="space-y-3 text-sm text-zinc-300">
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Everything in Monthly</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>2 months free</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Priority support</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span>Annual member badge</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+            );
+          })}
         </div>
+
+        {/* Founding Member Option */}
+        {showFoundingOffer && (
+          <div className="max-w-4xl mx-auto mb-12">
+            <div
+              onClick={() => setSelectedPlan('founding')}
+              className={`cursor-pointer transition-all ${
+                selectedPlan === 'founding'
+                  ? 'ring-2 ring-purple-500 scale-105'
+                  : 'hover:scale-102'
+              }`}
+            >
+              <div className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-2 border-purple-500/50 rounded-2xl p-8">
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  SPECIAL OFFER
+                </div>
+                
+                <div className="flex items-start gap-6">
+                  <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Crown className="w-8 h-8 text-purple-400" />
+                  </div>
+                  
+                  <div className="flex-grow">
+                    <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                      Founding Member
+                      {selectedPlan === 'founding' && (
+                        <Check className="w-6 h-6 text-emerald-400" />
+                      )}
+                    </h3>
+                    <p className="text-zinc-300 mb-4">
+                      Get <strong>Pro tier</strong> features at founding member pricing — locked for 24 months
+                    </p>
+                    
+                    <div className="flex items-baseline gap-3 mb-4">
+                      <div className="text-4xl font-bold text-purple-400">
+                        ${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}
+                      </div>
+                      <div className="text-zinc-400">/month</div>
+                      <div className="text-sm text-emerald-400 font-semibold">
+                        Save $80/mo for 24 months
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-purple-400 font-semibold mb-2">INCLUDES:</p>
+                        <ul className="space-y-1 text-sm text-zinc-400">
+                          <li>• All Pro tier features</li>
+                          <li>• 10 BriefPoint briefs/day</li>
+                          <li>• 30 ARC requests/month</li>
+                          <li>• 3 Strategic Intros/week</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs text-purple-400 font-semibold mb-2">BONUSES:</p>
+                        <ul className="space-y-1 text-sm text-zinc-400">
+                          <li>• Founding Member badge</li>
+                          <li>• Priority feature access</li>
+                          <li>• Price locked for 24 months</li>
+                          <li>• Limited availability</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ROI Calculator */}
         <div className="max-w-2xl mx-auto mb-8">
@@ -712,7 +438,7 @@ function SubscribePage() {
           <button
             onClick={handleCheckout}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 disabled:opacity-50 text-lg"
+            className="w-full bg-gradient-to-r from-purple-500 via-purple-600 to-pink-500 hover:from-purple-600 hover:via-purple-700 hover:to-pink-600 text-white font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 disabled:opacity-50 text-lg"
           >
             {isLoading ? (
               <>
@@ -722,46 +448,14 @@ function SubscribePage() {
             ) : (
               <>
                 <Lock className="w-5 h-5" />
-                Secure Checkout with Stripe
+                Proceed to Secure Checkout
               </>
             )}
           </button>
 
           <div className="flex items-center justify-center gap-2 mt-4 text-zinc-500 text-xs">
             <Shield className="w-4 h-4" />
-            <span>Secure payment powered by Stripe • 30-day money-back guarantee • 3 wins in 90 days or +3 months free</span>
-          </div>
-        </div>
-
-        {/* Guarantees Section */}
-        <div className="max-w-2xl mx-auto mt-12 space-y-4">
-          {/* 30-Day Money-Back */}
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <Shield className="w-8 h-8 text-emerald-400 flex-shrink-0" />
-              <div>
-                <h3 className="text-lg font-bold text-emerald-400 mb-2">30-Day Money-Back Guarantee</h3>
-                <p className="text-sm text-zinc-300">
-                  If Circle Network doesn't deliver meaningful value in your first 30 days, we'll refund 
-                  your membership fee in full. No questions asked. Simple email request.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Performance Guarantee */}
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <Zap className="w-8 h-8 text-purple-400 flex-shrink-0" />
-              <div>
-                <h3 className="text-lg font-bold text-purple-400 mb-2">3 Wins in 90 Days — Or +3 Months Free</h3>
-                <p className="text-sm text-zinc-300">
-                  If you don't achieve at least 3 meaningful wins (valuable introductions, partnerships, or 
-                  opportunities) within your first 90 days, we'll extend your membership by 3 months at no charge. 
-                  Email us within 100 days to claim.
-                </p>
-              </div>
-            </div>
+            <span>Secure payment powered by Stripe • 30-day money-back guarantee</span>
           </div>
         </div>
       </div>
@@ -773,11 +467,10 @@ export default function Subscribe() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
       </div>
     }>
       <SubscribePage />
     </Suspense>
   );
 }
-

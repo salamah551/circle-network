@@ -272,7 +272,7 @@ export default function BriefPointPage() {
 
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
-            <h3 className="text-xl font-bold mb-3">Core</h3>
+            <h3 className="text-xl font-bold mb-3">Professional</h3>
             <div className="text-3xl font-bold text-white mb-2">5</div>
             <p className="text-sm text-zinc-400 mb-4">briefs per day</p>
             <div className="text-xs text-zinc-500">Email delivery only</div>
@@ -287,7 +287,7 @@ export default function BriefPointPage() {
 
           <div className="bg-zinc-900 border border-purple-500/30 rounded-xl p-6 text-center">
             <h3 className="text-xl font-bold mb-3 text-purple-400">Elite</h3>
-            <div className="text-3xl font-bold text-white mb-2">20</div>
+            <div className="text-3xl font-bold text-white mb-2">25</div>
             <p className="text-sm text-zinc-400 mb-4">briefs per day</p>
             <div className="text-xs text-purple-400 font-semibold">Email + Slack delivery</div>
           </div>

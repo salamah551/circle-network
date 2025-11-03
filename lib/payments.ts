@@ -79,9 +79,7 @@ export function buildMetadata(
 
 /**
  * Map tier to price ID from environment variables
- * Maps new tier names to existing price IDs:
- * - inner-circle -> founding price
- * - core -> premium price
+ * Supports both new standardized tiers and legacy tier names for backwards compatibility
  */
 export function resolvePriceId(tier?: string, explicitPriceId?: string): string | null {
   if (explicitPriceId) {
@@ -94,13 +92,18 @@ export function resolvePriceId(tier?: string, explicitPriceId?: string): string 
   
   const tierLower = tier.toLowerCase();
   
-  // Map new tier names to env variables
+  // Map tier names to env variables (new standardized + legacy)
   const tierToPriceId: Record<string, string | undefined> = {
-    'inner-circle': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING,
+    // New standardized tiers
+    'professional': process.env.NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL,
+    'pro': process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+    'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE,
     'founding': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING,
-    'core': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
-    'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
-    'elite': process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE
+    // Legacy tier mappings
+    'inner-circle': process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING,
+    'core': process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
+    'charter': process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
+    'premium': process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM,
   };
   
   return tierToPriceId[tierLower] || null;
@@ -130,8 +133,8 @@ export function validateProductionPriceIds(): { valid: boolean; error?: string }
   }
   
   const requiredPrices = [
-    'NEXT_PUBLIC_STRIPE_PRICE_FOUNDING',
-    'NEXT_PUBLIC_STRIPE_PRICE_PREMIUM',
+    'NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL',
+    'NEXT_PUBLIC_STRIPE_PRICE_PRO',
     'NEXT_PUBLIC_STRIPE_PRICE_ELITE'
   ];
   
