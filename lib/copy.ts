@@ -25,6 +25,8 @@ export const VALIDATION = {
   EMAIL_REQUIRED: "Let's double-check your email address...",
   EMAIL_INVALID: "That doesn't look quite right. Please enter a valid email.",
   PASSWORD_REQUIRED: 'Please provide your password to continue.',
+  PASSWORD_MIN_LENGTH: 'Password must be at least 6 characters.',
+  PASSWORD_MISMATCH: 'Passwords do not match.',
   FIELD_REQUIRED: 'This field is required to proceed.',
   TERMS_REQUIRED: 'Please review and accept the terms to continue.',
 } as const;
@@ -34,7 +36,11 @@ export const VALIDATION = {
  */
 export const LOADING = {
   AUTHENTICATING: 'Authenticating your access...',
+  SIGNING_IN: 'Signing you in...',
+  SIGNING_UP: 'Creating your account...',
   SENDING_MAGIC_LINK: 'Sending your secure link...',
+  SENDING_RESET_EMAIL: 'Sending reset instructions...',
+  RESETTING_PASSWORD: 'Updating your password...',
   PROCESSING: 'Processing your request...',
   LOADING_PROFILE: 'Loading your profile...',
   LOADING_DASHBOARD: 'Preparing your dashboard...',
@@ -48,7 +54,9 @@ export const ERRORS = {
   GENERIC: 'Something unexpected happened. Please try again.',
   NETWORK: 'Connection issue. Please check your network and try again.',
   AUTH_FAILED: "We couldn't authenticate your session. Please sign in again.",
+  INVALID_CREDENTIALS: 'Invalid login credentials. Please check your email and password.',
   EMAIL_NOT_FOUND: "We don't recognize that email. Do you need an invitation?",
+  EMAIL_ALREADY_REGISTERED: 'This email is already registered. Please sign in instead.',
   RATE_LIMIT: 'Too many attempts. Please wait a moment and try again.',
   SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
 } as const;
@@ -58,6 +66,9 @@ export const ERRORS = {
  */
 export const SUCCESS = {
   MAGIC_LINK_SENT: "Check your email! We've sent your secure sign-in link.",
+  PASSWORD_RESET_SENT: "Check your email! We've sent password reset instructions.",
+  PASSWORD_UPDATED: 'Your password has been updated successfully.',
+  ACCOUNT_CREATED: 'Welcome! Your account has been created.',
   PROFILE_UPDATED: 'Your profile has been updated.',
   SETTINGS_SAVED: 'Your settings have been saved.',
   INTRO_ACCEPTED: "Intro accepted - We'll notify the other member.",

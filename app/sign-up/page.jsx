@@ -1,33 +1,23 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
-import { LOADING, ERRORS, SUCCESS } from '@/lib/copy';
+import { VALIDATION, LOADING, ERRORS, SUCCESS } from '@/lib/copy';
 import { useAuth } from '@/components/AuthProvider';
 
-function LoginContent() {
+export default function SignUpPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, profile, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // Show success message if redirected from sign-up
-    const message = searchParams.get('message');
-    if (message === 'account-created') {
-      setSuccessMessage(SUCCESS.ACCOUNT_CREATED);
-    } else if (message === 'password-updated') {
-      setSuccessMessage(SUCCESS.PASSWORD_UPDATED);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    // Only redirect if auth state is fully resolved (not loading)
+    // Redirect if already authenticated
     if (!loading && user) {
       if (profile?.is_admin) {
         router.push('/admin');
@@ -40,11 +30,23 @@ function LoginContent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      setError(VALIDATION.PASSWORD_MISMATCH);
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      setError(VALIDATION.PASSWORD_MIN_LENGTH);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/sign-in', {
+      const response = await fetch('/api/auth/sign-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -56,8 +58,8 @@ function LoginContent() {
         throw new Error(data.error || ERRORS.GENERIC);
       }
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Redirect to login page with success message
+      router.push('/login?message=account-created');
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
@@ -83,17 +85,11 @@ function LoginContent() {
               <circle cx="20" cy="20" r="6" fill="#D4AF37"/>
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-zinc-400">Sign in to your Circle account</p>
+          <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
+          <p className="text-zinc-400">Join The Circle Network</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {successMessage && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-emerald-400 text-sm">
-              {successMessage}
-            </div>
-          )}
-
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm">
               {error}
@@ -119,8 +115,9 @@ function LoginContent() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="At least 6 characters"
                 required
+                minLength={6}
                 className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
               <button
@@ -131,10 +128,27 @@ function LoginContent() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <div className="mt-2 text-right">
-              <a href="/forgot-password" className="text-sm text-amber-400 hover:text-amber-300">
-                Forgot password?
-              </a>
+          </div>
+
+          <div>
+            <label className="block text-sm text-zinc-400 mb-2">Confirm Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your password"
+                required
+                minLength={6}
+                className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300"
+              >
+                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
@@ -146,11 +160,11 @@ function LoginContent() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                {LOADING.SIGNING_IN}
+                {LOADING.SIGNING_UP}
               </>
             ) : (
               <>
-                Sign In
+                Create Account
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
@@ -159,25 +173,13 @@ function LoginContent() {
 
         <div className="mt-8 text-center">
           <p className="text-sm text-zinc-500">
-            Don't have an account?{' '}
-            <a href="/sign-up" className="text-amber-400 hover:text-amber-300">
-              Sign up
+            Already have an account?{' '}
+            <a href="/login" className="text-amber-400 hover:text-amber-300">
+              Sign in
             </a>
           </p>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-      </div>
-    }>
-      <LoginContent />
-    </Suspense>
   );
 }
