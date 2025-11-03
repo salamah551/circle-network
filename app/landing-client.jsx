@@ -34,6 +34,12 @@ export default function NewHomepage() {
                 Sign In
               </Link>
               <Link 
+                href="/sign-up"
+                className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-300"
+              >
+                Sign Up
+              </Link>
+              <Link 
                 href="/subscribe"
                 className="text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg shadow-purple-500/20"
               >
