@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star } from 'lucide-react';
+import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase } from 'lucide-react';
 import ROICalculator from '../components/ROICalculator';
 import { TIERS, FOUNDING_OFFER } from '@/lib/pricing';
 
@@ -10,6 +10,62 @@ export default function NewHomepage() {
   const professional = TIERS.find(t => t.id === 'professional');
   const pro = TIERS.find(t => t.id === 'pro');
   const elite = TIERS.find(t => t.id === 'elite');
+
+  // Partnership form state
+  const [partnershipForm, setPartnershipForm] = useState({
+    name: '',
+    company: '',
+    email: '',
+    partnershipType: ''
+  });
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const handlePartnershipSubmit = (e) => {
+    e.preventDefault();
+    setFormError('');
+    
+    // Validate required fields
+    if (!partnershipForm.name || !partnershipForm.company || !partnershipForm.email || !partnershipForm.partnershipType) {
+      setFormError('Please fill in all required fields');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(partnershipForm.email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    // TODO: Wire this to a backend endpoint in the future
+    // For now, just log and show success message
+    console.log('Partnership application submitted:', partnershipForm);
+    
+    // Show success message
+    setShowSuccessMessage(true);
+    
+    // Reset form
+    setPartnershipForm({
+      name: '',
+      company: '',
+      email: '',
+      partnershipType: ''
+    });
+
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
+  };
+
+  const handlePartnershipInputChange = (e) => {
+    const { name, value } = e.target;
+    setPartnershipForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
@@ -67,17 +123,15 @@ export default function NewHomepage() {
 
         <div className="max-w-7xl mx-auto px-6 pt-24 pb-20 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              The World's First
+            <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
+              Private Intelligence.
               <br />
-              AI-Enhanced Private Network
+              Strategic Advantage.
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            Never walk into a meeting or decision cold again. Get <span className="text-purple-400 font-semibold">ARC™</span> competitive intelligence 
-            and <span className="text-purple-400 font-semibold">BriefPoint</span> meeting briefs—plus an exclusive community 
-            where elite professionals share insights and opportunities.
+            The Circle Network connects verified high-net-worth executives with premium opportunities through strategic intelligence
           </p>
 
           {/* Primary CTA */}
@@ -101,17 +155,93 @@ export default function NewHomepage() {
           {/* Trust indicators */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-white/60">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-purple-400" />
+              <CheckCircle className="w-4 h-4 text-amber-400" />
               <span>Invitation-only access</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-purple-400" />
+              <CheckCircle className="w-4 h-4 text-amber-400" />
               <span>Curated for excellence</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-purple-400" />
+              <CheckCircle className="w-4 h-4 text-amber-400" />
               <span>AI-enhanced intelligence</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Credibility Section */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8 md:p-12">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Award className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-white/90 text-lg leading-relaxed">
+                  Founded by former Wells Fargo Risk Analyst
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Brain className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-white/90 text-lg leading-relaxed">
+                  Proprietary intelligence platform
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Network className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-white/90 text-lg leading-relaxed">
+                  Exclusive regional partnerships
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Propositions - Three Columns */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Column 1 - Executives */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/20 rounded-2xl p-8 hover:border-amber-500/40 transition-all">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500/30 to-amber-500/10 border border-amber-500/40 rounded-xl flex items-center justify-center mb-6">
+              <Briefcase className="w-7 h-7 text-amber-400" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-amber-300">For Executives</h3>
+            <p className="text-white/70 text-lg leading-relaxed">
+              Access insider intelligence and strategic connections
+            </p>
+          </div>
+
+          {/* Column 2 - Service Providers */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/20 rounded-2xl p-8 hover:border-amber-500/40 transition-all">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500/30 to-amber-500/10 border border-amber-500/40 rounded-xl flex items-center justify-center mb-6">
+              <Building2 className="w-7 h-7 text-amber-400" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-amber-300">For Service Providers</h3>
+            <p className="text-white/70 text-lg leading-relaxed">
+              Connect with pre-qualified high-net-worth prospects
+            </p>
+          </div>
+
+          {/* Column 3 - Partners */}
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/20 rounded-2xl p-8 hover:border-amber-500/40 transition-all">
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500/30 to-amber-500/10 border border-amber-500/40 rounded-xl flex items-center justify-center mb-6">
+              <Users className="w-7 h-7 text-amber-400" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-amber-300">For Partners</h3>
+            <p className="text-white/70 text-lg leading-relaxed">
+              Exclusive access to verified executive networks
+            </p>
           </div>
         </div>
       </section>
@@ -652,6 +782,116 @@ export default function NewHomepage() {
         </div>
       </section>
 
+      {/* Partnership Application Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Become a <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">Founding Partner</span>
+            </h2>
+            <p className="text-xl text-white/60">
+              We're selecting 10 exclusive partners for early access
+            </p>
+          </div>
+
+          {showSuccessMessage && (
+            <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center animate-fade-in">
+              <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
+              <h3 className="text-xl font-bold text-emerald-300 mb-2">Application Received!</h3>
+              <p className="text-white/80">
+                Thank you for your interest in becoming a Founding Partner. We'll review your application and be in touch soon.
+              </p>
+            </div>
+          )}
+
+          {formError && (
+            <div className="mb-8 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 rounded-xl p-4 text-center">
+              <p className="text-red-300">{formError}</p>
+            </div>
+          )}
+
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8 md:p-12">
+            <form onSubmit={handlePartnershipSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={partnershipForm.name}
+                  onChange={handlePartnershipInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="Your full name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company" className="block text-sm font-semibold text-white/90 mb-2">
+                  Company *
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  value={partnershipForm.company}
+                  onChange={handlePartnershipInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="Your company name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={partnershipForm.email}
+                  onChange={handlePartnershipInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="your.email@company.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="partnershipType" className="block text-sm font-semibold text-white/90 mb-2">
+                  Partnership Type *
+                </label>
+                <select
+                  id="partnershipType"
+                  name="partnershipType"
+                  value={partnershipForm.partnershipType}
+                  onChange={handlePartnershipInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                >
+                  <option value="">Select partnership type</option>
+                  <option value="Wealth Management">Wealth Management</option>
+                  <option value="B2B Services">B2B Services</option>
+                  <option value="Executive Services">Executive Services</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                Apply for Partnership
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-white/10 py-12 bg-zinc-950">
         <div className="max-w-7xl mx-auto px-6">
@@ -704,12 +944,9 @@ export default function NewHomepage() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="border-t border-white/10 pt-8 text-center">
             <div className="text-sm text-white/40">
-              © 2025 The Circle Network. All rights reserved.
-            </div>
-            <div className="text-sm text-white/40">
-              Powered by ARC™ AI Engine
+              © {new Date().getFullYear()} The Circle Network | Founded by Shehab Salamah | Former Wells Fargo Risk Management
             </div>
           </div>
         </div>
