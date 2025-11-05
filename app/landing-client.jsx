@@ -19,20 +19,22 @@ export default function NewHomepage() {
     partnershipType: ''
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handlePartnershipSubmit = (e) => {
     e.preventDefault();
+    setFormError('');
     
     // Validate required fields
     if (!partnershipForm.name || !partnershipForm.company || !partnershipForm.email || !partnershipForm.partnershipType) {
-      alert('Please fill in all required fields');
+      setFormError('Please fill in all required fields');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(partnershipForm.email)) {
-      alert('Please enter a valid email address');
+      setFormError('Please enter a valid email address');
       return;
     }
 
@@ -802,6 +804,12 @@ export default function NewHomepage() {
             </div>
           )}
 
+          {formError && (
+            <div className="mb-8 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 rounded-xl p-4 text-center">
+              <p className="text-red-300">{formError}</p>
+            </div>
+          )}
+
           <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8 md:p-12">
             <form onSubmit={handlePartnershipSubmit} className="space-y-6">
               <div>
@@ -938,7 +946,7 @@ export default function NewHomepage() {
 
           <div className="border-t border-white/10 pt-8 text-center">
             <div className="text-sm text-white/40">
-              © 2024 The Circle Network | Founded by Shehab Salamah | Former Wells Fargo Risk Management
+              © {new Date().getFullYear()} The Circle Network | Founded by Shehab Salamah | Former Wells Fargo Risk Management
             </div>
           </div>
         </div>
