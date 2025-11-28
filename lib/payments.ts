@@ -5,7 +5,7 @@
 
 import Stripe from 'stripe';
 
-export type MembershipTier = 'inner-circle' | 'core' | 'founding' | 'premium' | 'elite';
+export type MembershipTier = 'professional' | 'pro' | 'elite' | 'founding';
 
 export interface CheckoutMetadata {
   userId: string;
