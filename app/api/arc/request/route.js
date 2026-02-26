@@ -2,6 +2,7 @@
 // POST /api/arc/request - Submit a new ARC™ request with attachments
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { processArcRequest } from '@/lib/arc-processor';
 
 export const dynamic = 'force-dynamic';
 
@@ -160,8 +161,10 @@ export async function POST(request) {
       .from('arc_requests')
       .insert({
         user_id: user.id,
-        content: content.trim(),
-        status: 'processing'
+        prompt: content.trim(),
+        title: title,
+        type: type,
+        status: 'processing',
       })
       .select()
       .single();
@@ -225,6 +228,30 @@ export async function POST(request) {
     
     // Get updated usage
     const updatedUsage = await checkMonthlyUsage(supabase, user.id, tier);
+
+    // Extract text content from text-based files for AI context
+    // Limit to 10K chars per file to stay within reasonable OpenAI context limits
+    const MAX_ATTACHMENT_TEXT_LENGTH = 10000;
+    const attachmentTexts = [];
+    for (const file of files) {
+      if (file && file.size > 0 && ['text/plain', 'text/csv'].includes(file.type)) {
+        try {
+          const text = await file.text();
+          attachmentTexts.push(text.substring(0, MAX_ATTACHMENT_TEXT_LENGTH));
+        } catch (e) {
+          console.error('Error reading file text:', e);
+        }
+      }
+    }
+
+    // Process with AI in the background (fire-and-forget)
+    processArcRequest({
+      requestId: arcRequest.id,
+      prompt: content.trim(),
+      type,
+      attachmentTexts,
+      supabase
+    }).catch(err => console.error('Background ARC processing failed:', err));
     
     return Response.json({
       id: arcRequest.id,

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Briefcase, Clock, CheckCircle, AlertCircle, ChevronRight, Loader2, LogIn } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 import { formatRelativeTime } from '@/lib/date-utils';
@@ -11,32 +12,45 @@ import { fetchWithAuth } from '@/lib/fetch-with-auth';
  * Fetches data from /api/arc/briefs endpoint
  */
 export default function ArcBriefsWidget() {
+  const router = useRouter();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchBriefs = async () => {
-      try {
-        const response = await fetchWithAuth('/api/arc/briefs');
-        if (response.status === 401 || response.status === 403) {
-          setError('reauth');
-          return;
-        }
-        if (!response.ok) {
-          throw new Error('Failed to fetch ARC briefs');
-        }
-        const data = await response.json();
-        setRequests(data);
-      } catch (err) {
-        console.error('Error fetching ARC briefs:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchBriefs = async () => {
+    try {
+      const response = await fetchWithAuth('/api/arc/briefs');
+      if (response.status === 401 || response.status === 403) {
+        setError('reauth');
+        return;
       }
-    };
+      if (!response.ok) {
+        throw new Error('Failed to fetch ARC briefs');
+      }
+      const data = await response.json();
+      setRequests(data);
+    } catch (err) {
+      console.error('Error fetching ARC briefs:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchBriefs();
+
+    // Auto-refresh every 10 seconds if any brief is processing
+    const interval = setInterval(() => {
+      setRequests(prev => {
+        if (prev.some(r => r.status === 'processing')) {
+          fetchBriefs();
+        }
+        return prev;
+      });
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const getStatusIcon = (status) => {
@@ -99,6 +113,7 @@ export default function ArcBriefsWidget() {
           {requests.map((request) => (
           <div
             key={request.id}
+            onClick={() => router.push(`/arc/${request.id}`)}
             className="group bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 
                      rounded-lg p-4 transition-all duration-200 cursor-pointer"
           >
