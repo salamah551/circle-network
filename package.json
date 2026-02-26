@@ -2,7 +2,7 @@
   "name": "circle-network",
   "version": "1.0.0",
   "private": true,
-  "description": "",
+  "description": "The Circle Network - AI-enhanced private executive network",
   "scripts": {
     "dev": "next dev -p 5000 -H 0.0.0.0",
     "build": "next build",

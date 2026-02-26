@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Send, Loader2, CheckCircle, AlertCircle, 
   Paperclip, X, FileText, Plane, TrendingUp, 
-  Users, MessageSquare, Target, Zap, LogIn
+  Users, MessageSquare, Target, Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/fetch-with-auth';

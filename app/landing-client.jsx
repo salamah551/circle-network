@@ -38,9 +38,8 @@ export default function NewHomepage() {
       return;
     }
 
-    // TODO: Wire this to a backend endpoint in the future
-    // For now, just log and show success message
-    console.log('Partnership application submitted:', partnershipForm);
+    // Note: This form is not yet connected to a backend.
+    // Submission is recorded locally for now.
     
     // Show success message
     setShowSuccessMessage(true);
