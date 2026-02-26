@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase, Lock, Key } from 'lucide-react';
 
 export default function NewHomepage() {
-  // Request Access form state
+  // Sign up form state
   const [requestForm, setRequestForm] = useState({
     name: '',
     email: '',
@@ -39,8 +39,8 @@ export default function NewHomepage() {
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
-          subject: 'Access Request',
-          message: `Access Request\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`
+          subject: 'Sign Up Interest',
+          message: `Sign Up Interest\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`
         })
       });
 
@@ -50,7 +50,7 @@ export default function NewHomepage() {
       setRequestForm({ name: '', email: '', company: '', title: '' });
       setTimeout(() => setShowSuccessMessage(false), 8000);
     } catch {
-      setFormError('Something went wrong. Please email us directly at invite@thecirclenetwork.org');
+      setFormError('Something went wrong. Please email us directly at help@thecirclenetwork.org');
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +87,7 @@ export default function NewHomepage() {
                 href="#request-access"
                 className="text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg shadow-purple-500/20"
               >
-                Request Access
+                Join The Circle
               </a>
             </div>
           </div>
@@ -111,10 +111,7 @@ export default function NewHomepage() {
         <div className="max-w-7xl mx-auto px-6 pt-24 pb-20 text-center">
           {/* Trust badges */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-            <span className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-semibold text-amber-400 uppercase tracking-wide">
-              <Key className="w-3 h-3" />
-              Invitation Only
-            </span>
+
             <span className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-xs font-semibold text-emerald-400 uppercase tracking-wide">
               <Shield className="w-3 h-3" />
               Vetted Members
@@ -134,7 +131,7 @@ export default function NewHomepage() {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            The Circle Network connects verified high-net-worth executives with premium opportunities through strategic intelligence. Membership is extended by invitation only.
+            The Circle Network connects verified high-net-worth executives with premium opportunities through strategic intelligence.
           </p>
 
           {/* Primary CTAs */}
@@ -143,7 +140,7 @@ export default function NewHomepage() {
               href="#request-access"
               className="group px-10 py-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-3"
             >
-              Request an Invitation
+              Join The Circle
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
             <Link
@@ -159,7 +156,7 @@ export default function NewHomepage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-white/60">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-amber-400" />
-              <span>Invitation-only access</span>
+              <span>Open membership</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-amber-400" />
@@ -612,13 +609,13 @@ export default function NewHomepage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mb-4">
               <Lock className="w-4 h-4" />
-              Invitation Only
+              Join Now
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Request an <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">Invitation</span>
+              Join <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
             </h2>
             <p className="text-xl text-white/60">
-              Membership is extended by invitation only. Submit your details and we&apos;ll be in touch if there&apos;s a fit.
+              Sign up today and get access to an exclusive community of high-performing professionals.
             </p>
           </div>
 
@@ -709,12 +706,12 @@ export default function NewHomepage() {
                 disabled={isSubmitting}
                 className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Access Request'}
+                {isSubmitting ? 'Submitting...' : 'Get Started'}
                 {!isSubmitting && <ArrowRight className="w-5 h-5" />}
               </button>
 
               <p className="text-xs text-white/40 text-center">
-                We review all applications personally. Not all applicants will be admitted.
+                Join today and connect with a curated community of high-performing professionals.
               </p>
             </form>
           </div>
@@ -736,7 +733,7 @@ export default function NewHomepage() {
                 </span>
               </Link>
               <p className="text-white/60 max-w-md">
-                The world&apos;s first AI-enhanced private network. An exclusive, invitation-only community
+                The world&apos;s first AI-enhanced private network. An exclusive community
                 where technology and human expertise converge to create an undeniable advantage.
               </p>
             </div>

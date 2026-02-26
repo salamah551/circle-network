@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 // Simple in-memory rate limiter: max 5 requests per IP per 60 seconds
 const rateLimitMap = new Map();
@@ -32,15 +33,6 @@ function checkRateLimit(ip) {
 
 export async function POST(request) {
   try {
-    // Reject when SendGrid is not configured
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error('SENDGRID_API_KEY is not configured');
-      return NextResponse.json(
-        { error: 'Email service is not configured' },
-        { status: 503 }
-      );
-    }
-
     // Rate limiting by IP
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -64,52 +56,33 @@ export async function POST(request) {
       );
     }
 
-    // Send email using SendGrid API
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        personalizations: [{
-          to: [{ email: 'help@thecirclenetwork.org' }],
-          subject: `Contact Form: ${subject}`
-        }],
-        from: {
-          email: 'noreply@thecirclenetwork.org',
-          name: 'The Circle'
-        },
-        reply_to: {
-          email: email,
-          name: name
-        },
-        content: [{
-          type: 'text/html',
-          value: `
-            <h2>New Contact Form Submission</h2>
-            <p><strong>From:</strong> ${name} (${email})</p>
-            <p><strong>Subject:</strong> ${subject}</p>
-            <hr />
-            <p><strong>Message:</strong></p>
-            <p>${message.replace(/\n/g, '<br>')}</p>
-          `
-        }]
-      })
-    });
+    // Save to Supabase contact_submissions table
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('SendGrid error:', errorData);
+    const { error: dbError } = await supabase
+      .from('contact_submissions')
+      .insert({
+        name,
+        email: email.toLowerCase(),
+        subject,
+        message,
+        submitted_at: new Date().toISOString()
+      });
+
+    if (dbError) {
+      console.error('Contact submission DB error:', dbError);
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'Failed to submit your message' },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Email sent successfully' 
+      message: 'Message received successfully' 
     });
 
   } catch (error) {

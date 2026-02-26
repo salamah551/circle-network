@@ -311,7 +311,7 @@ export default function BulkInvitesPage() {
               <ul className="text-sm text-zinc-300 space-y-1">
                 <li>• Add recipients with inline form (First Name, Last Name, Email)</li>
                 <li>• Automatic duplicate checking against existing recipients</li>
-                <li>• System sends max 100 emails/day (SendGrid limit)</li>
+                <li>• System processes max 100 invites/day</li>
                 <li>• 4-email sequence: Day 0, Day 3, Day 7, Day 14</li>
                 <li>• Auto-stops if recipient converts or unsubscribes</li>
                 <li>• Full tracking: opens, clicks, conversions</li>
@@ -472,7 +472,7 @@ export default function BulkInvitesPage() {
                   max="100"
                   className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
-                <p className="text-xs text-zinc-500 mt-1">Max 100 emails/day (SendGrid limit)</p>
+                <p className="text-xs text-zinc-500 mt-1">Max 100 invites/day</p>
               </div>
             </div>
 

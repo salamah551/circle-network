@@ -61,7 +61,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside space-y-2 ml-4 mt-2">
               <li>LinkedIn (if you choose to connect your profile)</li>
               <li>Payment processors (Stripe) for transaction verification</li>
-              <li>Email service providers (SendGrid) for delivery confirmation</li>
+              
             </ul>
           </section>
 
@@ -93,7 +93,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside space-y-2 ml-4 mt-2">
               <li><strong>Supabase:</strong> Database and authentication infrastructure</li>
               <li><strong>Stripe:</strong> Payment processing (they have their own privacy policy)</li>
-              <li><strong>SendGrid:</strong> Transactional email delivery</li>
+
               <li><strong>Vercel/Replit:</strong> Hosting and infrastructure</li>
             </ul>
             <p className="mt-4">
