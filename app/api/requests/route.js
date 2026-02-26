@@ -33,7 +33,7 @@ export async function GET(request) {
       .from('requests')
       .select(`
         *,
-        profile:profiles!requests_user_id_fkey(*),
+        profile:profiles!requests_requester_id_fkey(*),
         replies:request_replies(count)
       `)
       .order('created_at', { ascending: false })
@@ -88,7 +88,7 @@ export async function POST(request) {
     const { data, error } = await supabase
       .from('requests')
       .insert({
-        user_id: session.user.id,
+        requester_id: session.user.id,
         title: title.trim(),
         description: description.trim(),
         category: category || 'other',
@@ -96,7 +96,7 @@ export async function POST(request) {
       })
       .select(`
         *,
-        profile:profiles!requests_user_id_fkey(*),
+        profile:profiles!requests_requester_id_fkey(*),
         replies:request_replies(count)
       `)
       .single();

@@ -58,7 +58,7 @@ export async function POST(request) {
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .in('id', messageIds)
-      .eq('to_user_id', user.id)
+      .eq('recipient_id', user.id)
       .is('read_at', null)
       .select();
 
@@ -125,7 +125,7 @@ export async function GET(request) {
     const { count, error } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
-      .eq('to_user_id', user.id)
+      .eq('recipient_id', user.id)
       .is('read_at', null);
 
     if (error) {

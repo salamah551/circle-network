@@ -92,7 +92,7 @@ export default function GlobalSearch() {
         // Search requests
         supabase
           .from('requests')
-          .select('id, title, category, status, created_at, profile:profiles!requests_user_id_fkey(full_name)')
+          .select('id, title, category, status, created_at, profile:profiles!requests_requester_id_fkey(full_name)')
           .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
           .order('created_at', { ascending: false })
           .limit(5),

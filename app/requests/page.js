@@ -94,7 +94,7 @@ export default function RequestsPage() {
             const { data: p } = await supabase
               .from('profiles')
               .select('*')
-              .eq('id', row.user_id)
+              .eq('id', row.requester_id)
               .single();
 
             setRequests((prev) => [{ ...row, profile: p, replies: [{ count: 0 }] }, ...prev]);
@@ -130,7 +130,7 @@ export default function RequestsPage() {
 
             // If I'm the owner, show toast
             const req = requests.find((r) => r.id === reply.request_id);
-            if (req && req.user_id === me?.id && reply.user_id !== me?.id) {
+            if (req && req.requester_id === me?.id && reply.user_id !== me?.id) {
               showToast({
                 title: 'New reply to your request',
                 description: 'Someone just replied to your request.',
@@ -176,7 +176,7 @@ export default function RequestsPage() {
         .from('requests')
         .select(`
           *,
-          profile:profiles!requests_user_id_fkey(*),
+          profile:profiles!requests_requester_id_fkey(*),
           replies:request_replies(count)
         `)
         .order('created_at', { ascending: false })
@@ -262,7 +262,7 @@ export default function RequestsPage() {
         .from('requests')
         .update({ status: 'resolved' })
         .eq('id', requestId)
-        .eq('user_id', me.id);
+        .eq('requester_id', me.id);
       if (error) throw error;
       setReplyModalOpen(false);
     } catch (e) {
@@ -709,7 +709,7 @@ export default function RequestsPage() {
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">{replyText.length}/500</div>
 
-                {activeRequest.user_id === me?.id && (
+                {activeRequest.requester_id === me?.id && (
                   <div className="mt-4">
                     <button
                       onClick={() => markResolved(activeRequest.id)}

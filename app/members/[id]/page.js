@@ -133,8 +133,8 @@ export default function MemberProfilePage() {
       const { error: msgError } = await supabase
         .from('messages')
         .insert({
-          from_user_id: currentUser.id,
-          to_user_id: memberId,
+          sender_id: currentUser.id,
+          recipient_id: memberId,
           content: directMessage
         });
 

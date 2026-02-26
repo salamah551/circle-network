@@ -38,7 +38,13 @@ export default function AuthCallback() {
           user_id: userId
         });
         
-        if (email === 'nahdasheh@gmail.com' || email === 'invite@thecirclenetwork.org') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', userId)
+          .single();
+
+        if (profile?.is_admin) {
           router.push('/admin');
         } else {
           router.push('/dashboard');

@@ -116,7 +116,7 @@ export async function POST(request) {
           bio,
           expertise,
           needs,
-          linkedin: linkedin || null,
+          linkedin_url: linkedin || null,
           twitter: twitter || null,
           website: website || null,
           updated_at: new Date().toISOString()
@@ -147,7 +147,7 @@ export async function POST(request) {
           bio,
           expertise,
           needs,
-          linkedin: linkedin || null,
+          linkedin_url: linkedin || null,
           twitter: twitter || null,
           website: website || null,
           is_founding_member: true,
