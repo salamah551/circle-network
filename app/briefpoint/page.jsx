@@ -43,7 +43,7 @@ export default function BriefPointPage() {
           </p>
 
           <Link
-            href="/subscribe"
+            href="/briefpoint/new"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-purple-400 hover:to-purple-500 transition-all shadow-xl"
           >
             Get Started with BriefPoint
