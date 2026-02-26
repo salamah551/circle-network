@@ -161,9 +161,9 @@ export async function POST(request) {
       .from('arc_requests')
       .insert({
         user_id: user.id,
-        prompt: content.trim(),
         title: title,
         type: type,
+        content: content.trim(),
         status: 'processing',
       })
       .select()
