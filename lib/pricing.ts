@@ -279,6 +279,13 @@ export function shouldShowCharterUrgencyBadge(): boolean {
 }
 
 /**
+ * Launch mode configuration — when LAUNCH_MODE is true, only the founding tier
+ * is presented on the subscribe page to reduce decision fatigue for cold outreach leads.
+ */
+export const LAUNCH_TIER: TierIdWithFounding = 'founding';
+export const LAUNCH_MODE = true;
+
+/**
  * @deprecated Use TIERS instead
  */
 export function getMRRValues(): { founding: number; regular: number } {

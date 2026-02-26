@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import Link from 'next/link';
 import {
   Crown, Loader2, Menu, X, LogOut, Activity, Sparkles, Users, Target,
-  MessageSquare, TrendingUp, Shield, BarChart3, Mail, Settings,
+  MessageSquare, Shield, BarChart3, Mail, Settings,
   Rss, UserCheck
 } from 'lucide-react';
 
@@ -199,14 +199,6 @@ export default function PersonalizedDashboard() {
           {/* Elite AI Features - Only visible to Inner Circle (founding) members */}
           {isFoundingMember && (
             <>
-              <Link
-                href="/deal-flow"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
-              >
-                <TrendingUp className="w-5 h-5" />
-                <span>Deal Flow Alerts</span>
-              </Link>
-
               <Link
                 href="/reputation"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
