@@ -536,8 +536,8 @@ export default function FeedPage() {
           {posts.length === 0 ? (
             <div className="text-center py-16">
               <ImageIcon className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No posts yet</h3>
-              <p className="text-zinc-400 mb-6">Be the first to share something with the community.</p>
+              <h3 className="text-xl font-semibold mb-2">Be the first to share an insight</h3>
+              <p className="text-zinc-400 mb-6">Share what you&apos;re working on, ask a question, or post a win. This community responds.</p>
               <button
                 onClick={() => setShowComposer(true)}
                 className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-lg transition-colors inline-flex items-center gap-2"

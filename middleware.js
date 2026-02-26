@@ -52,6 +52,7 @@ const PUBLIC_PREFIXES = [
   '/help',
   '/welcome',
   '/cookies',
+  '/community',
   '/landing',
 ];
 

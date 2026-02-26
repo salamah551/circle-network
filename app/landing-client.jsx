@@ -1,69 +1,63 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase } from 'lucide-react';
-import ROICalculator from '../components/ROICalculator';
-import { TIERS, FOUNDING_OFFER } from '@/lib/pricing';
+import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase, Lock, Key } from 'lucide-react';
 
 export default function NewHomepage() {
-  // Access standardized tiers
-  const professional = TIERS.find(t => t.id === 'professional');
-  const pro = TIERS.find(t => t.id === 'pro');
-  const elite = TIERS.find(t => t.id === 'elite');
-
-  // Partnership form state
-  const [partnershipForm, setPartnershipForm] = useState({
+  // Request Access form state
+  const [requestForm, setRequestForm] = useState({
     name: '',
-    company: '',
     email: '',
-    partnershipType: ''
+    company: '',
+    title: ''
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handlePartnershipSubmit = (e) => {
+  const handleRequestSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
-    
-    // Validate required fields
-    if (!partnershipForm.name || !partnershipForm.company || !partnershipForm.email || !partnershipForm.partnershipType) {
-      setFormError('Please fill in all required fields');
+
+    if (!requestForm.name || !requestForm.email || !requestForm.company || !requestForm.title) {
+      setFormError('Please fill in all fields');
       return;
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(partnershipForm.email)) {
+    if (!emailRegex.test(requestForm.email)) {
       setFormError('Please enter a valid email address');
       return;
     }
 
-    // Note: This form is not yet connected to a backend.
-    // Submission is recorded locally for now.
-    
-    // Show success message
-    setShowSuccessMessage(true);
-    
-    // Reset form
-    setPartnershipForm({
-      name: '',
-      company: '',
-      email: '',
-      partnershipType: ''
-    });
+    setIsSubmitting(true);
 
-    // Hide success message after 5 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: requestForm.name,
+          email: requestForm.email,
+          message: `Access Request\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`
+        })
+      });
+
+      if (!response.ok) throw new Error('Submission failed');
+
+      setShowSuccessMessage(true);
+      setRequestForm({ name: '', email: '', company: '', title: '' });
+      setTimeout(() => setShowSuccessMessage(false), 8000);
+    } catch {
+      setFormError('Something went wrong. Please email us directly at invite@thecirclenetwork.org');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handlePartnershipInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPartnershipForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setRequestForm(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -82,24 +76,18 @@ export default function NewHomepage() {
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link 
+              <Link
                 href="/login"
                 className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-300"
               >
                 Sign In
               </Link>
-              <Link 
-                href="/sign-up"
-                className="text-sm text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-all duration-300"
-              >
-                Sign Up
-              </Link>
-              <Link 
-                href="/subscribe"
+              <a
+                href="#request-access"
                 className="text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-all duration-300 shadow-lg shadow-purple-500/20"
               >
-                Subscribe
-              </Link>
+                Request Access
+              </a>
             </div>
           </div>
         </div>
@@ -112,7 +100,6 @@ export default function NewHomepage() {
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10" />
           <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-3xl animate-pulse-slow" />
           <div className="absolute top-1/3 right-1/4 translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-3xl animate-pulse-slower" />
-          {/* Neural network-like lines */}
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-1/4 left-1/3 w-px h-40 bg-gradient-to-b from-indigo-500 to-transparent" />
             <div className="absolute top-1/3 right-1/3 w-px h-32 bg-gradient-to-b from-purple-500 to-transparent" />
@@ -121,6 +108,22 @@ export default function NewHomepage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 pt-24 pb-20 text-center">
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <span className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-semibold text-amber-400 uppercase tracking-wide">
+              <Key className="w-3 h-3" />
+              Invitation Only
+            </span>
+            <span className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-xs font-semibold text-emerald-400 uppercase tracking-wide">
+              <Shield className="w-3 h-3" />
+              Vetted Members
+            </span>
+            <span className="flex items-center gap-1.5 px-4 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-full text-xs font-semibold text-purple-400 uppercase tracking-wide">
+              <CheckCircle className="w-3 h-3" />
+              30-Day Guarantee
+            </span>
+          </div>
+
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
               Private Intelligence.
@@ -130,23 +133,23 @@ export default function NewHomepage() {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/70 mb-10 max-w-4xl mx-auto leading-relaxed">
-            The Circle Network connects verified high-net-worth executives with premium opportunities through strategic intelligence
+            The Circle Network connects verified high-net-worth executives with premium opportunities through strategic intelligence. Membership is extended by invitation only.
           </p>
 
-          {/* Primary CTA */}
+          {/* Primary CTAs */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-            <Link 
-              href="/subscribe"
+            <a
+              href="#request-access"
               className="group px-10 py-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-3"
             >
-              View Membership Tiers
+              Request an Invitation
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link 
-              href="/briefpoint"
+            </a>
+            <Link
+              href="/login"
               className="group px-10 py-5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
             >
-              Learn About BriefPoint
+              Member Sign In
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -207,6 +210,72 @@ export default function NewHomepage() {
         </div>
       </section>
 
+      {/* Who's Inside Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Who&apos;s Inside</h2>
+          <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            A curated network of high-performing professionals — anonymized to protect member privacy
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-6 mb-10">
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/20 rounded-2xl p-8 text-center hover:border-amber-500/40 transition-all">
+            <div className="text-4xl font-bold text-amber-400 mb-2">47</div>
+            <div className="text-white/80 font-semibold mb-1">Executives</div>
+            <div className="text-xs text-white/40">C-Suite &amp; VP Level</div>
+          </div>
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-purple-500/20 rounded-2xl p-8 text-center hover:border-purple-500/40 transition-all">
+            <div className="text-4xl font-bold text-purple-400 mb-2">23</div>
+            <div className="text-white/80 font-semibold mb-1">Fund Managers</div>
+            <div className="text-xs text-white/40">Private &amp; Hedge Funds</div>
+          </div>
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-indigo-500/20 rounded-2xl p-8 text-center hover:border-indigo-500/40 transition-all">
+            <div className="text-4xl font-bold text-indigo-400 mb-2">$2.4B+</div>
+            <div className="text-white/80 font-semibold mb-1">Network Revenue</div>
+            <div className="text-xs text-white/40">Combined &amp; Growing</div>
+          </div>
+          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-emerald-500/20 rounded-2xl p-8 text-center hover:border-emerald-500/40 transition-all">
+            <div className="text-4xl font-bold text-emerald-400 mb-2">12</div>
+            <div className="text-white/80 font-semibold mb-1">Industries</div>
+            <div className="text-xs text-white/40">Represented</div>
+          </div>
+        </div>
+
+        {/* Industry breakdown */}
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8">
+          <h3 className="text-lg font-semibold mb-6 text-white/80">Industry Breakdown</h3>
+          <div className="space-y-4">
+            {[
+              { label: 'Finance & Investment', pct: 34, color: 'bg-amber-500' },
+              { label: 'Technology & SaaS', pct: 22, color: 'bg-purple-500' },
+              { label: 'Consulting & Advisory', pct: 18, color: 'bg-indigo-500' },
+              { label: 'Real Estate & Development', pct: 14, color: 'bg-emerald-500' },
+              { label: 'Healthcare & Life Sciences', pct: 12, color: 'bg-pink-500' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-4">
+                <div className="w-40 text-sm text-white/60 shrink-0">{item.label}</div>
+                <div className="flex-1 bg-zinc-800 rounded-full h-2">
+                  <div className={`${item.color} h-2 rounded-full`} style={{ width: `${item.pct}%` }} />
+                </div>
+                <div className="w-10 text-sm text-white/60 text-right">{item.pct}%</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-white/30 mt-6">* Aggregate statistics. Individual member identities are never disclosed publicly.</p>
+        </div>
+
+        <div className="text-center mt-8">
+          <Link
+            href="/community"
+            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+          >
+            See member success stories
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
       {/* Value Propositions - Three Columns */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-3 gap-8">
@@ -245,84 +314,6 @@ export default function NewHomepage() {
         </div>
       </section>
 
-      {/* Social Proof - Statistics Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">The AI Advantage</h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            Leading organizations are already seeing transformative results with AI
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Statistic 1 - Cost Reduction */}
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-indigo-500/30 transition-all">
-            <div className="flex items-start justify-between mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 border border-indigo-500/30 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-indigo-400" />
-              </div>
-            </div>
-            <div className="text-4xl md:text-5xl font-bold text-white mb-4">10-20%</div>
-            <p className="text-white/80 text-lg leading-relaxed mb-4">
-              average cost decrease across various business functions through AI adoption
-            </p>
-            <a 
-              href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai-in-2023-generative-ais-breakout-year" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1"
-            >
-              Source: McKinsey Global Survey
-              <ArrowRight className="w-3 h-3" />
-            </a>
-          </div>
-
-          {/* Statistic 2 - Sales Impact */}
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-purple-500/30 transition-all">
-            <div className="flex items-start justify-between mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-purple-500/10 border border-purple-500/30 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-purple-400" />
-              </div>
-            </div>
-            <div className="text-4xl md:text-5xl font-bold text-white mb-4">50%+</div>
-            <p className="text-white/80 text-lg leading-relaxed mb-4">
-              increase in leads and 60-70% reduction in call time for companies using AI in sales
-            </p>
-            <a 
-              href="https://hbr.org/2021/07/when-sales-teams-should-and-shouldnt-use-ai" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1"
-            >
-              Source: Harvard Business Review
-              <ArrowRight className="w-3 h-3" />
-            </a>
-          </div>
-
-          {/* Statistic 3 - Future Advantage */}
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 hover:border-pink-500/30 transition-all">
-            <div className="flex items-start justify-between mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-pink-500/10 border border-pink-500/30 rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-pink-400" />
-              </div>
-            </div>
-            <div className="text-4xl md:text-5xl font-bold text-white mb-4">72%</div>
-            <p className="text-white/80 text-lg leading-relaxed mb-4">
-              of business leaders believe AI will be the business advantage of the future
-            </p>
-            <a 
-              href="https://www.pwc.com/us/en/tech-effect/ai-analytics/ai-business-survey.html" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-pink-400 hover:text-pink-300 transition-colors inline-flex items-center gap-1"
-            >
-              Source: PwC
-              <ArrowRight className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* The ARC™ Engine Showcase */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
@@ -333,7 +324,7 @@ export default function NewHomepage() {
             The ARC™ Engine: Your Unfair Advantage
           </h2>
           <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            While others are still figuring out AI, our members are already leveraging a purpose-built intelligence 
+            While others are still figuring out AI, our members are already leveraging a purpose-built intelligence
             platform that works 24/7 to deliver insights, opportunities, and advantages.
           </p>
         </div>
@@ -354,7 +345,7 @@ export default function NewHomepage() {
                 </div>
                 <h4 className="text-xl font-bold mb-3 group-hover:text-indigo-300 transition-colors">Vendor Leverage</h4>
                 <p className="text-white/60 leading-relaxed">
-                  ARC™ analyzes your SaaS and vendor invoices in real-time, identifies hidden overspending patterns, 
+                  ARC™ analyzes your SaaS and vendor invoices in real-time, identifies hidden overspending patterns,
                   and auto-generates negotiation scripts proven to save thousands in annual costs.
                 </p>
                 <div className="mt-4 pt-4 border-t border-zinc-700/50">
@@ -372,8 +363,8 @@ export default function NewHomepage() {
                 </div>
                 <h4 className="text-xl font-bold mb-3 group-hover:text-purple-300 transition-colors">Travel Optimization</h4>
                 <p className="text-white/60 leading-relaxed">
-                  Simply forward your flight confirmations. ARC™ monitors upgrade opportunities, alerts you to lounge access 
-                  you didn't know you had, and predicts potential disruptions hours before airlines announce them.
+                  Simply forward your flight confirmations. ARC™ monitors upgrade opportunities, alerts you to lounge access
+                  you didn&apos;t know you had, and predicts potential disruptions hours before airlines announce them.
                 </p>
                 <div className="mt-4 pt-4 border-t border-zinc-700/50">
                   <span className="text-xs text-purple-400 font-semibold">SAVE 15+ HOURS/MONTH</span>
@@ -390,7 +381,7 @@ export default function NewHomepage() {
                 </div>
                 <h4 className="text-xl font-bold mb-3 group-hover:text-pink-300 transition-colors">Market Intelligence</h4>
                 <p className="text-white/60 leading-relaxed">
-                  ARC™ continuously scans industry newsletters, research reports, and competitive signals to surface 
+                  ARC™ continuously scans industry newsletters, research reports, and competitive signals to surface
                   critical insights you would have missed—delivered as concise, actionable briefs every morning.
                 </p>
                 <div className="mt-4 pt-4 border-t border-zinc-700/50">
@@ -424,7 +415,7 @@ export default function NewHomepage() {
                   <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full">Limited ARC Access</span>
                 </h4>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  ARC™ will map the hidden web of connections within your professional network, identifying 
+                  ARC™ will map the hidden web of connections within your professional network, identifying
                   warm introduction paths to any decision-maker—even through 3-4 degrees of separation.
                 </p>
               </div>
@@ -441,7 +432,7 @@ export default function NewHomepage() {
                   <span className="text-xs px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded-full">Limited ARC Access</span>
                 </h4>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  Detect M&A signals, funding rounds, and market shifts before they're public knowledge. 
+                  Detect M&amp;A signals, funding rounds, and market shifts before they&apos;re public knowledge.
                   ARC™ synthesizes unstructured data from hundreds of sources to give you first-mover advantage.
                 </p>
               </div>
@@ -461,8 +452,8 @@ export default function NewHomepage() {
               Introducing BriefPoint
             </h2>
             <p className="text-xl text-white/60 max-w-3xl mx-auto">
-              Automated meeting briefs delivered before every conversation. Get participant intelligence, 
-              strategic talking points, and context—so you're always the most prepared person in the room.
+              Automated meeting briefs delivered before every conversation. Get participant intelligence,
+              strategic talking points, and context—so you&apos;re always the most prepared person in the room.
             </p>
           </div>
 
@@ -526,26 +517,12 @@ export default function NewHomepage() {
         </div>
       </section>
 
-      {/* The ROI Calculator */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Quantify Your Advantage</h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            See how much time and money ARC™ can save you each year
-          </p>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-          <ROICalculator />
-        </div>
-      </section>
-
       {/* The Pillars of Value Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Where Technology Meets Exclusivity</h2>
           <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            The Circle isn't just a network or a tool—it's the convergence of both, 
+            The Circle isn&apos;t just a network or a tool—it&apos;s the convergence of both,
             designed exclusively for those who understand that exceptional results require exceptional resources.
           </p>
         </div>
@@ -558,8 +535,8 @@ export default function NewHomepage() {
             </div>
             <h3 className="text-3xl font-bold mb-4 text-indigo-300">Elite Community</h3>
             <p className="text-white/70 text-lg leading-relaxed">
-              Access a rigorously vetted network of innovators, decision-makers, and industry leaders. 
-              Share insights in private channels, solve complex challenges in expert-led sessions, 
+              Access a rigorously vetted network of innovators, decision-makers, and industry leaders.
+              Share insights in private channels, solve complex challenges in expert-led sessions,
               and build relationships with peers who operate at your level—or higher.
             </p>
           </div>
@@ -571,9 +548,9 @@ export default function NewHomepage() {
             </div>
             <h3 className="text-3xl font-bold mb-4 text-purple-300">Proprietary AI Platform</h3>
             <p className="text-white/70 text-lg leading-relaxed">
-              Every member is equipped with ARC™, our purpose-built AI engine that doesn't just assist—it anticipates. 
-              The platform learns from the collective patterns of our community, creating a network effect 
-              where each member's intelligence amplifies the advantage for all.
+              Every member is equipped with ARC™, our purpose-built AI engine that doesn&apos;t just assist—it anticipates.
+              The platform learns from the collective patterns of our community, creating a network effect
+              where each member&apos;s intelligence amplifies the advantage for all.
             </p>
           </div>
         </div>
@@ -589,31 +566,31 @@ export default function NewHomepage() {
 
           <div className="prose prose-invert prose-lg max-w-none">
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              For years, I watched brilliant professionals operate in isolation—working harder instead of smarter 
+              For years, I watched brilliant professionals operate in isolation—working harder instead of smarter
               because they lacked two critical resources: access to the right intelligence and access to the right people.
             </p>
-            
+
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              The Circle exists to solve this problem for a select few. <span className="text-purple-400 font-semibold">The 
-              future belongs to those who can harness both human expertise and artificial intelligence</span>—not as separate tools, 
+              The Circle exists to solve this problem for a select few. <span className="text-purple-400 font-semibold">The
+              future belongs to those who can harness both human expertise and artificial intelligence</span>—not as separate tools,
               but as a unified advantage.
             </p>
-            
+
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              ARC™, our proprietary AI engine, doesn't replace judgment—it amplifies it. It handles the exhausting work 
-              of monitoring markets, analyzing patterns, and surfacing opportunities so you can focus on what actually 
+              ARC™, our proprietary AI engine, doesn&apos;t replace judgment—it amplifies it. It handles the exhausting work
+              of monitoring markets, analyzing patterns, and surfacing opportunities so you can focus on what actually
               drives results: relationships, decisions, and execution.
             </p>
-            
+
             <p className="text-white/80 text-lg leading-relaxed mb-6">
-              But technology without the right community is incomplete. That's why membership is selective and intentional. 
-              Every person here has been vetted. Every interaction has purpose. Every connection has the potential to 
+              But technology without the right community is incomplete. That&apos;s why membership is selective and intentional.
+              Every person here has been vetted. Every interaction has purpose. Every connection has the potential to
               fundamentally change the trajectory of your career or business.
             </p>
-            
+
             <p className="text-white/80 text-lg leading-relaxed">
-              We're not building another networking platform or productivity tool. We're building an unfair advantage 
-              for the people who join us early. If you recognize the value of what we're creating, I invite you to apply.
+              We&apos;re not building another networking platform or productivity tool. We&apos;re building an unfair advantage
+              for the people who join us early. If you recognize the value of what we&apos;re creating, I invite you to apply.
             </p>
 
             <div className="mt-8 pt-6 border-t border-zinc-700">
@@ -628,177 +605,28 @@ export default function NewHomepage() {
         </div>
       </section>
 
-      {/* Three-Tier Membership Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <div className="inline-block px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full text-sm font-bold text-white mb-6">
-            THREE PATHS TO EXTRAORDINARY
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Choose Your Level of Access
-          </h2>
-          <p className="text-xl text-white/60 max-w-3xl mx-auto">
-            The Circle offers three distinct membership tiers, each designed to deliver exceptional value. 
-            All provide access to our AI-powered platform and vetted community—the difference is depth and exclusivity.
-          </p>
-        </div>
-
-        {/* Founding Member Special Offer Banner */}
-        <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Star className="w-5 h-5 text-purple-400" />
-            <h3 className="text-xl font-bold text-purple-400">Special Founding Member Offer</h3>
-            <Star className="w-5 h-5 text-purple-400" />
-          </div>
-          <p className="text-zinc-300 mb-2">
-            Get Pro tier features at <strong className="text-white">${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo</strong> — locked for 24 months
-          </p>
-          <p className="text-sm text-zinc-400">
-            Save $80/mo compared to regular Pro pricing. Limited availability.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {/* Professional */}
-          <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 border-zinc-700 rounded-3xl p-8 overflow-hidden group hover:border-zinc-600 transition-all duration-300 flex flex-col">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-zinc-500/10 rounded-full blur-3xl -z-10 group-hover:bg-zinc-500/20 transition-all" />
-            
-            <div className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs font-bold text-white/80 mb-4 self-start">
-              STARTER
-            </div>
-
-            <h3 className="text-2xl md:text-3xl font-bold mb-1">{professional.name}</h3>
-            <p className="text-white/60 text-sm mb-6">{professional.target}</p>
-
-            <div className="mb-6">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(professional.priceMonthlyCents / 100).toFixed(0)}</div>
-              <div className="text-white/60 text-sm">/month</div>
-            </div>
-
-            <div className="space-y-3 mb-8 flex-grow">
-              {professional.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-white/80">{feature}</div>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href="/subscribe"
-              className="block w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-center rounded-xl transition-all duration-300 border border-zinc-700 hover:border-zinc-600 mt-auto"
-            >
-              <span className="flex items-center justify-center gap-2 text-sm">
-                Subscribe Now
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </Link>
-          </div>
-
-          {/* Pro - Highlighted */}
-          <div className="relative bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-2 border-purple-500/70 rounded-3xl p-8 overflow-hidden group hover:border-purple-400/90 transition-all duration-300 flex flex-col transform md:scale-105">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/30 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/40 transition-all" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/30 rounded-full blur-3xl -z-10 group-hover:bg-pink-500/40 transition-all" />
-            
-            <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white mb-4 self-start">
-              MOST POPULAR
-            </div>
-
-            <h3 className="text-2xl md:text-3xl font-bold mb-1">{pro.name}</h3>
-            <p className="text-white/60 text-sm mb-6">{pro.target}</p>
-
-            <div className="mb-6">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(pro.priceMonthlyCents / 100).toFixed(0)}</div>
-              <div className="text-white/60 text-sm">/month</div>
-            </div>
-
-            <div className="space-y-3 mb-8 flex-grow">
-              {pro.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-white/90">{feature}</div>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href="/subscribe"
-              className="block w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 mt-auto"
-            >
-              <span className="flex items-center justify-center gap-2 text-sm">
-                Subscribe Now
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </Link>
-
-            <p className="text-xs text-purple-300 mt-3 text-center font-semibold">
-              Or get founding member rate: ${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo
-            </p>
-          </div>
-
-          {/* Elite */}
-          <div className="relative bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500/50 rounded-3xl p-8 overflow-hidden group hover:border-indigo-400/70 transition-all duration-300 flex flex-col">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl -z-10 group-hover:bg-indigo-500/30 transition-all" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
-            
-            <div className="inline-block px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-xs font-bold text-white mb-4 self-start">
-              PREMIUM
-            </div>
-
-            <h3 className="text-2xl md:text-3xl font-bold mb-1">{elite.name}</h3>
-            <p className="text-white/60 text-sm mb-6">{elite.target}</p>
-
-            <div className="mb-6">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(elite.priceMonthlyCents / 100).toFixed(0)}</div>
-              <div className="text-white/60 text-sm">/month</div>
-            </div>
-
-            <div className="space-y-3 mb-8 flex-grow">
-              {elite.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-white/90">{feature}</div>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href="/subscribe"
-              className="block w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 mt-auto"
-            >
-              <span className="flex items-center justify-center gap-2 text-sm">
-                Subscribe Now
-                <ArrowRight className="w-4 h-4" />
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-white/60 text-sm">
-            Compare all features on the <Link href="/membership" className="text-purple-400 hover:text-purple-300 font-semibold">membership page</Link> or learn about <Link href="/briefpoint" className="text-purple-400 hover:text-purple-300 font-semibold">BriefPoint</Link>.
-          </p>
-        </div>
-      </section>
-
-      {/* Partnership Application Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="max-w-3xl mx-auto">
+      {/* Request Access Section */}
+      <section id="request-access" className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mb-4">
+              <Lock className="w-4 h-4" />
+              Invitation Only
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Become a <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">Founding Partner</span>
+              Request an <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">Invitation</span>
             </h2>
             <p className="text-xl text-white/60">
-              We're selecting 10 exclusive partners for early access
+              Membership is extended by invitation only. Submit your details and we&apos;ll be in touch if there&apos;s a fit.
             </p>
           </div>
 
           {showSuccessMessage && (
-            <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center animate-fade-in">
+            <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center">
               <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-emerald-300 mb-2">Interest Noted!</h3>
+              <h3 className="text-xl font-bold text-emerald-300 mb-2">Request Received</h3>
               <p className="text-white/80">
-                Thank you for your interest in becoming a Founding Partner. Our partnership program is coming soon — we'll reach out when it launches.
+                Thank you. If your profile is a strong fit, we&apos;ll reach out within 5 business days with next steps.
               </p>
             </div>
           )}
@@ -810,20 +638,36 @@ export default function NewHomepage() {
           )}
 
           <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8 md:p-12">
-            <form onSubmit={handlePartnershipSubmit} className="space-y-6">
+            <form onSubmit={handleRequestSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">
-                  Name *
+                  Full Name *
                 </label>
                 <input
                   type="text"
                   id="name"
                   name="name"
-                  value={partnershipForm.name}
-                  onChange={handlePartnershipInputChange}
+                  value={requestForm.name}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
                   placeholder="Your full name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={requestForm.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  placeholder="your.email@company.com"
                 />
               </div>
 
@@ -835,57 +679,42 @@ export default function NewHomepage() {
                   type="text"
                   id="company"
                   name="company"
-                  value={partnershipForm.company}
-                  onChange={handlePartnershipInputChange}
+                  value={requestForm.company}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="Your company name"
+                  placeholder="Your company or fund"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
-                  Email *
+                <label htmlFor="title" className="block text-sm font-semibold text-white/90 mb-2">
+                  Title / Role *
                 </label>
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={partnershipForm.email}
-                  onChange={handlePartnershipInputChange}
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={requestForm.title}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="your.email@company.com"
+                  placeholder="e.g. CEO, Managing Director, Fund Manager"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="partnershipType" className="block text-sm font-semibold text-white/90 mb-2">
-                  Partnership Type *
-                </label>
-                <select
-                  id="partnershipType"
-                  name="partnershipType"
-                  value={partnershipForm.partnershipType}
-                  onChange={handlePartnershipInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-amber-500/50 transition-colors"
-                >
-                  <option value="">Select partnership type</option>
-                  <option value="Wealth Management">Wealth Management</option>
-                  <option value="B2B Services">B2B Services</option>
-                  <option value="Executive Services">Executive Services</option>
-                  <option value="Other">Other</option>
-                </select>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Apply for Partnership
-                <ArrowRight className="w-5 h-5" />
+                {isSubmitting ? 'Submitting...' : 'Submit Access Request'}
+                {!isSubmitting && <ArrowRight className="w-5 h-5" />}
               </button>
+
+              <p className="text-xs text-white/40 text-center">
+                We review all applications personally. Not all applicants will be admitted.
+              </p>
             </form>
           </div>
         </div>
@@ -906,7 +735,7 @@ export default function NewHomepage() {
                 </span>
               </Link>
               <p className="text-white/60 max-w-md">
-                The world's first AI-enhanced private network. An exclusive, invitation-only community 
+                The world&apos;s first AI-enhanced private network. An exclusive, invitation-only community
                 where technology and human expertise converge to create an undeniable advantage.
               </p>
             </div>
@@ -916,7 +745,7 @@ export default function NewHomepage() {
               <h4 className="font-semibold mb-4">Community</h4>
               <ul className="space-y-2 text-sm text-white/60">
                 <li>
-                  <Link href="/subscribe" className="hover:text-white transition-colors">Subscribe</Link>
+                  <Link href="/community" className="hover:text-white transition-colors">Member Stories</Link>
                 </li>
                 <li>
                   <Link href="/membership" className="hover:text-white transition-colors">Membership</Link>
