@@ -6,9 +6,9 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { ArrowLeft, Check, X, Eye, Loader2, Mail, MapPin, Linkedin, Briefcase } from 'lucide-react';
 
 // Use singleton browser client to prevent "Multiple GoTrueClient instances" warning
-const supabase = getSupabaseBrowserClient();
 
 export default function AdminApplicationsPage() {
+  const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [applications, setApplications] = useState([]);

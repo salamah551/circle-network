@@ -38,9 +38,8 @@ export default function NewHomepage() {
       return;
     }
 
-    // TODO: Wire this to a backend endpoint in the future
-    // For now, just log and show success message
-    console.log('Partnership application submitted:', partnershipForm);
+    // Note: This form is not yet connected to a backend.
+    // Submission is recorded locally for now.
     
     // Show success message
     setShowSuccessMessage(true);
@@ -797,9 +796,9 @@ export default function NewHomepage() {
           {showSuccessMessage && (
             <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center animate-fade-in">
               <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-emerald-300 mb-2">Application Received!</h3>
+              <h3 className="text-xl font-bold text-emerald-300 mb-2">Interest Noted!</h3>
               <p className="text-white/80">
-                Thank you for your interest in becoming a Founding Partner. We'll review your application and be in touch soon.
+                Thank you for your interest in becoming a Founding Partner. Our partnership program is coming soon — we'll reach out when it launches.
               </p>
             </div>
           )}

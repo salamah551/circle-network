@@ -40,6 +40,12 @@ function createClient() {
         get(name) {
           return cookieStore.get(name)?.value;
         },
+        set(name, value, options) {
+          try { cookieStore.set(name, value, options); } catch (e) { console.error('Cookie set error:', e); }
+        },
+        remove(name, options) {
+          try { cookieStore.set(name, '', { ...options, maxAge: 0 }); } catch (e) { console.error('Cookie remove error:', e); }
+        },
       },
     }
   );

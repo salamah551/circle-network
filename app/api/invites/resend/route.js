@@ -32,6 +32,12 @@ export async function POST(request) {
           get(name) {
             return cookieStore.get(name)?.value;
           },
+          set(name, value, options) {
+            try { cookieStore.set(name, value, options); } catch (e) { console.error('Cookie set error:', e); }
+          },
+          remove(name, options) {
+            try { cookieStore.set(name, '', { ...options, maxAge: 0 }); } catch (e) { console.error('Cookie remove error:', e); }
+          },
         },
       }
     );
@@ -51,7 +57,7 @@ export async function POST(request) {
       .single();
 
     // Send invite email via SendGrid using the EXISTING invite code
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}?email=${encodeURIComponent(email)}&code=${inviteCode}`;
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/accept?email=${encodeURIComponent(email)}&code=${inviteCode}`;
     
     const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
