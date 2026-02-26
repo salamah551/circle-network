@@ -5,14 +5,13 @@ import { useAuth } from '@/components/AuthProvider';
 import Link from 'next/link';
 import {
   Crown, Loader2, Menu, X, LogOut, Activity, Sparkles, Users, Target,
-  MessageSquare, Shield, BarChart3, Mail, Settings,
+  MessageSquare, Mail, Settings,
   Rss, UserCheck
 } from 'lucide-react';
 
 // Dashboard widgets
 import ActionCenter from '@/components/dashboard/ActionCenter';
 import ArcBriefsWidget from '@/components/dashboard/ArcBriefsWidget';
-import UpcomingTravelWidget from '@/components/dashboard/UpcomingTravelWidget';
 import MarketIntelWidget from '@/components/dashboard/MarketIntelWidget';
 import AiMatchesWidget from '@/components/dashboard/AiMatchesWidget';
 import CommunityHighlightsWidget from '@/components/dashboard/CommunityHighlightsWidget';
@@ -23,7 +22,6 @@ import { getPersonalizedLayout, getPersonalizedWelcome } from '@/lib/dashboardPe
 const widgetComponents = {
   ActionCenter,
   ArcBriefsWidget,
-  UpcomingTravelWidget,
   MarketIntelWidget,
   AiMatchesWidget,
   CommunityHighlightsWidget
@@ -56,9 +54,13 @@ export default function PersonalizedDashboard() {
       setWidgetLayout(layout.widgets);
       
       // Get personalized welcome message
+      const displayName = profile?.first_name
+        || profile?.full_name?.split(' ')[0]
+        || user?.email?.split('@')[0]
+        || 'there';
       const welcome = getPersonalizedWelcome(
-        profile?.needs_assessment, 
-        profile?.first_name || 'Member'
+        profile?.needs_assessment,
+        displayName
       );
       setWelcomeMessage(welcome);
 
@@ -135,6 +137,21 @@ export default function PersonalizedDashboard() {
           </Link>
         </div>
 
+        {/* User Info */}
+        <div className="px-4 py-3 border-b border-zinc-800 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-black font-bold text-sm flex-shrink-0">
+              {(profile?.first_name?.[0] || profile?.full_name?.[0] || user?.email?.[0] || 'M').toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {profile?.full_name || profile?.first_name || user?.email?.split('@')[0]}
+              </p>
+              <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
+            </div>
+          </div>
+        </div>
+
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <Link
             href="/dashboard"
@@ -193,29 +210,6 @@ export default function PersonalizedDashboard() {
               </span>
             )}
           </Link>
-
-          <div className="my-4 border-t border-zinc-800"></div>
-
-          {/* Elite AI Features - Only visible to Inner Circle (founding) members */}
-          {isFoundingMember && (
-            <>
-              <Link
-                href="/reputation"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
-              >
-                <Shield className="w-5 h-5" />
-                <span>Reputation Guardian</span>
-              </Link>
-
-              <Link
-                href="/intelligence"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
-              >
-                <BarChart3 className="w-5 h-5" />
-                <span>Competitive Intel</span>
-              </Link>
-            </>
-          )}
 
           <div className="my-4 border-t border-zinc-800"></div>
 

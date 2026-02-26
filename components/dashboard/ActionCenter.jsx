@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Send, Loader2, CheckCircle, AlertCircle, 
-  Paperclip, X, FileText, Plane, TrendingUp, 
-  Users, MessageSquare, Target, Zap
+  Paperclip, X, FileText, Plane, TrendingUp
 } from 'lucide-react';
 import Link from 'next/link';
 import { fetchWithAuth } from '@/lib/fetch-with-auth';
@@ -165,13 +164,6 @@ export default function ActionCenter() {
     { id: 'brief', label: 'Briefs', icon: FileText, description: 'Research, analysis, document review' },
     { id: 'travel', label: 'Travel', icon: Plane, description: 'Flight upgrades, itinerary optimization' },
     { id: 'intel', label: 'Intel', icon: TrendingUp, description: 'Market insights, competitive analysis' }
-  ];
-
-  const quickActions = [
-    { icon: Users, label: 'Members', href: '/members' },
-    { icon: MessageSquare, label: 'Messages', href: '/messages' },
-    { icon: Target, label: 'Requests', href: '/requests' },
-    { icon: Zap, label: 'AI Intros', href: '/intros' }
   ];
 
   const isExhausted = usage.remaining <= 0;
@@ -373,29 +365,6 @@ export default function ActionCenter() {
               <p className="text-sm">{errorMessage}</p>
             </div>
           )}
-
-          {/* Quick Navigation Chips */}
-          <div className="pt-4 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-3">Quick Access</p>
-            <div className="flex flex-wrap gap-2">
-              {quickActions.map(action => {
-                const Icon = action.icon;
-                return (
-                  <Link
-                    key={action.href}
-                    href={action.href}
-                    className="px-3 py-2 bg-zinc-800/50 hover:bg-zinc-800 
-                             border border-zinc-700 rounded-lg text-sm text-zinc-300
-                             transition-all duration-200 hover:text-white hover:border-zinc-600
-                             flex items-center gap-2"
-                  >
-                    <Icon className="w-4 h-4" />
-                    {action.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
     </div>
