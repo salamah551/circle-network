@@ -64,12 +64,12 @@ export async function GET(request) {
     // Count unique connections (people messaged)
     const { data: messages } = await supabase
       .from('messages')
-      .select('from_user_id, to_user_id')
-      .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`);
+      .select('sender_id, recipient_id')
+      .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`);
 
     const uniqueConnections = new Set();
     messages?.forEach(msg => {
-      const otherId = msg.from_user_id === userId ? msg.to_user_id : msg.from_user_id;
+      const otherId = msg.sender_id === userId ? msg.recipient_id : msg.sender_id;
       uniqueConnections.add(otherId);
     });
 
@@ -83,7 +83,7 @@ export async function GET(request) {
     const { count: messagesExchanged } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
-      .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`);
+      .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`);
 
     // Count events attended
     const { count: eventsAttended } = await supabase

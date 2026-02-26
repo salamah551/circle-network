@@ -86,7 +86,7 @@ function MessagesContent() {
           event: 'INSERT', 
           schema: 'public', 
           table: 'messages',
-          filter: `to_user_id=eq.${currentUser.id}`
+          filter: `recipient_id=eq.${currentUser.id}`
         },
         (payload) => {
           console.log('🔴 NEW MESSAGE RECEIVED:', payload);
@@ -129,8 +129,8 @@ function MessagesContent() {
     // If message is for current conversation, add it immediately
     if (selectedConversation) {
       const isForCurrentConvo = 
-        (newMsg.from_user_id === selectedConversation.other_user.id && newMsg.to_user_id === currentUser.id) ||
-        (newMsg.to_user_id === selectedConversation.other_user.id && newMsg.from_user_id === currentUser.id);
+        (newMsg.sender_id === selectedConversation.other_user.id && newMsg.recipient_id === currentUser.id) ||
+        (newMsg.recipient_id === selectedConversation.other_user.id && newMsg.sender_id === currentUser.id);
       
       if (isForCurrentConvo) {
         setMessages(prev => {
@@ -140,7 +140,7 @@ function MessagesContent() {
         });
         
         // Auto-mark as read if it's for us
-        if (newMsg.to_user_id === currentUser.id) {
+        if (newMsg.recipient_id === currentUser.id) {
           setTimeout(() => markAsRead(selectedConversation.other_user.id), 500);
         }
         
@@ -175,20 +175,20 @@ function MessagesContent() {
     try {
       const { data: sentMessages } = await supabase
         .from('messages')
-        .select('to_user_id, created_at, content, read_at')
-        .eq('from_user_id', userId)
+        .select('recipient_id, created_at, content, read_at')
+        .eq('sender_id', userId)
         .order('created_at', { ascending: false });
 
       const { data: receivedMessages } = await supabase
         .from('messages')
-        .select('from_user_id, created_at, content, read_at')
-        .eq('to_user_id', userId)
+        .select('sender_id, created_at, content, read_at')
+        .eq('recipient_id', userId)
         .order('created_at', { ascending: false });
 
       const userIds = new Set();
       [...(sentMessages || []), ...(receivedMessages || [])].forEach(msg => {
-        if (msg.to_user_id && msg.to_user_id !== userId) userIds.add(msg.to_user_id);
-        if (msg.from_user_id && msg.from_user_id !== userId) userIds.add(msg.from_user_id);
+        if (msg.recipient_id && msg.recipient_id !== userId) userIds.add(msg.recipient_id);
+        if (msg.sender_id && msg.sender_id !== userId) userIds.add(msg.sender_id);
       });
 
       if (userIds.size === 0) {
@@ -204,13 +204,13 @@ function MessagesContent() {
       const convos = Array.from(userIds).map(otherUserId => {
         const profile = profiles?.find(p => p.id === otherUserId);
         const userMessages = [
-          ...(sentMessages?.filter(m => m.to_user_id === otherUserId) || []),
-          ...(receivedMessages?.filter(m => m.from_user_id === otherUserId) || [])
+          ...(sentMessages?.filter(m => m.recipient_id === otherUserId) || []),
+          ...(receivedMessages?.filter(m => m.sender_id === otherUserId) || [])
         ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         const lastMessage = userMessages[0];
         const unreadCount = receivedMessages?.filter(m => 
-          m.from_user_id === otherUserId && !m.read_at
+          m.sender_id === otherUserId && !m.read_at
         ).length || 0;
 
         return {
@@ -257,7 +257,7 @@ function MessagesContent() {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .or(`and(from_user_id.eq.${currentUser.id},to_user_id.eq.${otherUserId}),and(from_user_id.eq.${otherUserId},to_user_id.eq.${currentUser.id})`)
+        .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -278,8 +278,8 @@ function MessagesContent() {
       const { error } = await supabase
         .from('messages')
         .update({ read_at: new Date().toISOString() })
-        .eq('to_user_id', currentUser.id)
-        .eq('from_user_id', otherUserId)
+        .eq('recipient_id', currentUser.id)
+        .eq('sender_id', otherUserId)
         .is('read_at', null);
 
       if (error) {
@@ -309,8 +309,8 @@ function MessagesContent() {
       const optimisticMessage = {
         id: `temp-${Date.now()}`,
         content: messageText,
-        from_user_id: currentUser.id,
-        to_user_id: selectedConversation.other_user.id,
+        sender_id: currentUser.id,
+        recipient_id: selectedConversation.other_user.id,
         created_at: new Date().toISOString(),
         read_at: null,
         sending: true
@@ -324,8 +324,8 @@ function MessagesContent() {
       const { data, error } = await supabase
         .from('messages')
         .insert({
-          from_user_id: currentUser.id,
-          to_user_id: selectedConversation.other_user.id,
+          sender_id: currentUser.id,
+          recipient_id: selectedConversation.other_user.id,
           content: messageText
         })
         .select()
@@ -589,8 +589,8 @@ function MessagesContent() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={messageContainerRef}>
                 {messages.map((msg, idx) => {
-                  const isFromMe = msg.from_user_id === currentUser.id;
-                  const showAvatar = idx === 0 || messages[idx - 1].from_user_id !== msg.from_user_id;
+                  const isFromMe = msg.sender_id === currentUser.id;
+                  const showAvatar = idx === 0 || messages[idx - 1].sender_id !== msg.sender_id;
 
                   return (
                     <div
