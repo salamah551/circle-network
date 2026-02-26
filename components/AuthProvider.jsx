@@ -7,6 +7,7 @@ const AuthContext = createContext({
   user: null,
   profile: null,
   loading: true,
+  initError: null,
 });
 
 export function AuthProvider({ children }) {
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState(null);
   
   // Get singleton supabase client once
   const supabase = getSupabaseBrowserClient();
@@ -46,6 +48,7 @@ export function AuthProvider({ children }) {
         
         if (error) {
           console.error('Error getting session:', error);
+          setInitError(error.message);
         }
         
         setSession(currentSession);
@@ -56,6 +59,7 @@ export function AuthProvider({ children }) {
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+        setInitError(error.message);
       } finally {
         setLoading(false);
       }
@@ -64,25 +68,32 @@ export function AuthProvider({ children }) {
     initializeAuth();
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log('Auth state changed:', event);
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          await fetchProfile(currentSession.user.id);
-        } else {
-          setProfile(null);
+    let subscription;
+    try {
+      ({ data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, currentSession) => {
+          console.log('Auth state changed:', event);
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          
+          if (currentSession?.user) {
+            await fetchProfile(currentSession.user.id);
+          } else {
+            setProfile(null);
+          }
+          
+          setLoading(false);
         }
-        
-        setLoading(false);
-      }
-    );
+      ));
+    } catch (error) {
+      console.error('Error subscribing to auth changes:', error);
+      setInitError(error.message);
+      setLoading(false);
+    }
 
     // Cleanup subscription on unmount
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [supabase]);
 
@@ -100,6 +111,7 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    initError,
     signOut,
   };
 
