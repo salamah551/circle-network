@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Clock, CheckCircle, AlertCircle, ChevronRight, Loader2, LogIn, Plus, Link as LinkIcon } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
@@ -18,6 +18,7 @@ export default function BriefPointWidget() {
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const meetingsRef = useRef([]);
 
   const fetchData = async () => {
     try {
@@ -33,7 +34,9 @@ export default function BriefPointWidget() {
 
       if (meetingsRes.ok) {
         const data = await meetingsRes.json();
-        setMeetings(Array.isArray(data) ? data.slice(0, 5) : []);
+        const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
+        setMeetings(sliced);
+        meetingsRef.current = sliced;
         setCalendarConnected(Array.isArray(data) && data.some(m => m.source === 'google_calendar'));
       }
 
@@ -48,17 +51,15 @@ export default function BriefPointWidget() {
     }
   };
 
+  // Keep a ref to the latest meetings so the interval can check without stale closure
   useEffect(() => {
     fetchData();
 
     // Auto-refresh every 10 seconds if any meeting is still processing
     const interval = setInterval(() => {
-      setMeetings(prev => {
-        if (prev.some(m => m.status === 'processing')) {
-          fetchData();
-        }
-        return prev;
-      });
+      if (meetingsRef.current.some(m => m.status === 'processing')) {
+        fetchData();
+      }
     }, 10000);
 
     return () => clearInterval(interval);

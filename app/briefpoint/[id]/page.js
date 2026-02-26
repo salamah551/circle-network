@@ -15,39 +15,50 @@ function SimpleMarkdown({ content }) {
   const lines = content.split('\n');
   const elements = [];
   let key = 0;
+  let i = 0;
 
-  for (let i = 0; i < lines.length; i++) {
+  while (i < lines.length) {
     const line = lines[i];
 
     if (line.startsWith('# ')) {
       elements.push(<h1 key={key++} className="text-2xl font-bold text-white mt-6 mb-3">{line.slice(2)}</h1>);
+      i++;
     } else if (line.startsWith('## ')) {
       elements.push(<h2 key={key++} className="text-xl font-bold text-white mt-5 mb-2">{line.slice(3)}</h2>);
+      i++;
     } else if (line.startsWith('### ')) {
       elements.push(<h3 key={key++} className="text-lg font-semibold text-white mt-4 mb-2">{line.slice(4)}</h3>);
+      i++;
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      elements.push(
-        <li key={key++} className="text-zinc-300 ml-4 list-disc mb-1">
-          {renderInline(line.slice(2))}
-        </li>
-      );
+      // Collect consecutive unordered list items
+      const items = [];
+      while (i < lines.length && (lines[i].startsWith('- ') || lines[i].startsWith('* '))) {
+        items.push(<li key={key++} className="text-zinc-300 mb-1">{renderInline(lines[i].slice(2))}</li>);
+        i++;
+      }
+      elements.push(<ul key={key++} className="list-disc ml-6 mb-2">{items}</ul>);
     } else if (/^\d+\. /.test(line)) {
-      const text = line.replace(/^\d+\. /, '');
-      elements.push(
-        <li key={key++} className="text-zinc-300 ml-4 list-decimal mb-1">
-          {renderInline(text)}
-        </li>
-      );
+      // Collect consecutive ordered list items
+      const items = [];
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        const text = lines[i].replace(/^\d+\. /, '');
+        items.push(<li key={key++} className="text-zinc-300 mb-1">{renderInline(text)}</li>);
+        i++;
+      }
+      elements.push(<ol key={key++} className="list-decimal ml-6 mb-2">{items}</ol>);
     } else if (line.trim() === '') {
       elements.push(<br key={key++} />);
+      i++;
     } else if (line.startsWith('---')) {
       elements.push(<hr key={key++} className="border-zinc-700 my-4" />);
+      i++;
     } else {
       elements.push(
         <p key={key++} className="text-zinc-300 mb-2 leading-relaxed">
           {renderInline(line)}
         </p>
       );
+      i++;
     }
   }
 
