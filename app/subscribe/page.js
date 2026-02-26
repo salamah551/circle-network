@@ -6,7 +6,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import ROICalculator from '@/components/ROICalculator';
 import MoneyBackGuarantee from '@/components/MoneyBackGuarantee';
 import { trackEvent } from '@/lib/posthog';
-import { TIERS, FOUNDING_OFFER, getStripePriceIdByTier, formatPriceMonthly } from '@/lib/pricing';
+import { TIERS, FOUNDING_OFFER, getStripePriceIdByTier, formatPriceMonthly, LAUNCH_MODE } from '@/lib/pricing';
 
 // Use singleton Supabase browser client to prevent "Multiple GoTrueClient instances" warning
 const supabase = getSupabaseBrowserClient();
@@ -22,7 +22,7 @@ function SubscribePage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [sendingMagicLink, setSendingMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('pro'); // Default to Pro tier
+  const [selectedPlan, setSelectedPlan] = useState('founding'); // Default to Founding tier in launch mode
   const [showFoundingOffer, setShowFoundingOffer] = useState(false);
 
   useEffect(() => {
@@ -250,10 +250,12 @@ function SubscribePage() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Choose Your Membership Tier
+            {LAUNCH_MODE ? 'Founding Member Access' : 'Choose Your Membership Tier'}
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            Select the plan that matches your needs. All tiers include access to our AI-powered platform and vetted community.
+            {LAUNCH_MODE
+              ? 'Secure your founding member spot — one tier, one price, price locked for 24 months.'
+              : 'Select the plan that matches your needs. All tiers include access to our AI-powered platform and vetted community.'}
           </p>
         </div>
 
@@ -274,7 +276,8 @@ function SubscribePage() {
           </div>
         )}
 
-        {/* Pricing Tiers */}
+        {/* Pricing Tiers — hidden in launch mode */}
+        {!LAUNCH_MODE && (
         <div className="grid md:grid-cols-3 gap-8 mb-12 max-w-7xl mx-auto">
           {TIERS.map((tier, index) => {
             const isPopular = tier.id === 'pro';
@@ -346,6 +349,7 @@ function SubscribePage() {
             );
           })}
         </div>
+        )}
 
         {/* Founding Member Option */}
         {showFoundingOffer && (
