@@ -21,6 +21,15 @@ export async function POST(request) {
       );
     }
 
+    // Guard: ensure Supabase env vars are present before making any API calls
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      return NextResponse.json(
+        { error: 'Authentication service not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     // Create Supabase client with cookie support
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });

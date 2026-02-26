@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Loader2, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { VALIDATION, LOADING, ERRORS, SUCCESS } from '@/lib/copy';
-import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -16,8 +16,15 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [validSession, setValidSession] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [fatalError, setFatalError] = useState('');
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setFatalError('Authentication is not configured. Please contact support.');
+      setCheckingSession(false);
+      return;
+    }
+
     const supabase = getSupabaseBrowserClient();
     let resolved = false;
 
@@ -103,6 +110,17 @@ export default function ResetPasswordPage() {
       setIsLoading(false);
     }
   };
+
+  if (fatalError) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-red-500 rounded-2xl p-8 text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Service Unavailable</h1>
+          <p className="text-zinc-400">{fatalError}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (checkingSession) {
     return (
