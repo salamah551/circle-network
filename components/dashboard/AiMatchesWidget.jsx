@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Users, Sparkles, Building2, Target, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Users, Sparkles, Building2, Target, ArrowRight, Loader2, AlertCircle, LogIn } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/fetch-with-auth';
 
 /**
  * AI-Curated Matches Widget
@@ -17,7 +18,11 @@ export default function AiMatchesWidget() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await fetch('/api/matches');
+        const response = await fetchWithAuth('/api/matches');
+        if (response.status === 401 || response.status === 403) {
+          setError('reauth');
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch matches');
         }
@@ -60,7 +65,15 @@ export default function AiMatchesWidget() {
         </div>
       )}
 
-      {error && (
+      {error === 'reauth' ? (
+        <div className="flex items-center gap-2 text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+          <LogIn className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">
+            Your session has expired.{' '}
+            <a href="/login" className="underline hover:text-amber-300">Sign in again</a> to view matches.
+          </p>
+        </div>
+      ) : error && (
         <div className="flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p className="text-sm">Failed to load matches. Please try again later.</p>

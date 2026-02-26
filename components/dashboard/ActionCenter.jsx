@@ -3,9 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Send, Loader2, CheckCircle, AlertCircle, 
   Paperclip, X, FileText, Plane, TrendingUp, 
-  Users, MessageSquare, Target, Zap
+  Users, MessageSquare, Target, Zap, LogIn
 } from 'lucide-react';
 import Link from 'next/link';
+import { fetchWithAuth } from '@/lib/fetch-with-auth';
 
 /**
  * ARC™ Hub - Central action center with service tabs and file uploads
@@ -43,7 +44,7 @@ export default function ActionCenter() {
 
   const loadUsage = async () => {
     try {
-      const response = await fetch('/api/arc/usage', { credentials: 'include' });
+      const response = await fetchWithAuth('/api/arc/usage', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setUsage(data);
@@ -130,7 +131,7 @@ export default function ActionCenter() {
         formData.append('files', file);
       });
 
-      const response = await fetch('/api/arc/request', {
+      const response = await fetchWithAuth('/api/arc/request', {
         method: 'POST',
         credentials: 'include',
         body: formData
