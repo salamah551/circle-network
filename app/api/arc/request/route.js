@@ -50,7 +50,7 @@ async function checkMonthlyUsage(supabase, userId, tier) {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   
-  const { data, error } = await supabase
+  const { count, error } = await supabase
     .from('arc_requests')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
@@ -61,7 +61,7 @@ async function checkMonthlyUsage(supabase, userId, tier) {
     return { used: 0, limit: USAGE_LIMITS[tier] || 5, remaining: USAGE_LIMITS[tier] || 5 };
   }
   
-  const used = data?.length || 0;
+  const used = count || 0;
   const limit = USAGE_LIMITS[tier] || 5;
   const remaining = Math.max(0, limit - used);
   
@@ -73,9 +73,9 @@ export async function POST(request) {
     const supabase = createClient();
     
     // Get authenticated user
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!session) {
+    if (!user) {
       return Response.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -86,13 +86,13 @@ export async function POST(request) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('membership_tier, is_founding_member')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
     
     const tier = profile?.membership_tier || 'professional';
     
     // Check monthly usage cap
-    const usage = await checkMonthlyUsage(supabase, session.user.id, tier);
+    const usage = await checkMonthlyUsage(supabase, user.id, tier);
     
     if (usage.remaining <= 0) {
       return Response.json(
@@ -153,9 +153,7 @@ export async function POST(request) {
     const { data: arcRequest, error: insertError } = await supabase
       .from('arc_requests')
       .insert({
-        user_id: session.user.id,
-        type: type,
-        title: title,
+        user_id: user.id,
         content: content.trim(),
         status: 'processing'
       })
@@ -176,7 +174,7 @@ export async function POST(request) {
       if (file && file.size > 0) {
         try {
           // Generate storage path: {user_id}/{request_id}/{filename}
-          const storagePath = `${session.user.id}/${arcRequest.id}/${file.name}`;
+          const storagePath = `${user.id}/${arcRequest.id}/${file.name}`;
           
           // Convert File to Buffer
           const arrayBuffer = await file.arrayBuffer();
@@ -200,7 +198,7 @@ export async function POST(request) {
             .from('arc_request_attachments')
             .insert({
               request_id: arcRequest.id,
-              user_id: session.user.id,
+              user_id: user.id,
               file_name: file.name,
               file_size: file.size,
               file_type: file.type,
@@ -220,7 +218,7 @@ export async function POST(request) {
     }
     
     // Get updated usage
-    const updatedUsage = await checkMonthlyUsage(supabase, session.user.id, tier);
+    const updatedUsage = await checkMonthlyUsage(supabase, user.id, tier);
     
     return Response.json({
       id: arcRequest.id,

@@ -5,7 +5,9 @@ import { createClient } from '@supabase/supabase-js';
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log('📥 Received application:', JSON.stringify(body, null, 2));
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📥 Received application:', JSON.stringify(body, null, 2));
+    }
     
   // Initialize at runtime
   const supabaseAdmin = createClient(
@@ -28,7 +30,9 @@ export async function POST(request) {
       userId
     } = body;
 
-    console.log('✅ Parsed fields:', { email, inviteCode, userId, fullName, title, company });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Parsed fields:', { email, inviteCode, userId, fullName, title, company });
+    }
 
     // Validate required fields
     if (!fullName || !title || !company || !bio || !email || !inviteCode || !userId) {
