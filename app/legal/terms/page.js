@@ -70,7 +70,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-light text-white mb-4">4. Payment Terms</h2>
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.1 Subscription Fees</h3>
             <p>
-              Membership is billed monthly. Current pricing: Founding $179/mo, Premium $299/mo, Elite $499/mo. Founding member pricing is locked in 
+              Membership is billed monthly. Current pricing: Founding $399/mo, Pro $299/mo, Elite $499/mo. Founding member pricing is locked in 
               for the lifetime of the membership. Premium and Elite tier pricing is subject to change with 30 days notice. Monthly billing cycle.
             </p>
 
@@ -89,7 +89,7 @@ export default function TermsOfService() {
 
             <h3 className="text-xl font-light text-white/90 mb-3 mt-6">4.4 Founding Member Rate Lock</h3>
             <p>
-              Founding members receive a guaranteed lifetime rate of $179/mo. This rate will not increase, 
+              Founding members receive a guaranteed rate of $399/mo locked for 24 months. This rate will not increase during the lock period, 
               even if you pause and later resume your membership, provided your account remains in good standing. Founding members also receive 
               priority access to new features and exclusive member benefits.
             </p>

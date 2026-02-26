@@ -136,7 +136,7 @@ export const CHECKOUT_SUCCESS = {
   PROFESSIONAL: "You're now a Professional member at $199/mo.",
   PRO: "You're now a Pro member at $299/mo.",
   ELITE: "You're now an Elite member at $499/mo.",
-  FOUNDING: "You're now a Founding Member with Pro tier at $219/mo locked for 24 months.",
+  FOUNDING: "You're now a Founding Member with Pro tier at $399/mo locked for 24 months.",
   // Legacy messages (deprecated)
   INNER_CIRCLE: "You're now a founding Inner Circle member.",
   CHARTER: "You're now a Charter Member with lifetime rate locked in.",

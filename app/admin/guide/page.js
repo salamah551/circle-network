@@ -343,7 +343,7 @@ Templates are managed in lib/sendgrid-templates.js`,
 Subscription dashboard shows:
 • All active Stripe subscriptions
 • Customer details (name, email, member ID)
-• Plan type (Founding $199/mo, Monthly $249/mo, Annual $2,400/yr)
+• Plan type (Founding $399/mo, Annual Founding $3,999/yr)
 • Subscription status (active, past_due, cancelled)
 • Next billing date
 • Lifetime value and MRR contribution
@@ -398,7 +398,7 @@ Subscription health:
 
 Founding member tracking:
 • Total founding members vs. regular
-• Locked-in rate revenue ($199 vs $249)
+• Locked-in rate revenue ($399/mo founding)
 • Founding member churn rate
 
 Export reports to CSV for deeper analysis or financial reporting.`,
@@ -677,26 +677,20 @@ Deliverability monitoring:
         title: 'Pricing & Plans',
         content: `Current pricing structure:
 
-Founding Member ($199/mo):
+Founding Member ($399/mo):
 • Available until November 1, 2025
 • Limited to first 500 members
 • Lifetime locked-in rate
 • All platform features
-• Stripe Price ID: NEXT_PUBLIC_STRIPE_FOUNDING_PRICE_ID
+• Stripe Price ID: NEXT_PUBLIC_STRIPE_PRICE_FOUNDING
 
-Monthly Plan ($249/mo):
-• Available after launch
-• Standard membership rate
-• Monthly billing cycle
-• All platform features
-• Stripe Price ID: NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID
-
-Annual Plan ($2,400/yr):
-• Available after launch
-• Save $588 vs monthly ($249 × 12 = $2,988)
+Annual Founding ($3,999/yr):
+• Available until November 1, 2025
+• Limited to first 500 members
+• Save $789/year vs monthly ($399 × 12 = $4,788)
 • One-time annual payment
 • All platform features
-• Stripe Price ID: NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
+• Stripe Price ID: NEXT_PUBLIC_STRIPE_PRICE_FOUNDING_ANNUAL
 
 To update pricing:
 1. Create new price in Stripe dashboard

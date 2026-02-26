@@ -12,7 +12,7 @@ export type TierId = 'professional' | 'pro' | 'elite';
 /**
  * Tier identifier including special founding offer
  */
-export type TierIdWithFounding = TierId | 'founding';
+export type TierIdWithFounding = TierId | 'founding' | 'founding-annual';
 
 /**
  * Usage limits for each tier
@@ -121,7 +121,19 @@ export const TIERS: MembershipTier[] = [
  */
 export const FOUNDING_OFFER: FoundingOffer = {
   appliesTo: 'pro',
-  priceMonthlyCents: 21900, // $219/mo
+  priceMonthlyCents: 39900, // $399/mo
+  durationMonths: 24
+};
+
+/**
+ * Founding Members annual offer - Pro tier at annual rate for 24 months
+ */
+export const FOUNDING_OFFER_ANNUAL = {
+  appliesTo: 'pro' as TierId,
+  priceAnnualCents: 399900, // $3,999/year ($333/mo effective)
+  monthlyEquivalentCents: 33300, // $333/mo
+  savingsCents: 78900, // saves $789/year vs monthly
+  savingsPercent: 16,
   durationMonths: 24
 };
 
@@ -140,6 +152,8 @@ export function getStripePriceIdByTier(tierId: TierIdWithFounding): string | und
       return process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE;
     case 'founding':
       return process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING;
+    case 'founding-annual':
+      return process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING_ANNUAL;
     default:
       return undefined;
   }

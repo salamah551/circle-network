@@ -271,7 +271,7 @@ function SubscribePage() {
               Get Pro tier features at <strong className="text-white">${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo</strong> — locked for 24 months
             </p>
             <p className="text-sm text-zinc-400">
-              Save $80/mo compared to regular Pro pricing. Limited availability.
+              Founding rate — locked for 24 months. Standard membership will be $599/mo.
             </p>
           </div>
         )}
@@ -389,7 +389,7 @@ function SubscribePage() {
                       </div>
                       <div className="text-zinc-400">/month</div>
                       <div className="text-sm text-emerald-400 font-semibold">
-                        Save $80/mo for 24 months
+                        Founding rate — locked for 24 months
                       </div>
                     </div>
 

@@ -121,7 +121,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
           You're being invited during our founding member phase, which means:
         </p>
         <ul style="margin:0 0 16px 0;padding:0 0 0 20px;color:#f5f5f5;">
-          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Lifetime Founding Member Status</strong><br/>Lock in $179/mo forever (Premium pricing $299/mo, Elite $499/mo)</li>
+          <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Founding Member Status</strong><br/>Lock in $399/mo for 24 months (Pro pricing $299/mo, Elite $499/mo)</li>
           <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Priority Access to Features</strong><br/>Get early access to all new platform features and AI tools as they launch</li>
           <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Founding Member Badge</strong><br/>Displayed on your profile, showing you were part of the original founding members</li>
           <li style="margin:0 0 12px 0;font-size:15px;line-height:1.5;"><strong style="color:#E5C77E;">✓ Direct Input on Development</strong><br/>Shape the platform's future through exclusive founder surveys and feedback sessions</li>
@@ -209,7 +209,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </p>
 
       <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
-        You're among a highly selective group being invited during our <strong>founding member phase</strong>—and there are only <strong>11 days left</strong> to claim your spot at the locked-in price of $179/mo.
+        You're among a highly selective group being invited during our <strong>founding member phase</strong>—and there are only <strong>11 days left</strong> to claim your spot at the locked-in price of $399/mo.
       </p>
 
       <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#333;">
@@ -294,7 +294,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       <div style="background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);color:#fff;padding:24px;margin:0 0 24px 0;border-radius:8px;">
         <h2 style="margin:0 0 16px 0;font-size:18px;font-weight:700;color:#E5C77E;">THE MATH IS SIMPLE</h2>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
-          Circle Network costs $179/mo as a founding member ($2,148/year).
+          Circle Network costs $399/mo as a founding member ($4,788/year).
         </p>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;color:#f5f5f5;">
           If just <strong style="color:#E5C77E;">ONE connection</strong> this year creates $50,000 in value (a conservative estimate), your ROI is <strong style="color:#E5C77E;">23x</strong>.
@@ -362,7 +362,7 @@ function getEmailTemplate(stage, recipient, trackingPixel, unsubscribeUrl) {
       </p>
 
       <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#333;">
-        Your invitation code expires in <strong style="color:#DC143C;">72 hours</strong>, and after that, you'll miss the founding member pricing of $179/mo—locked in for life.
+        Your invitation code expires in <strong style="color:#DC143C;">72 hours</strong>, and after that, you'll miss the founding member pricing of $399/mo—locked in for 24 months.
       </p>
 
       <div style="background:#FEE2E2;border-left:4px solid #DC143C;padding:20px;margin:0 0 24px 0;border-radius:4px;">

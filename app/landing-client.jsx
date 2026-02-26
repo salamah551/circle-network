@@ -605,6 +605,162 @@ export default function NewHomepage() {
         </div>
       </section>
 
+      {/* Three-Tier Membership Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <div className="inline-block px-6 py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full text-sm font-bold text-white mb-6">
+            THREE PATHS TO EXTRAORDINARY
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Choose Your Level of Access
+          </h2>
+          <p className="text-xl text-white/60 max-w-3xl mx-auto">
+            The Circle offers three distinct membership tiers, each designed to deliver exceptional value. 
+            All provide access to our AI-powered platform and vetted community—the difference is depth and exclusivity.
+          </p>
+        </div>
+
+        {/* Founding Member Special Offer Banner */}
+        <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Star className="w-5 h-5 text-purple-400" />
+            <h3 className="text-xl font-bold text-purple-400">Special Founding Member Offer</h3>
+            <Star className="w-5 h-5 text-purple-400" />
+          </div>
+          <p className="text-zinc-300 mb-2">
+            Get Pro tier features at <strong className="text-white">${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo</strong> — locked for 24 months
+          </p>
+          <p className="text-sm text-zinc-400">
+            Founding rate — locked for 24 months. Standard membership will be $599/mo.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {/* Professional */}
+          <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 border-2 border-zinc-700 rounded-3xl p-8 overflow-hidden group hover:border-zinc-600 transition-all duration-300 flex flex-col">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-zinc-500/10 rounded-full blur-3xl -z-10 group-hover:bg-zinc-500/20 transition-all" />
+            
+            <div className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs font-bold text-white/80 mb-4 self-start">
+              STARTER
+            </div>
+
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">{professional.name}</h3>
+            <p className="text-white/60 text-sm mb-6">{professional.target}</p>
+
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(professional.priceMonthlyCents / 100).toFixed(0)}</div>
+              <div className="text-white/60 text-sm">/month</div>
+            </div>
+
+            <div className="space-y-3 mb-8 flex-grow">
+              {professional.features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-white/80">{feature}</div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/subscribe"
+              className="block w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-center rounded-xl transition-all duration-300 border border-zinc-700 hover:border-zinc-600 mt-auto"
+            >
+              <span className="flex items-center justify-center gap-2 text-sm">
+                Subscribe Now
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
+          </div>
+
+          {/* Pro - Highlighted */}
+          <div className="relative bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-2 border-purple-500/70 rounded-3xl p-8 overflow-hidden group hover:border-purple-400/90 transition-all duration-300 flex flex-col transform md:scale-105">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/30 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/40 transition-all" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-500/30 rounded-full blur-3xl -z-10 group-hover:bg-pink-500/40 transition-all" />
+            
+            <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white mb-4 self-start">
+              MOST POPULAR
+            </div>
+
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">{pro.name}</h3>
+            <p className="text-white/60 text-sm mb-6">{pro.target}</p>
+
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(pro.priceMonthlyCents / 100).toFixed(0)}</div>
+              <div className="text-white/60 text-sm">/month</div>
+            </div>
+
+            <div className="space-y-3 mb-8 flex-grow">
+              {pro.features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-white/90">{feature}</div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/subscribe"
+              className="block w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 mt-auto"
+            >
+              <span className="flex items-center justify-center gap-2 text-sm">
+                Subscribe Now
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
+
+            <p className="text-xs text-purple-300 mt-3 text-center font-semibold">
+              Or get founding member rate: ${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo
+            </p>
+          </div>
+
+          {/* Elite */}
+          <div className="relative bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500/50 rounded-3xl p-8 overflow-hidden group hover:border-indigo-400/70 transition-all duration-300 flex flex-col">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl -z-10 group-hover:bg-indigo-500/30 transition-all" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -z-10 group-hover:bg-purple-500/30 transition-all" />
+            
+            <div className="inline-block px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-xs font-bold text-white mb-4 self-start">
+              PREMIUM
+            </div>
+
+            <h3 className="text-2xl md:text-3xl font-bold mb-1">{elite.name}</h3>
+            <p className="text-white/60 text-sm mb-6">{elite.target}</p>
+
+            <div className="mb-6">
+              <div className="text-3xl md:text-4xl font-bold text-white mb-1">${(elite.priceMonthlyCents / 100).toFixed(0)}</div>
+              <div className="text-white/60 text-sm">/month</div>
+            </div>
+
+            <div className="space-y-3 mb-8 flex-grow">
+              {elite.features.map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-white/90">{feature}</div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/subscribe"
+              className="block w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold text-center rounded-xl hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 mt-auto"
+            >
+              <span className="flex items-center justify-center gap-2 text-sm">
+                Subscribe Now
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-white/60 text-sm">
+            Compare all features on the <Link href="/membership" className="text-purple-400 hover:text-purple-300 font-semibold">membership page</Link> or learn about <Link href="/briefpoint" className="text-purple-400 hover:text-purple-300 font-semibold">BriefPoint</Link>.
+          </p>
+        </div>
+      </section>
+
+      {/* Partnership Application Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-3xl mx-auto">
       {/* Request Access Section */}
       <section id="request-access" className="max-w-7xl mx-auto px-6 py-20">
         <div className="max-w-2xl mx-auto">
