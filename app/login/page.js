@@ -59,11 +59,19 @@ function LoginContent() {
       });
 
       if (signInError) {
-        throw new Error(signInError.message || ERRORS.GENERIC);
+        const msg = signInError.message?.toLowerCase() || '';
+        const isInvalidCredentials =
+          signInError.code === 'invalid_credentials' ||
+          msg.includes('invalid') ||
+          msg.includes('credentials') ||
+          msg.includes('email not confirmed');
+        throw new Error(isInvalidCredentials ? ERRORS.INVALID_CREDENTIALS : (signInError.message || ERRORS.GENERIC));
       }
 
-      // onAuthStateChange in AuthProvider will update `user`, which triggers
-      // the redirect useEffect above. No manual router.push needed here.
+      // onAuthStateChange in AuthProvider will update `user`, triggering
+      // the redirect useEffect above. Push to /dashboard as an explicit
+      // fallback; the useEffect will redirect to /admin if the user is an admin.
+      router.push('/dashboard');
     } catch (err) {
       setError(err.message || ERRORS.GENERIC);
     } finally {

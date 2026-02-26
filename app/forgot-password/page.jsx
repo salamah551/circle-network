@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ArrowRight, Loader2, Mail } from 'lucide-react';
 import { LOADING, ERRORS, SUCCESS } from '@/lib/copy';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -15,21 +16,24 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
+      if (!isSupabaseConfigured()) {
+        throw new Error('Authentication is not configured. Please contact support.');
+      }
 
-      const data = await response.json();
+      const supabase = getSupabaseBrowserClient();
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email.toLowerCase().trim(),
+        { redirectTo }
+      );
 
-      if (!response.ok) {
-        throw new Error(data.error || ERRORS.GENERIC);
+      if (resetError) {
+        throw new Error(resetError.message || ERRORS.GENERIC);
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || ERRORS.GENERIC);
     } finally {
       setIsLoading(false);
     }

@@ -18,47 +18,48 @@ export default function ResetPasswordPage() {
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    // Check if user has a valid recovery session
-    const checkSession = async () => {
-      try {
-        const supabase = getSupabaseBrowserClient();
-        
-        // Check the URL hash for access_token and type=recovery
-        // Supabase sends password reset with type=recovery in the hash
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const tokenType = hashParams.get('type');
-        
-        // Verify this is a recovery session
-        if (accessToken && tokenType === 'recovery') {
-          // Exchange the token for a session
-          const { data: { session }, error } = await supabase.auth.getSession();
-          
-          if (session && !error) {
-            setValidSession(true);
-          } else {
-            setError('Invalid or expired reset link. Please request a new password reset.');
-          }
-        } else {
-          // Check if user already has an active session (shouldn't be here)
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            // User is logged in but didn't come from reset link - redirect to settings
-            router.push('/settings');
-          } else {
-            setError('Invalid or expired reset link. Please request a new password reset.');
-          }
-        }
-      } catch (err) {
-        console.error('Session check error:', err);
-        setError('Failed to verify reset link. Please try again.');
-      } finally {
-        setCheckingSession(false);
+    const supabase = getSupabaseBrowserClient();
+    let resolved = false;
+
+    const resolve = (hasSession) => {
+      if (resolved) return;
+      resolved = true;
+      if (hasSession) {
+        setValidSession(true);
+      } else {
+        setError('Invalid or expired reset link. Please request a new password reset.');
       }
+      setCheckingSession(false);
     };
 
-    checkSession();
-  }, [router]);
+    // Listen for PASSWORD_RECOVERY event which Supabase fires after
+    // exchanging the access_token from the URL hash.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          resolve(!!session);
+        }
+      }
+    );
+
+    // Also check for an existing session immediately (handles page refresh or
+    // cases where the token was already exchanged before the listener registered).
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        resolve(true);
+      }
+    }).catch((err) => {
+      console.error('Session check error:', err);
+    });
+
+    // Show error after timeout if still not resolved
+    const timer = setTimeout(() => resolve(false), 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
