@@ -26,7 +26,7 @@ Current members include people from Y Combinator, Fortune 500 C-suites, Andreess
 
 You have {{deadline}} days left to use your invitation code ({{invite_code}}).
 
-Founding is $179/mo (lock in early access pricing).
+Founding is $399/mo (lock in early access pricing).
 Premium is $299/mo (strategic introductions, member directory, events).
 Elite is $499/mo (Premium plus AI Deal Flow, Reputation Guardian, Competitive Intelligence coming Q1 2026).
 

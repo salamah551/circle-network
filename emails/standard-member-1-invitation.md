@@ -22,7 +22,7 @@ Everyone in the network is vetted—tech founders, investors, executives, adviso
 
 We have three membership tiers:
 
-**Founding ($179/month):** AI-powered introductions, member directory, messaging, events, deal flow marketplace access. Limited availability.
+**Founding ($399/month):** AI-powered introductions, member directory, messaging, events, deal flow marketplace access. Limited availability.
 
 **Premium ($299/month):** AI-powered introductions, member directory, messaging, events, deal flow marketplace access.
 

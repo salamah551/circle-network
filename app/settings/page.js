@@ -523,7 +523,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                     <p className="text-white/40 text-xs">
-                      Your rate is locked in forever as a founding member. Regular pricing is $249/month.
+                      Your rate is locked in forever as a founding member. Regular pricing is $599/month.
                     </p>
                   </div>
 

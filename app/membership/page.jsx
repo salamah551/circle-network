@@ -51,7 +51,7 @@ export default function MembershipPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-bold mb-4">Core</h3>
             <div className="mb-6">
-              <div className="text-4xl font-bold text-white mb-2">$179</div>
+              <div className="text-4xl font-bold text-white mb-2">$199</div>
               <div className="text-zinc-400 text-sm">per month</div>
               <div className="text-emerald-400 text-sm mt-2">$143/mo billed annually (−20%)</div>
             </div>
@@ -175,7 +175,7 @@ export default function MembershipPage() {
           </div>
           <h3 className="text-2xl font-bold mb-3">Lock in Pro Features Forever</h3>
           <p className="text-zinc-300 mb-4">
-            First 100 members get Pro tier features (30 ARC requests/month, 10 BriefPoint briefs/day) for just <span className="text-emerald-400 font-bold">$249/month</span>
+            First 100 members get Pro tier features (30 ARC requests/month, 10 BriefPoint briefs/day) for just <span className="text-emerald-400 font-bold">$399/month</span>
           </p>
           <p className="text-sm text-zinc-400 mb-6">
             24-month price lock • Limited to first 100 sign-ups • Never available again

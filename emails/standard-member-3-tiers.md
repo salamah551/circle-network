@@ -14,7 +14,7 @@ Hi {{first_name}},
 
 Wanted to help you choose between our membership tiers by breaking down what each includes.
 
-**Founding ($179/month):**
+**Founding ($399/month):**
 - AI-powered strategic introductions (3/week)
 - Member directory and advanced search
 - Direct messaging

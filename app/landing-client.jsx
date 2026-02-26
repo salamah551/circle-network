@@ -654,7 +654,7 @@ export default function NewHomepage() {
             Get Pro tier features at <strong className="text-white">${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo</strong> — locked for 24 months
           </p>
           <p className="text-sm text-zinc-400">
-            Save $80/mo compared to regular Pro pricing. Limited availability.
+            Founding rate — locked for 24 months. Standard membership will be $599/mo.
           </p>
         </div>
 
