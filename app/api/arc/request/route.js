@@ -250,7 +250,6 @@ export async function POST(request) {
       prompt: content.trim(),
       type,
       attachmentTexts,
-      supabase
     }).catch(err => console.error('Background ARC processing failed:', err));
     
     return Response.json({
