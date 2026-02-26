@@ -4,11 +4,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { LOADING, ERRORS, SUCCESS } from '@/lib/copy';
 import { useAuth } from '@/components/AuthProvider';
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, initError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -44,22 +45,28 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || ERRORS.GENERIC);
+      // If Supabase env keys are missing, show a clear error immediately
+      if (!isSupabaseConfigured()) {
+        throw new Error('Authentication is not configured. Please contact support.');
       }
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Sign in directly with the browser Supabase client so it gains a valid
+      // local session and the AuthProvider's onAuthStateChange fires correctly.
+      const supabase = getSupabaseBrowserClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      });
+
+      if (signInError) {
+        throw new Error(signInError.message || ERRORS.GENERIC);
+      }
+
+      // onAuthStateChange in AuthProvider will update `user`, which triggers
+      // the redirect useEffect above. No manual router.push needed here.
     } catch (err) {
-      setError(err.message);
+      setError(err.message || ERRORS.GENERIC);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -88,6 +95,12 @@ function LoginContent() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {initError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm">
+              Authentication service unavailable. Please try again later or contact support.
+            </div>
+          )}
+
           {successMessage && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-emerald-400 text-sm">
               {successMessage}
