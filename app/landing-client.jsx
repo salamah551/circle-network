@@ -39,6 +39,7 @@ export default function NewHomepage() {
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
+          subject: 'Access Request',
           message: `Access Request\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`
         })
       });

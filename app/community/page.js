@@ -65,6 +65,7 @@ export default function CommunityPage() {
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
+          subject: 'Community Page Access Request',
           message: `Community Page Access Request\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`,
         }),
       });
