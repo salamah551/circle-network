@@ -22,9 +22,11 @@ export default async function DashboardLayout({ children }) {
     .eq('id', session.user.id)
     .single();
   
-  if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    redirect('/login');
+  if (profileError || !profile) {
+    console.error('Error fetching profile or profile missing:', profileError);
+    // Profile may not exist yet (e.g. payment just completed via magic link).
+    // Redirect to /subscribe so the user can complete setup.
+    redirect('/subscribe');
   }
   
   // 3. Check for active subscription

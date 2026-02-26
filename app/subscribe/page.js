@@ -25,6 +25,30 @@ function SubscribePage() {
   const [selectedPlan, setSelectedPlan] = useState('founding'); // Default to Founding tier in launch mode
   const [showFoundingOffer, setShowFoundingOffer] = useState(false);
 
+  // Creates a minimal profile row if one does not yet exist for the user.
+  // This covers the magic-link / subscribe flow where the normal sign-up
+  // page (which creates the profile) is bypassed.
+  const ensureProfileExists = async (session) => {
+    try {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!existingProfile) {
+        await supabase.from('profiles').insert({
+          id: session.user.id,
+          email: session.user.email,
+          status: 'active',
+        });
+      }
+    } catch (err) {
+      // Non-fatal — the Stripe webhook upsert will also create the profile.
+      console.warn('ensureProfileExists warning:', err);
+    }
+  };
+
   useEffect(() => {
     const emailParam = searchParams.get('email');
     if (emailParam) {
@@ -36,17 +60,35 @@ function SubscribePage() {
     setShowFoundingOffer(!!foundingPriceId);
 
     // Check authentication
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         console.error('Session error:', error);
       }
 
       if (session) {
         setSession(session);
+        // Ensure a profile row exists for this user (magic-link users bypass
+        // the normal sign-up flow so no profile is created automatically).
+        await ensureProfileExists(session);
       }
       
       setCheckingAuth(false);
     });
+
+    // Also listen for auth state changes so that when the user clicks the
+    // magic link and is redirected back to /subscribe, we catch the SIGNED_IN
+    // event and ensure the profile exists.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setSession(session);
+        await ensureProfileExists(session);
+        setCheckingAuth(false);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [searchParams]);
 
   // Handle magic link request for unauthenticated users

@@ -116,16 +116,44 @@ export async function POST(request) {
           stripeCustomerId = customerId;
         }
 
-        // Update profile: persist stripe_customer_id and set status to active
+        // Retrieve subscription details for richer profile data
+        let subscription = null;
+        const subscriptionId = session.subscription;
+        if (subscriptionId) {
+          try {
+            subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          } catch (subErr) {
+            console.error('Error retrieving subscription:', subErr);
+          }
+        }
+
+        const membershipTier = session.metadata?.membershipTier || (isFoundingMember ? 'founding' : 'professional');
+        const userEmail = session.customer_email || session.customer_details?.email;
+
+        // Upsert profile: create a minimal profile if one doesn't exist yet,
+        // or update an existing one. This handles the magic-link / subscribe
+        // flow where a profile row may not have been created before payment.
+        const profileUpsertData = {
+          id: userId,
+          email: userEmail,
+          status: 'active',
+          subscription_status: 'active',
+          is_founding_member: isFoundingMember,
+          stripe_customer_id: stripeCustomerId,
+          membership_tier: membershipTier,
+        };
+
+        if (subscription) {
+          profileUpsertData.stripe_subscription_id = subscription.id;
+          profileUpsertData.stripe_price_id = subscription.items.data[0]?.price?.id;
+          if (subscription.current_period_end) {
+            profileUpsertData.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
+          }
+        }
+
         const { error: profileError } = await supabaseAdmin
           .from('profiles')
-          .update({ 
-            status: 'active',
-            subscription_status: 'active',
-            is_founding_member: isFoundingMember,
-            stripe_customer_id: stripeCustomerId
-          })
-          .eq('id', userId);
+          .upsert(profileUpsertData, { onConflict: 'id' });
 
         if (profileError) {
           console.error('Error updating profile:', profileError);

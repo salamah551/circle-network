@@ -181,8 +181,8 @@ function LoginContent() {
         <div className="mt-8 text-center">
           <p className="text-sm text-zinc-500">
             Don't have an account?{' '}
-            <a href="/sign-up" className="text-amber-400 hover:text-amber-300">
-              Sign up
+            <a href="/subscribe" className="text-amber-400 hover:text-amber-300">
+              Get started
             </a>
           </p>
         </div>

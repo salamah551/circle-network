@@ -10,7 +10,7 @@ const ONBOARDING_STEPS = [
   {
     icon: Sparkles,
     title: 'Welcome to Circle Network!',
-    description: 'You\'re now part of an exclusive community of elite professionals. This quick tour will show you how to maximize your membership and build valuable connections.',
+    description: 'You\'ve been selected to join an exclusive community of elite professionals. This quick tour will show you how to maximize your membership and build valuable connections.',
     action: 'Get Started',
     color: 'from-amber-500 to-amber-600'
   },
