@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyUnsubscribeSignature } from '@/lib/unsubscribe-token';
 
 
 export async function GET(request, { params }) {
@@ -11,6 +12,17 @@ export async function GET(request, { params }) {
   );
   try {
     const recipientId = params.id;
+
+    // Validate HMAC signature to prevent arbitrary ID-triggered unsubscribes
+    const { searchParams } = new URL(request.url);
+    const sig = searchParams.get('sig');
+
+    if (!verifyUnsubscribeSignature(recipientId, sig)) {
+      return NextResponse.json(
+        { error: 'Invalid or missing unsubscribe signature' },
+        { status: 400 }
+      );
+    }
 
     // Look up recipient in bulk_invites table
     const { data: recipient, error: lookupError } = await supabaseAdmin

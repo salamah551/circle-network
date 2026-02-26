@@ -1,7 +1,59 @@
 import { NextResponse } from 'next/server';
 
+// Simple in-memory rate limiter: max 5 requests per IP per 60 seconds
+const rateLimitMap = new Map();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+
+  // Evict expired entries to prevent unbounded memory growth
+  for (const [key, entry] of rateLimitMap) {
+    if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(key);
+    }
+  }
+
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry) {
+    rateLimitMap.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count += 1;
+  return true;
+}
+
 export async function POST(request) {
   try {
+    // Reject when SendGrid is not configured
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error('SENDGRID_API_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Email service is not configured' },
+        { status: 503 }
+      );
+    }
+
+    // Rate limiting by IP
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before trying again.' },
+        { status: 429 }
+      );
+    }
+
     const { name, email, subject, message } = await request.json();
 
     // Validate required fields

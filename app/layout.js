@@ -2,6 +2,10 @@ import './globals.css'
 import ToastContainer from '@/components/Toast'
 import PostHogProvider from '@/components/PostHogProvider'
 import { AuthProvider } from '@/components/AuthProvider'
+import { warnMissingServerEnv } from '@/lib/env/validate'
+
+// Warn once at startup about missing critical environment variables
+warnMissingServerEnv();
 
 export const metadata = {
   title: 'The Circle Network — The World\'s First AI-Enhanced Private Network',

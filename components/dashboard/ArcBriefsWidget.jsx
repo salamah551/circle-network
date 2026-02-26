@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Briefcase, Clock, CheckCircle, AlertCircle, ChevronRight, Loader2 } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle, AlertCircle, ChevronRight, Loader2, LogIn } from 'lucide-react';
 import DashboardWidget from './DashboardWidget';
 import { formatRelativeTime } from '@/lib/date-utils';
+import { fetchWithAuth } from '@/lib/fetch-with-auth';
 
 /**
  * My ARC™ Briefs Widget
@@ -17,7 +18,11 @@ export default function ArcBriefsWidget() {
   useEffect(() => {
     const fetchBriefs = async () => {
       try {
-        const response = await fetch('/api/arc/briefs');
+        const response = await fetchWithAuth('/api/arc/briefs');
+        if (response.status === 401 || response.status === 403) {
+          setError('reauth');
+          return;
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch ARC briefs');
         }
@@ -74,7 +79,15 @@ export default function ArcBriefsWidget() {
         </div>
       )}
 
-      {error && (
+      {error === 'reauth' ? (
+        <div className="flex items-center gap-2 text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+          <LogIn className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">
+            Your session has expired.{' '}
+            <a href="/login" className="underline hover:text-amber-300">Sign in again</a> to view your briefs.
+          </p>
+        </div>
+      ) : error && (
         <div className="flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p className="text-sm">Failed to load ARC briefs. Please try again later.</p>

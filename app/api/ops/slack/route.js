@@ -71,12 +71,21 @@ function parseSlackCommand(text) {
  */
 export async function POST(request) {
   try {
+    // Reject immediately when the signing secret is not configured
+    if (!process.env.SLACK_SIGNING_SECRET) {
+      console.error('SLACK_SIGNING_SECRET is not configured');
+      return Response.json(
+        { error: 'Slack integration is not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.text();
     
     // Verify Slack signature
     const isValid = await verifySlackSignature(request, body);
     
-    if (!isValid && process.env.SLACK_SIGNING_SECRET) {
+    if (!isValid) {
       return Response.json(
         { 
           response_type: 'ephemeral',

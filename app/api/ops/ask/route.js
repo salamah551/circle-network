@@ -20,11 +20,20 @@ import OpenAI from 'openai';
  */
 export async function POST(request) {
   try {
+    // OPS_API_TOKEN is required to use this endpoint
+    const expectedToken = process.env.OPS_API_TOKEN;
+    if (!expectedToken) {
+      console.error('OPS_API_TOKEN is not configured');
+      return Response.json(
+        { error: 'Ops API is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Check authorization
     const authHeader = request.headers.get('authorization');
-    const expectedToken = process.env.OPS_API_TOKEN;
     
-    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    if (authHeader !== `Bearer ${expectedToken}`) {
       return Response.json(
         { error: 'Unauthorized' },
         { status: 401 }
