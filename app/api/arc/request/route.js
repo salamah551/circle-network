@@ -268,7 +268,10 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error submitting ARC request:', error);
     return Response.json(
-      { error: 'Failed to submit ARC request' },
+      { 
+        error: 'Failed to submit ARC request',
+        ...(process.env.NODE_ENV === 'development' && { details: error.message })
+      },
       { status: 500 }
     );
   }
