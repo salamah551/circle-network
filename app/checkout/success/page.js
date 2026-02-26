@@ -3,50 +3,52 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Sparkles, Loader2, Crown } from 'lucide-react';
-import { CHECKOUT_SUCCESS, TIER_NAMES } from '@/lib/copy';
-import { getThreeTierPricing } from '@/lib/pricing';
+import { CHECKOUT_SUCCESS } from '@/lib/copy';
+import { TIERS, FOUNDING_OFFER } from '@/lib/pricing';
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get('session_id');
-  const tier = searchParams.get('tier') || 'charter';
+  const tier = searchParams.get('tier') || 'founding';
   
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const pricing = getThreeTierPricing();
-
-  // Map tier to tier name and message
+  // Map tier to tier name and message using actual pricing constants
   const getTierInfo = () => {
-    switch (tier.toLowerCase()) {
-      case 'inner-circle':
-      case 'innercircle':
-        return {
-          name: TIER_NAMES.INNER_CIRCLE,
-          message: CHECKOUT_SUCCESS.INNER_CIRCLE,
-          price: `$${pricing.innerCircle.formattedPrice}`,
-          color: 'indigo',
-          gradient: 'from-indigo-500 via-purple-500 to-pink-500'
-        };
-      case 'professional':
-        return {
-          name: TIER_NAMES.PROFESSIONAL_MEMBER,
-          message: CHECKOUT_SUCCESS.PROFESSIONAL,
-          price: `$${pricing.professional.formattedPrice}`,
-          color: 'zinc',
-          gradient: 'from-zinc-600 to-zinc-700'
-        };
-      case 'charter':
-      default:
-        return {
-          name: TIER_NAMES.CHARTER_MEMBER,
-          message: CHECKOUT_SUCCESS.CHARTER,
-          price: `$${pricing.charter.formattedPrice}`,
-          color: 'purple',
-          gradient: 'from-purple-500 to-pink-500'
-        };
+    // Handle founding tier
+    if (tier === 'founding') {
+      return {
+        name: 'Founding Member',
+        message: CHECKOUT_SUCCESS.FOUNDING,
+        price: `$${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo`,
+        color: 'purple',
+        gradient: 'from-purple-500 to-pink-500'
+      };
     }
+
+    // Handle standard tiers (professional, pro, elite)
+    const tierData = TIERS.find(t => t.id === tier);
+    if (tierData) {
+      const successMsg = CHECKOUT_SUCCESS[tier.toUpperCase()] || `Welcome to The Circle Network as a ${tierData.name} member.`;
+      return {
+        name: tierData.name,
+        message: successMsg,
+        price: `$${(tierData.priceMonthlyCents / 100).toFixed(0)}/mo`,
+        color: tier === 'elite' ? 'purple' : tier === 'pro' ? 'amber' : 'zinc',
+        gradient: tier === 'elite' ? 'from-purple-500 to-pink-500' : tier === 'pro' ? 'from-amber-500 to-amber-600' : 'from-zinc-600 to-zinc-700'
+      };
+    }
+
+    // Default fallback
+    return {
+      name: 'Member',
+      message: 'Welcome to The Circle Network.',
+      price: '',
+      color: 'purple',
+      gradient: 'from-purple-500 to-pink-500'
+    };
   };
 
   const tierInfo = getTierInfo();
@@ -92,6 +94,9 @@ function CheckoutSuccessContent() {
             {CHECKOUT_SUCCESS.TITLE}
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
+            Your application has been approved and your membership is now active.
+          </p>
+          <p className="text-lg text-zinc-300 max-w-2xl mx-auto mt-2">
             {tierInfo.message}
           </p>
           {sessionId && (
@@ -109,7 +114,7 @@ function CheckoutSuccessContent() {
                 {tierInfo.name.toUpperCase()}
               </div>
               <h2 className="text-2xl font-bold text-white">{tierInfo.name}</h2>
-              <p className="text-zinc-400">{tierInfo.price}/year</p>
+              <p className="text-zinc-400">{tierInfo.price}/mo</p>
             </div>
             <Crown className={`w-12 h-12 text-${tierInfo.color}-400`} />
           </div>
@@ -129,10 +134,10 @@ function CheckoutSuccessContent() {
             </div>
           </div>
 
-          {tier === 'charter' && (
+          {tier === 'founding' && (
             <div className={`bg-${tierInfo.color}-500/10 border border-${tierInfo.color}-500/30 rounded-lg p-4`}>
               <p className="text-sm text-purple-400 font-semibold">
-                🔒 Lifetime Rate Locked: Your ${pricing.charter.formattedPrice}/year rate is guaranteed forever—it will never increase.
+                🔒 Founding Rate Locked: Your ${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo rate is locked for 24 months.
               </p>
             </div>
           )}

@@ -109,22 +109,22 @@ export default function WelcomePage() {
             <Check className="w-10 h-10 text-amber-400" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Welcome to Circle Network! 
+            Welcome to The Circle, {profile?.first_name || profile?.full_name?.split(' ')[0] || 'Member'}.
           </h1>
           {isFoundingMember && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full mb-4">
               <Crown className="w-5 h-5 text-amber-400" />
-              <span className="text-amber-400 font-semibold">You're an Inner Circle (Founding Member)</span>
+              <span className="text-amber-400 font-semibold">You're a Founding Member</span>
             </div>
           )}
           {isCoreMember && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
               <Crown className="w-5 h-5 text-purple-400" />
-              <span className="text-purple-400 font-semibold">You're a Core (Charter Member)</span>
+              <span className="text-purple-400 font-semibold">You're a Core Member</span>
             </div>
           )}
-          <p className="text-xl text-zinc-400">
-            Your journey to meaningful connections starts now
+          <p className="text-xl text-zinc-300 max-w-2xl mx-auto">
+            You've been selected to join a private network of exceptional professionals. Your membership grants you access to AI-powered intelligence, strategic introductions, and a community of peers who operate at the highest level.
           </p>
         </div>
 
@@ -204,7 +204,7 @@ export default function WelcomePage() {
                 iconBg: 'bg-blue-500/20',
                 iconColor: 'text-blue-400',
                 title: 'Browse Members',
-                description: 'Explore the directory of 250 accomplished professionals',
+                description: 'Explore the directory of accomplished professionals in the network',
                 action: 'Browse members',
                 link: '/members'
               },
