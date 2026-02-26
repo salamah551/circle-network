@@ -47,9 +47,9 @@ export async function GET() {
     const supabase = createClient();
     
     // Get authenticated user
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (!session) {
+    if (!user) {
       return Response.json(
         { used: 0, limit: 5, remaining: 5 },
         { status: 200 }
@@ -60,7 +60,7 @@ export async function GET() {
     const { data: profile } = await supabase
       .from('profiles')
       .select('membership_tier, is_founding_member')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
     
     const tier = profile?.membership_tier || 'professional';
@@ -70,10 +70,10 @@ export async function GET() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
-    const { data, error } = await supabase
+    const { count, error } = await supabase
       .from('arc_requests')
-      .select('id', { count: 'exact' })
-      .eq('user_id', session.user.id)
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
       .gte('created_at', startOfMonth.toISOString());
     
     if (error) {
@@ -81,7 +81,7 @@ export async function GET() {
       return Response.json({ used: 0, limit, remaining: limit });
     }
     
-    const used = data?.length || 0;
+    const used = count || 0;
     const remaining = Math.max(0, limit - used);
     
     return Response.json({ used, limit, remaining });
