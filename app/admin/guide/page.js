@@ -324,8 +324,7 @@ Wildcard Persona:
 • General professional networking
 • Broad value propositions
 • Examples: Career opportunities, mentorship
-
-Templates are managed in lib/sendgrid-templates.js`,
+`,
         icon: MessageSquare
       }
     ]
@@ -645,34 +644,7 @@ All features are available immediately based on membership tier.
 No date-based gating - everything is controlled by tier capabilities.`,
         icon: Calendar
       },
-      {
-        title: 'Email Settings',
-        content: `Configure email system via SendGrid:
 
-Email types managed:
-• Transactional (magic links, receipts)
-• Marketing (bulk invite campaigns)
-• Notifications (messages, events, requests)
-• System (password resets, alerts)
-
-SendGrid configuration:
-• API key: Stored in SENDGRID_API_KEY secret
-• From email: invite@thecirclenetwork.org
-• Reply-to: support@thecirclenetwork.org
-• Domain authentication required for deliverability
-
-Email templates location: lib/sendgrid-templates.js
-• 20 templates total (5 personas × 4 sequences)
-• Customize subject lines, content, CTAs
-• Dynamic variables for personalization
-
-Deliverability monitoring:
-• Bounce rate (keep < 2%)
-• Open rate (target > 25%)
-• Spam complaints (keep < 0.1%)
-• Unsubscribe rate (monitor trends)`,
-        icon: Mail
-      },
       {
         title: 'Pricing & Plans',
         content: `Current pricing structure:
@@ -800,7 +772,6 @@ Data protection:
 
 API security:
 • Keep API keys in environment secrets
-• Rotate SendGrid API key quarterly
 • Monitor Stripe webhook signatures
 • Check for failed auth attempts
 • Block suspicious IP addresses

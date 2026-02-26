@@ -3,7 +3,6 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
-import { sendFoundingMemberWelcomeEmail } from '@/lib/sendgrid';
 
 // PostHog server-side tracking helper
 async function trackServerEvent(eventName, properties = {}) {
@@ -173,25 +172,6 @@ export async function POST(request) {
             currency: session.currency,
           });
           
-          // Send welcome email
-          try {
-            // Get user profile for name
-            const { data: userProfile } = await supabaseAdmin
-              .from('profiles')
-              .select('full_name')
-              .eq('id', userId)
-              .single();
-            
-            await sendFoundingMemberWelcomeEmail({
-              to: session.customer_email,
-              name: userProfile?.full_name || 'there',
-              isFoundingMember: isFoundingMember
-            });
-            console.log(`Welcome email sent to ${session.customer_email}`);
-          } catch (emailError) {
-            console.error('Error sending welcome email:', emailError);
-            // Don't fail the webhook if email fails
-          }
         }
 
         // Update application status

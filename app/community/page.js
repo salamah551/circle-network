@@ -65,8 +65,8 @@ export default function CommunityPage() {
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
-          subject: 'Community Page Access Request',
-          message: `Community Page Access Request\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`,
+          subject: 'Community Page Sign Up',
+          message: `Community Page Sign Up\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`,
         }),
       });
 
@@ -76,7 +76,7 @@ export default function CommunityPage() {
       setRequestForm({ name: '', email: '', company: '', title: '' });
       setTimeout(() => setShowSuccess(false), 8000);
     } catch {
-      setFormError('Something went wrong. Please email invite@thecirclenetwork.org directly.');
+      setFormError('Something went wrong. Please email help@thecirclenetwork.org directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,7 +100,7 @@ export default function CommunityPage() {
               Sign In
             </Link>
             <a href="#request-access" className="text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-all shadow-lg shadow-purple-500/20">
-              Request Access
+              Join The Circle
             </a>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function CommunityPage() {
       <section className="max-w-7xl mx-auto px-6 pt-20 pb-12 text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mb-6">
           <Lock className="w-3 h-3" />
-          Invitation Only — Member Proof
+          Open Membership — Member Proof
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
           <span className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">
@@ -219,10 +219,10 @@ export default function CommunityPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">
-              Request an <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">Invitation</span>
+              Join <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
             </h2>
             <p className="text-xl text-white/60">
-              Membership is extended by invitation only. Submit your details and we&apos;ll be in touch if there&apos;s a fit.
+              Sign up today and get access to an exclusive community of high-performing professionals.
             </p>
           </div>
 

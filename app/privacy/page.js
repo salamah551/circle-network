@@ -143,7 +143,7 @@ export default function PrivacyPage() {
                 <ul className="text-zinc-400 mt-2 space-y-1">
                   <li>• Supabase (database and authentication)</li>
                   <li>• Stripe (payment processing)</li>
-                  <li>• SendGrid (email delivery)</li>
+
                   <li>• Vercel (hosting and infrastructure)</li>
                 </ul>
                 <p className="text-zinc-400 mt-2 mb-0">
