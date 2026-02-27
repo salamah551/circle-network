@@ -12,10 +12,6 @@ import {
   UserCheck,
   ArrowRight,
   Loader2,
-  Upload,
-  Play,
-  CheckCircle,
-  AlertCircle,
   Shield,
 } from 'lucide-react';
 import { getMRRValues } from '@/lib/pricing';
@@ -43,11 +39,6 @@ export default function AdminDashboard() {
   });
 
   const [recentActivity, setRecentActivity] = useState([]);
-  
-  // Cron trigger states
-  const [isTriggeringCron, setIsTriggeringCron] = useState(false);
-  const [cronResult, setCronResult] = useState(null);
-  const [cronError, setCronError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -159,43 +150,6 @@ export default function AdminDashboard() {
     }
   }
 
-  async function handleRunInviteCron() {
-    setIsTriggeringCron(true);
-    setCronResult(null);
-    setCronError(null);
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setCronError('No active session');
-        return;
-      }
-
-      const response = await fetch('/api/admin/run-invites', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setCronError(data.error || 'Failed to trigger cron job');
-        return;
-      }
-
-      setCronResult(data.result);
-      await loadStats(); // Refresh stats after running cron
-    } catch (e) {
-      console.error('Error triggering cron:', e);
-      setCronError(e.message || 'Unexpected error');
-    } finally {
-      setIsTriggeringCron(false);
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -294,83 +248,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Manual Cron Trigger */}
-        <div className="bg-gradient-to-br from-amber-900/20 to-amber-800/10 border border-amber-500/30 rounded-xl p-6 mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Mail className="w-6 h-6 text-amber-400" />
-                Manual Invite Sequence Trigger
-              </h2>
-              <p className="text-zinc-400 text-sm mb-4">
-                Manually trigger the daily invite cron job to process all active campaigns. This runs the same logic as the automated 09:00 UTC job.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleRunInviteCron}
-              disabled={isTriggeringCron}
-              className="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-black disabled:text-zinc-500 font-semibold rounded-lg transition-colors flex items-center gap-2"
-            >
-              {isTriggeringCron ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Play className="w-5 h-5" />
-                  Run Now
-                </>
-              )}
-            </button>
-
-            {cronResult && (
-              <div className="flex items-center gap-2 text-emerald-400 text-sm">
-                <CheckCircle className="w-5 h-5" />
-                <span>
-                  Sent: {cronResult.campaigns_processed || 0} campaigns processed
-                  {cronResult.results && cronResult.results.length > 0 && (
-                    <span className="ml-2">
-                      ({cronResult.results.reduce((sum, r) => sum + (r.sent || 0), 0)} emails sent)
-                    </span>
-                  )}
-                </span>
-              </div>
-            )}
-
-            {cronError && (
-              <div className="flex items-center gap-2 text-red-400 text-sm">
-                <AlertCircle className="w-5 h-5" />
-                <span>Error: {cronError}</span>
-              </div>
-            )}
-          </div>
-
-          {cronResult?.results && cronResult.results.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-amber-500/20">
-              <h3 className="text-sm font-semibold text-amber-400 mb-2">Campaign Results:</h3>
-              <div className="space-y-2">
-                {cronResult.results.map((result, idx) => (
-                  <div key={idx} className="text-xs text-zinc-400 bg-black/30 rounded p-2">
-                    <span className="font-medium text-white">{result.campaign}</span>
-                    {result.sent !== undefined && (
-                      <span className="ml-2">
-                        • Sent: {result.sent} | Failed: {result.failed || 0} | Suppressed: {result.suppressed || 0}
-                      </span>
-                    )}
-                    {result.error && (
-                      <span className="ml-2 text-red-400">• Error: {result.error}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <button
@@ -382,20 +259,6 @@ export default function AdminDashboard() {
               Manage Members
             </h3>
             <p className="text-zinc-500 text-sm mb-3">View and manage all members</p>
-            <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
-          </button>
-
-          
-
-          <button
-            onClick={() => router.push('/admin/bulk-invites')}
-            className="bg-zinc-900 border border-zinc-800 hover:border-amber-500/30 rounded-xl p-6 transition-all text-left group"
-          >
-            <Upload className="w-8 h-8 text-purple-400 mb-3" />
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">
-              Bulk Invites
-            </h3>
-            <p className="text-zinc-500 text-sm mb-3">CSV upload & email campaigns</p>
             <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-amber-400 transition-colors" />
           </button>
 

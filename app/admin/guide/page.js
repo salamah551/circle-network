@@ -24,7 +24,6 @@ Key sections:
 • Overview - Real-time platform metrics and analytics
 • Members - Manage all member accounts and profiles
 • Invites - Generate and track invitation codes
-• Bulk Invites - Send mass email campaigns with automation
 • Subscriptions - Manage Stripe payments and billing
 • Activity Logs - Complete audit trail of all admin actions
 • Support Tickets - Handle member support requests`,
@@ -183,9 +182,7 @@ Use insights to:
     subsections: [
       {
         title: 'Generating Invite Codes',
-        content: `Navigate to /admin/invites to create new invitation codes.
-
-Single invite creation:
+        content: `Single invite creation:
 1. Enter recipient's email address
 2. Click "Generate Invite"
 3. Code format: FOUNDING-XXXXXX (6 random characters)
@@ -216,116 +213,6 @@ Tracking data:
 
 Filter and search invites by email, code, or status to track campaign performance.`,
         icon: BarChart3
-      }
-    ]
-  },
-  {
-    id: 'bulk-campaigns',
-    title: 'Bulk Email Campaigns',
-    icon: Send,
-    color: 'purple',
-    subsections: [
-      {
-        title: 'Creating Bulk Invite Campaigns',
-        content: `Navigate to /admin/bulk-invites to send mass invitation campaigns.
-
-Campaign setup process:
-1. Enter campaign name for tracking
-2. Paste email addresses (one per line or comma-separated)
-3. Select persona type:
-   • founder - Tech startup founders
-   • operator - Business operators and COOs
-   • investor - VCs and angel investors
-   • executive - C-level executives
-   • wildcard - General professionals
-4. System generates unique invite codes for each email
-5. Launches automated 4-stage email sequence
-
-Campaign features:
-• Automatic deduplication of email addresses
-• Invalid email detection and filtering
-• Bulk invite code generation
-• Automated email sequences with tracking`,
-        icon: Zap
-      },
-      {
-        title: 'Email Automation Sequences',
-        content: `Each bulk campaign triggers a 4-stage automated sequence:
-
-Email 1 (Day 0) - Initial Invitation
-• Sent immediately upon campaign creation
-• Personalized with recipient's persona
-• Includes unique invite code and signup link
-• Social proof and founding member benefits
-
-Email 2 (Day 3) - Social Proof
-• "X new members joined this week"
-• Updated member count and recent joins
-• Community growth momentum
-
-Email 3 (Day 7) - Value Demonstration
-• Member success stories specific to persona
-• Concrete examples of network value
-• Testimonials and ROI examples
-
-Email 4 (Day 14) - Final Urgency
-• Expiration reminder (7 days left)
-• Last chance to lock in founding member pricing
-• Final call-to-action
-
-Timing is automatically managed by the cron job at /api/cron/email-sequences`,
-        icon: Clock
-      },
-      {
-        title: 'Email Tracking & Analytics',
-        content: `Monitor campaign performance in the email tracking dashboard:
-
-Tracked metrics:
-• Email delivery status (sent, delivered, bounced)
-• Open rates with pixel tracking
-• Click-through rates on links
-• Conversion to signup
-• Persona-specific performance
-
-Campaign analytics:
-• Total emails sent per campaign
-• Sequence step completion rates
-• Time-to-conversion analysis
-• Bounce and unsubscribe tracking
-
-Access detailed reports at /admin/bulk-invites/[campaign-id] to see individual recipient progress through the sequence.`,
-        icon: TrendingUp
-      },
-      {
-        title: 'Persona-Based Personalization',
-        content: `Each persona receives tailored messaging:
-
-Founder Persona:
-• Focuses on fundraising, product-market fit, scaling
-• Highlights founder-to-founder connections
-• Examples: "Raised $2M from intro", "Found co-founder"
-
-Operator Persona:
-• Emphasizes operational efficiency, hiring, processes
-• Shows operator community value
-• Examples: "Hired VP Ops", "Optimized supply chain"
-
-Investor Persona:
-• Deal flow, portfolio support, LP relationships
-• Investor-specific networking value
-• Examples: "Sourced Series A deal", "Co-invested"
-
-Executive Persona:
-• Board seats, strategy, leadership insights
-• C-level peer connections
-• Examples: "Board advisor role", "Strategic partnership"
-
-Wildcard Persona:
-• General professional networking
-• Broad value propositions
-• Examples: Career opportunities, mentorship
-`,
-        icon: MessageSquare
       }
     ]
   },
@@ -691,8 +578,6 @@ Core tables:
 • support_tickets - Support system
 • admin_activity_log - Audit trail
 • referrals - Referral tracking
-• bulk_invite_campaigns - Email campaigns
-• bulk_invite_recipients - Campaign recipients
 
 Database access:
 • Development DB: Via Replit environment
@@ -963,14 +848,6 @@ export default function AdminGuidePage() {
             <Link href="/admin/applications" className="flex items-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
               <FileText className="w-5 h-5 text-cyan-400" />
               <span>Applications</span>
-            </Link>
-            <Link href="/admin/invites" className="flex items-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
-              <Mail className="w-5 h-5 text-emerald-400" />
-              <span>Invites</span>
-            </Link>
-            <Link href="/admin/bulk-invites" className="flex items-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
-              <Send className="w-5 h-5 text-purple-400" />
-              <span>Bulk Campaigns</span>
             </Link>
             <Link href="/admin/subscriptions" className="flex items-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
               <CreditCard className="w-5 h-5 text-rose-400" />
