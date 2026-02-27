@@ -1,12 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/bulk-invites/track/send",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/email-automation",
-      "schedule": "5 9 * * *"
-    }
-  ]
+  "crons": []
 }
