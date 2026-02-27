@@ -15,6 +15,7 @@ import ArcBriefsWidget from '@/components/dashboard/ArcBriefsWidget';
 import MarketIntelWidget from '@/components/dashboard/MarketIntelWidget';
 import AiMatchesWidget from '@/components/dashboard/AiMatchesWidget';
 import CommunityHighlightsWidget from '@/components/dashboard/CommunityHighlightsWidget';
+import BriefPointWidget from '@/components/dashboard/BriefPointWidget';
 
 // Personalization
 import { getPersonalizedLayout, getPersonalizedWelcome } from '@/lib/dashboardPersonalization';
@@ -24,7 +25,8 @@ const widgetComponents = {
   ArcBriefsWidget,
   MarketIntelWidget,
   AiMatchesWidget,
-  CommunityHighlightsWidget
+  CommunityHighlightsWidget,
+  BriefPointWidget
 };
 
 export default function PersonalizedDashboard() {

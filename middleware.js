@@ -74,6 +74,12 @@ function isProtectedRoute(pathname) {
     }
   }
 
+  // Protect /briefpoint sub-pages (e.g. /briefpoint/new, /briefpoint/<uuid>)
+  // while keeping /briefpoint (marketing page) public
+  if (pathname.startsWith('/briefpoint/')) {
+    return true;
+  }
+
   return false;
 }
 
