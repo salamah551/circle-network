@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import Link from 'next/link';
 import {
   ArrowLeft, Lock, Crown, BarChart3, TrendingUp, Users, 
@@ -9,10 +9,7 @@ import {
   DollarSign, Award, AlertCircle, CheckCircle
 } from 'lucide-react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = getSupabaseBrowserClient();
 
 export default function IntelligencePage() {
   const router = useRouter();
