@@ -1,12 +1,13 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Loader2, Eye, EyeOff, CheckCircle, Mail } from 'lucide-react';
 import { VALIDATION, LOADING, ERRORS } from '@/lib/copy';
+import { isSupabaseConfigured } from '@/lib/supabase-browser';
 
-export default function SignUpPage() {
-  const router = useRouter();
+function SignUpContent() {
+  const searchParams = useSearchParams();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +18,15 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
+
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    const emailParam = searchParams.get('email');
+    if (codeParam) setInviteCode(codeParam);
+    if (emailParam) setEmail(emailParam);
+  }, [searchParams]);
 
   const validate = () => {
     const errors = {};
@@ -55,14 +65,20 @@ export default function SignUpPage() {
       return;
     }
 
+    if (!isSupabaseConfigured()) {
+      setError('Authentication service not configured. Please contact support.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      const normalizedEmail = email.toLowerCase().trim();
       const res = await fetch('/api/auth/sign-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: email.toLowerCase().trim(),
+          email: normalizedEmail,
           password,
           fullName: fullName.trim(),
           inviteCode: inviteCode.trim() || undefined,
@@ -76,13 +92,53 @@ export default function SignUpPage() {
         return;
       }
 
-      router.push('/onboarding/start');
+      setSubmittedEmail(normalizedEmail);
+      setSubmitted(true);
     } catch {
       setError(ERRORS.NETWORK);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-md mx-auto px-4 py-20">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" stroke="#D4AF37" strokeWidth="2" fill="none"/>
+                <circle cx="20" cy="20" r="12" stroke="#D4AF37" strokeWidth="1.5" fill="none"/>
+                <circle cx="20" cy="20" r="6" fill="#D4AF37"/>
+              </svg>
+            </div>
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="w-16 h-16 text-emerald-400" />
+            </div>
+            <h1 className="text-3xl font-bold mb-3">Check Your Email</h1>
+            <p className="text-zinc-400 mb-2">
+              We've sent a verification link to:
+            </p>
+            <p className="text-amber-400 font-semibold mb-6 flex items-center justify-center gap-2">
+              <Mail className="w-4 h-4" />
+              {submittedEmail}
+            </p>
+            <p className="text-zinc-500 text-sm mb-8">
+              Click the link in your email to verify your account and complete setup.
+              Check your spam folder if you don't see it within a few minutes.
+            </p>
+            <Link
+              href="/login"
+              className="text-amber-400 hover:text-amber-300 text-sm"
+            >
+              Return to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -212,15 +268,32 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center space-y-3">
           <p className="text-sm text-zinc-500">
             Already have an account?{' '}
             <Link href="/login" className="text-amber-400 hover:text-amber-300">
               Sign in
             </Link>
           </p>
+          <p className="text-sm text-zinc-600">
+            <Link href="/forgot-password" className="text-zinc-500 hover:text-zinc-400">
+              Forgot your password?
+            </Link>
+          </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+      </div>
+    }>
+      <SignUpContent />
+    </Suspense>
   );
 }
