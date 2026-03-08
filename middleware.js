@@ -39,6 +39,7 @@ const PUBLIC_PREFIXES = [
   '/sign-up',
   '/auth',
   '/forgot-password',
+  '/reset-password',
   '/subscribe',
   '/apply',
   '/api/signals',
