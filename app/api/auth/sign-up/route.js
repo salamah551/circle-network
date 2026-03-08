@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, fullName, inviteCode } = await request.json();
 
     // Validate inputs
-    if (!email || !password) {
+    if (!email || !password || !fullName) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Full name, email, and password are required' },
         { status: 400 }
       );
     }
@@ -34,10 +35,14 @@ export async function POST(request) {
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
-    // Sign up the user
+    // Sign up the user with metadata
     const { data, error } = await supabase.auth.signUp({
       email: email.toLowerCase().trim(),
       password,
+      options: {
+        data: { full_name: fullName.trim() },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/auth/callback`,
+      },
     });
 
     if (error) {
@@ -56,6 +61,52 @@ export async function POST(request) {
         { error: error.message || 'Failed to create account' },
         { status: 400 }
       );
+    }
+
+    const userId = data.user?.id;
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Failed to create account' },
+        { status: 500 }
+      );
+    }
+
+    // Create profile row using admin client (bypasses RLS)
+    try {
+      const adminClient = getSupabaseAdmin();
+
+      const { error: profileError } = await adminClient
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: email.toLowerCase().trim(),
+          full_name: fullName.trim(),
+          status: 'active',
+          membership_tier: 'founding',
+          onboarding_completed: false,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        // Don't fail the sign-up if profile creation fails - user can still log in
+      }
+
+      // If an invite code was provided, mark it as used
+      if (inviteCode) {
+        // Try matching on both possible column names; non-fatal if neither matches
+        await adminClient
+          .from('invites')
+          .update({ status: 'used' })
+          .eq('code', inviteCode);
+
+        await adminClient
+          .from('invites')
+          .update({ status: 'used' })
+          .eq('invite_code', inviteCode);
+      }
+    } catch (adminError) {
+      console.error('Admin client error:', adminError);
+      // Non-fatal - user auth was created successfully
     }
 
     return NextResponse.json({

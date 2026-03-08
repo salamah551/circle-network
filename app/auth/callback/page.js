@@ -40,12 +40,14 @@ export default function AuthCallback() {
         
         const { data: profile } = await supabase
           .from('profiles')
-          .select('is_admin')
+          .select('is_admin, onboarding_completed')
           .eq('id', userId)
           .single();
 
         if (profile?.is_admin) {
           router.push('/admin');
+        } else if (profile?.onboarding_completed === false) {
+          router.push('/onboarding/start');
         } else {
           router.push('/dashboard');
         }
