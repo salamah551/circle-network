@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendContactConfirmation, sendContactNotification } from '@/lib/send-email';
 
 // Simple in-memory rate limiter: max 5 requests per IP per 60 seconds
 const rateLimitMap = new Map();
@@ -79,6 +80,12 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+
+    // Send emails non-blocking — don't fail the request if email fails
+    Promise.all([
+      sendContactConfirmation({ to: email.toLowerCase(), name }),
+      sendContactNotification({ name, email: email.toLowerCase(), subject, message }),
+    ]).catch((err) => console.error('Contact email error:', err));
 
     return NextResponse.json({ 
       success: true, 

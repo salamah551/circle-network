@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { sendInviteEmail } from '@/lib/send-email';
 
 export async function POST(request) {
   // Initialize at runtime
@@ -47,15 +48,33 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    // Fetch the inviter's name for the email
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single();
+
     // Update the invite's last sent timestamp
     await supabaseAdmin
       .from('invites')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', inviteId);
 
+    // Send the invite email (non-blocking — don't fail the response on email error)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thecirclenetwork.org';
+    const applyUrl = `${appUrl}/apply?code=${encodeURIComponent(inviteCode)}&email=${encodeURIComponent(email)}`;
+
+    sendInviteEmail({
+      to: email,
+      inviteCode,
+      inviterName: profile?.full_name || undefined,
+      applyUrl,
+    }).catch((err) => console.error('Invite email send error:', err));
+
     return NextResponse.json({
       success: true,
-      message: 'Invite updated successfully'
+      message: 'Invite resent successfully'
     });
 
   } catch (error) {

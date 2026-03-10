@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { sendNotificationEmail } from '@/lib/send-email';
 
 export async function POST(request) {
   try {
-    const { type, recipientEmail } = await request.json();
+    const { type, recipientEmail, data } = await request.json();
 
     if (!type || !recipientEmail) {
       return NextResponse.json(
@@ -11,11 +12,15 @@ export async function POST(request) {
       );
     }
 
-    // Email notifications via SendGrid have been removed.
-    // Notification delivery is handled in-app.
-    console.log(`Notification skipped (email removed): type=${type}, recipient=${recipientEmail}`);
+    const result = await sendNotificationEmail({ to: recipientEmail, type, data });
 
-    return NextResponse.json({ success: true });
+    if (!result.success) {
+      console.error('Notification email failed:', result.error);
+      // Return success to caller — email failure should not block in-app flows
+      return NextResponse.json({ success: true, emailSent: false, emailError: result.error });
+    }
+
+    return NextResponse.json({ success: true, emailSent: true, id: result.id });
 
   } catch (error) {
     console.error('Notification send error:', error);
