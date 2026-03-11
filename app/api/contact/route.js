@@ -82,10 +82,16 @@ export async function POST(request) {
     }
 
     // Send emails non-blocking — don't fail the request if email fails
-    Promise.all([
-      sendContactConfirmation({ to: email.toLowerCase(), name }),
-      sendContactNotification({ name, email: email.toLowerCase(), subject, message }),
-    ]).catch((err) => console.error('Contact email error:', err));
+    // Skip user-facing contact confirmation for sign-up interest submissions
+    // (those users are redirected to /subscribe instead)
+    const isSignUpInterest = subject === 'Sign Up Interest' || subject === 'Community Page Sign Up';
+    const emailTasks = isSignUpInterest
+      ? [sendContactNotification({ name, email: email.toLowerCase(), subject, message })]
+      : [
+          sendContactConfirmation({ to: email.toLowerCase(), name }),
+          sendContactNotification({ name, email: email.toLowerCase(), subject, message }),
+        ];
+    Promise.all(emailTasks).catch((err) => console.error('Contact email error:', err));
 
     return NextResponse.json({ 
       success: true, 

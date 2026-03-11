@@ -121,7 +121,7 @@ export default function WelcomePage() {
             </div>
           )}
           <p className="text-xl text-zinc-300 max-w-2xl mx-auto">
-            You've been selected to join a private network of exceptional professionals. Your membership grants you access to AI-powered intelligence, strategic introductions, and a community of peers who operate at the highest level.
+            You&apos;ve been selected to join a private network of exceptional professionals. As a Founding Member, your rate is locked and your access is reserved — welcome to the inner circle.
           </p>
         </div>
 
