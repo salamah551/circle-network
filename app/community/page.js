@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Users, TrendingUp, Award, Building2, ArrowRight, CheckCircle, Star, Lock } from 'lucide-react';
 
@@ -36,7 +37,8 @@ const INDUSTRY_DATA = [
 ];
 
 export default function CommunityPage() {
-  const [requestForm, setRequestForm] = useState({ name: '', email: '', company: '', title: '' });
+  const router = useRouter();
+  const [requestForm, setRequestForm] = useState({ name: '', email: '' });
   const [showSuccess, setShowSuccess] = useState(false);
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +47,7 @@ export default function CommunityPage() {
     e.preventDefault();
     setFormError('');
 
-    if (!requestForm.name || !requestForm.email || !requestForm.company || !requestForm.title) {
+    if (!requestForm.name || !requestForm.email) {
       setFormError('Please fill in all fields');
       return;
     }
@@ -59,22 +61,25 @@ export default function CommunityPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact', {
+      // Save submission for tracking — skip contact confirmation email
+      await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
           subject: 'Community Page Sign Up',
-          message: `Community Page Sign Up\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`,
+          message: `Community Page Sign Up`,
         }),
       });
 
-      if (!response.ok) throw new Error('Submission failed');
-
+      const submittedEmail = requestForm.email;
       setShowSuccess(true);
-      setRequestForm({ name: '', email: '', company: '', title: '' });
-      setTimeout(() => setShowSuccess(false), 8000);
+      setRequestForm({ name: '', email: '' });
+      // Redirect to subscribe flow after brief success message
+      setTimeout(() => {
+        router.push(`/subscribe?email=${encodeURIComponent(submittedEmail)}`);
+      }, 1500);
     } catch {
       setFormError('Something went wrong. Please email help@thecirclenetwork.org directly.');
     } finally {
@@ -219,19 +224,23 @@ export default function CommunityPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">
-              Join <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
+              Your Invitation to <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
             </h2>
             <p className="text-xl text-white/60">
-              Sign up today and get access to an exclusive community of high-performing professionals.
+              Membership is curated and limited. Claim your founding member spot before it&apos;s filled.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mt-4">
+              <Lock className="w-3 h-3" />
+              Invite-only · &lt;50 Founding Members · Vetted community
+            </div>
           </div>
 
           {showSuccess && (
             <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center">
               <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-emerald-300 mb-2">Request Received</h3>
+              <h3 className="text-xl font-bold text-emerald-300 mb-2">Welcome to The Circle</h3>
               <p className="text-white/80">
-                Thank you. If your profile is a strong fit, we&apos;ll reach out within 5 business days.
+                Your invitation is confirmed. Taking you to complete your membership now…
               </p>
             </div>
           )}
@@ -247,8 +256,6 @@ export default function CommunityPage() {
               {[
                 { id: 'name', label: 'Full Name', placeholder: 'Your full name' },
                 { id: 'email', label: 'Email Address', placeholder: 'your.email@company.com', type: 'email' },
-                { id: 'company', label: 'Company', placeholder: 'Your company or fund' },
-                { id: 'title', label: 'Title / Role', placeholder: 'e.g. CEO, Managing Director, Fund Manager' },
               ].map((field) => (
                 <div key={field.id}>
                   <label htmlFor={field.id} className="block text-sm font-semibold text-white/90 mb-2">
@@ -272,12 +279,12 @@ export default function CommunityPage() {
                 disabled={isSubmitting}
                 className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Access Request'}
+                {isSubmitting ? 'Claiming Your Spot…' : 'Claim Your Founding Spot'}
                 {!isSubmitting && <ArrowRight className="w-5 h-5" />}
               </button>
 
               <p className="text-xs text-white/40 text-center">
-                We review all applications personally. Not all applicants will be admitted.
+                Invite-only · Membership is curated · Founding pricing locked for 24 months
               </p>
             </form>
           </div>

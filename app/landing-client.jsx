@@ -1,15 +1,15 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase, Lock, Key } from 'lucide-react';
 
 export default function NewHomepage() {
+  const router = useRouter();
   // Sign up form state
   const [requestForm, setRequestForm] = useState({
     name: '',
     email: '',
-    company: '',
-    title: ''
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [formError, setFormError] = useState('');
@@ -19,7 +19,7 @@ export default function NewHomepage() {
     e.preventDefault();
     setFormError('');
 
-    if (!requestForm.name || !requestForm.email || !requestForm.company || !requestForm.title) {
+    if (!requestForm.name || !requestForm.email) {
       setFormError('Please fill in all fields');
       return;
     }
@@ -33,22 +33,25 @@ export default function NewHomepage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact', {
+      // Save submission for tracking — do not send contact confirmation email
+      await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: requestForm.name,
           email: requestForm.email,
           subject: 'Sign Up Interest',
-          message: `Sign Up Interest\nCompany: ${requestForm.company}\nTitle: ${requestForm.title}`
+          message: `Sign Up Interest from landing page`
         })
       });
 
-      if (!response.ok) throw new Error('Submission failed');
-
+      // Show brief success message then redirect to subscribe flow
+      const submittedEmail = requestForm.email;
       setShowSuccessMessage(true);
-      setRequestForm({ name: '', email: '', company: '', title: '' });
-      setTimeout(() => setShowSuccessMessage(false), 8000);
+      setRequestForm({ name: '', email: '' });
+      setTimeout(() => {
+        router.push(`/subscribe?email=${encodeURIComponent(submittedEmail)}`);
+      }, 1500);
     } catch {
       setFormError('Something went wrong. Please email us directly at help@thecirclenetwork.org');
     } finally {
@@ -605,115 +608,111 @@ export default function NewHomepage() {
 
       {/* Request Access Section */}
       <section id="request-access" className="max-w-7xl mx-auto px-6 py-20">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mb-4">
               <Lock className="w-4 h-4" />
-              Join Now
+              Invite-Only · &lt;50 Founding Members · Vetted Community
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Join <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
+              Your Invitation to <span className="bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent">The Circle</span>
             </h2>
-            <p className="text-xl text-white/60">
-              Sign up today and get access to an exclusive community of high-performing professionals.
+            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+              Membership is curated and limited. You&apos;ve been selected — claim your founding member spot before it&apos;s filled.
             </p>
           </div>
 
-          {showSuccessMessage && (
-            <div className="mb-8 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center">
-              <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-emerald-300 mb-2">Request Received</h3>
-              <p className="text-white/80">
-                Thank you. If your profile is a strong fit, we&apos;ll reach out within 5 business days with next steps.
-              </p>
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Value Proposition */}
+            <div className="space-y-5">
+              <h3 className="text-lg font-semibold text-white/80 mb-4">What you get as a Founding Member:</h3>
+              {[
+                { icon: Brain, label: 'ARC™ Engine', desc: 'AI-powered strategic intelligence — vendor savings, market signals, opportunity radar' },
+                { icon: Users, label: 'Curated Executive Introductions', desc: 'AI-matched intros to the right people, at the right time' },
+                { icon: TrendingUp, label: 'Real-Time Deal-Flow Signals', desc: 'Market intelligence and deal-flow alerts tailored to your sector' },
+                { icon: Sparkles, label: 'BriefPoint Meeting Briefs', desc: 'Automated prep briefs with participant intel before every meeting' },
+                { icon: Plane, label: 'Travel Intelligence', desc: 'Optimized travel planning that saves 15+ hours per month' },
+                { icon: Crown, label: 'Founding Member Pricing', desc: 'Rate locked for 24 months — never increases as the platform grows' },
+              ].map(({ icon: Icon, label, desc }) => (
+                <div key={label} className="flex items-start gap-3">
+                  <div className="w-9 h-9 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-white text-sm">{label}</div>
+                    <div className="text-sm text-white/50">{desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
 
-          {formError && (
-            <div className="mb-8 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 rounded-xl p-4 text-center">
-              <p className="text-red-300">{formError}</p>
+            {/* Form */}
+            <div>
+              {showSuccessMessage && (
+                <div className="mb-6 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/50 rounded-xl p-6 text-center">
+                  <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
+                  <h3 className="text-xl font-bold text-emerald-300 mb-2">Welcome to The Circle</h3>
+                  <p className="text-white/80">
+                    Your invitation is confirmed. Taking you to complete your membership now…
+                  </p>
+                </div>
+              )}
+
+              {formError && (
+                <div className="mb-6 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 rounded-xl p-4 text-center">
+                  <p className="text-red-300">{formError}</p>
+                </div>
+              )}
+
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8">
+                <form onSubmit={handleRequestSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={requestForm.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                      placeholder="Your full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={requestForm.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
+                      placeholder="your.email@company.com"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Claiming Your Spot…' : 'Claim Your Founding Spot'}
+                    {!isSubmitting && <ArrowRight className="w-5 h-5" />}
+                  </button>
+
+                  <p className="text-xs text-white/40 text-center">
+                    Invite-only · Membership is curated · Founding pricing locked for 24 months
+                  </p>
+                </form>
+              </div>
             </div>
-          )}
-
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-amber-500/30 rounded-2xl p-8 md:p-12">
-            <form onSubmit={handleRequestSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={requestForm.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="Your full name"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={requestForm.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="your.email@company.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="company" className="block text-sm font-semibold text-white/90 mb-2">
-                  Company *
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  value={requestForm.company}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="Your company or fund"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="title" className="block text-sm font-semibold text-white/90 mb-2">
-                  Title / Role *
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={requestForm.title}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 bg-black/50 border border-zinc-700 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-amber-500/50 transition-colors"
-                  placeholder="e.g. CEO, Managing Director, Fund Manager"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Submitting...' : 'Get Started'}
-                {!isSubmitting && <ArrowRight className="w-5 h-5" />}
-              </button>
-
-              <p className="text-xs text-white/40 text-center">
-                Join today and connect with a curated community of high-performing professionals.
-              </p>
-            </form>
           </div>
         </div>
       </section>
