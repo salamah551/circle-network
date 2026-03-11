@@ -98,6 +98,10 @@ export default function ResetPasswordPage() {
         throw new Error(updateError.message);
       }
 
+      // Sign out so the AuthProvider doesn't redirect us away
+      // before we can show the success message
+      await supabase.auth.signOut();
+
       setSuccess(true);
       
       // Redirect to login after 3 seconds
@@ -107,6 +111,7 @@ export default function ResetPasswordPage() {
     } catch (err) {
       console.error('Password reset error:', err);
       setError(err.message || ERRORS.GENERIC);
+    } finally {
       setIsLoading(false);
     }
   };
