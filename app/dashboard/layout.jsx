@@ -6,7 +6,7 @@ import { validateArcEnvironment } from '@/lib/env/validate';
 import { AlertTriangle } from 'lucide-react';
 
 export default async function DashboardLayout({ children }) {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   
   // 1. Check authentication
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
