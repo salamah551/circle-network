@@ -8,7 +8,7 @@ This directory contains configuration files for the AI Ops Control Plane.
 
 Declares the desired state of infrastructure across:
 - **Onboarding rules:** Required fields, gates, redirects
-- **Pricing tiers:** Core ($179), Pro ($299), Elite ($499)
+- **Pricing tiers:** Professional ($199), Pro ($299), Elite ($499)
 - **Database tables:** Schema requirements, RLS, indexes
 - **Storage buckets:** Access policies, size limits
 - **Environment variables:** Required and optional configuration

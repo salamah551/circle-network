@@ -95,8 +95,8 @@ export default function AdminAnalyticsPage() {
         .eq('status', 'active');
 
       // Calculate MRR
-      const foundingRevenue = (foundingMembers || 0) * 199;
-      const regularRevenue = ((activeMembers || 0) - (foundingMembers || 0)) * 249;
+      const foundingRevenue = (foundingMembers || 0) * 399;
+      const regularRevenue = ((activeMembers || 0) - (foundingMembers || 0)) * 299;
       const mrr = foundingRevenue + regularRevenue;
       const totalRevenue = mrr * 12;
 
@@ -381,8 +381,8 @@ Total Messages,${metrics.totalMessages}
                   <span className="text-white">Founding Members</span>
                 </div>
                 <div className="text-right">
-                  <div className="text-white font-bold">${(metrics.foundingMembers * 199).toLocaleString()}</div>
-                  <div className="text-xs text-zinc-500">{metrics.foundingMembers} × $199</div>
+                  <div className="text-white font-bold">${(metrics.foundingMembers * 399).toLocaleString()}</div>
+                  <div className="text-xs text-zinc-500">{metrics.foundingMembers} × $399</div>
                 </div>
               </div>
               
@@ -393,10 +393,10 @@ Total Messages,${metrics.totalMessages}
                 </div>
                 <div className="text-right">
                   <div className="text-white font-bold">
-                    ${((metrics.activeMembers - metrics.foundingMembers) * 249).toLocaleString()}
+                    ${((metrics.activeMembers - metrics.foundingMembers) * 299).toLocaleString()}
                   </div>
                   <div className="text-xs text-zinc-500">
-                    {metrics.activeMembers - metrics.foundingMembers} × $249
+                    {metrics.activeMembers - metrics.foundingMembers} × $299
                   </div>
                 </div>
               </div>
