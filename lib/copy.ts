@@ -74,6 +74,7 @@ export const SUCCESS = {
   INTRO_ACCEPTED: "Intro accepted - We'll notify the other member.",
   INTRO_DECLINED: "Got it - We'll recalibrate future matches.",
   ARC_SUBMITTED: 'ARC is on it - your brief is now processing.',
+  EXISTING_MEMBER: 'You already have an account! Please sign in below.',
 } as const;
 
 /**
