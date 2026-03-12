@@ -81,8 +81,7 @@ export async function POST(request) {
           id: userId,
           email: email.toLowerCase().trim(),
           full_name: fullName.trim(),
-          status: 'active',
-          membership_tier: 'founding',
+          status: 'pending',
           onboarding_completed: false,
         });
 
