@@ -138,12 +138,12 @@ export const FOUNDING_OFFER: FoundingOffer = {
 
 /**
  * Founding Members annual offer - Pro tier at annual rate for 24 months
- * $3,999/yr ($333/mo effective, saves $789/yr vs monthly founding rate)
+ * $3,999/yr ($333.25/mo effective, saves $789/yr vs monthly founding rate)
  */
 export const FOUNDING_OFFER_ANNUAL: FoundingOfferAnnual = {
   appliesTo: 'pro',
   priceAnnualCents: 399900, // $3,999/yr
-  effectiveMonthlyCents: 33325, // ~$333/mo
+  effectiveMonthlyCents: 33325, // $333.25/mo ($3,999 ÷ 12)
   savingsVsMonthlyAnnual: 78900, // $789/yr saved vs monthly founding rate
   durationMonths: 24
 };
