@@ -42,7 +42,7 @@ export async function POST(request) {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.toLowerCase().trim(),
       {
-        redirectTo: `${appUrl}/reset-password`,
+        redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
       }
     );
 

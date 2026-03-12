@@ -32,12 +32,20 @@ function LoginContent() {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // Show success message if redirected from sign-up
+    // Show success message if redirected from sign-up or join form
     const message = searchParams.get('message');
     if (message === 'account-created') {
       setSuccessMessage(SUCCESS.ACCOUNT_CREATED);
     } else if (message === 'password-updated') {
       setSuccessMessage(SUCCESS.PASSWORD_UPDATED);
+    } else if (message === 'existing-member') {
+      setSuccessMessage(SUCCESS.EXISTING_MEMBER);
+    }
+
+    // Show error message from auth callback failures
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'auth-callback-failed') {
+      setError('The password reset link has expired or is invalid. Please request a new one.');
     }
   }, [searchParams]);
 

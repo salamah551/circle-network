@@ -61,6 +61,18 @@ export default function CommunityPage() {
     setIsSubmitting(true);
 
     try {
+      // Check if this email already has an active membership
+      const memberCheckRes = await fetch('/api/auth/check-membership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: requestForm.email }),
+      });
+      const memberCheck = await memberCheckRes.json();
+      if (memberCheck.exists) {
+        router.push('/login?message=existing-member');
+        return;
+      }
+
       // Save submission for tracking — skip contact confirmation email
       await fetch('/api/contact', {
         method: 'POST',
