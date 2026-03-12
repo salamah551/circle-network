@@ -8,7 +8,7 @@ export async function POST(request) {
   
   try {
     supabaseAdmin = getSupabaseAdmin();
-    supabaseServer = getSupabaseServerClient();
+    supabaseServer = await getSupabaseServerClient();
   } catch (error) {
     console.error('Failed to initialize Supabase clients:', error.message);
     return NextResponse.json(

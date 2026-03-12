@@ -2,7 +2,7 @@ import { getSupabaseServerClient } from '@/lib/supabase';
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = await getSupabaseServerClient();
     
     // Get authenticated user from session
     const { data: { session } } = await supabase.auth.getSession();
@@ -83,7 +83,7 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = await getSupabaseServerClient();
     
     // Get authenticated user from session
     const { data: { session } } = await supabase.auth.getSession();
@@ -143,7 +143,7 @@ export async function DELETE(request) {
 // Check if an item is saved
 export async function GET(request) {
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = await getSupabaseServerClient();
     
     // Get authenticated user from session
     const { data: { session } } = await supabase.auth.getSession();

@@ -6,6 +6,20 @@ import { LOADING, ERRORS, SUCCESS } from '@/lib/copy';
 import { useAuth } from '@/components/AuthProvider';
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase-browser';
 
+/**
+ * Validate that a redirect URL is safe (internal path only).
+ * Returns the path if valid, or undefined to fall back to the default.
+ */
+function getSafeRedirect(next) {
+  if (!next) return undefined;
+  // Must be a relative path starting with '/' and must not start with '//'
+  // (which browsers treat as a protocol-relative URL to an external host).
+  if (next.startsWith('/') && !next.startsWith('//')) {
+    return next;
+  }
+  return undefined;
+}
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,13 +44,14 @@ function LoginContent() {
   useEffect(() => {
     // Only redirect if auth state is fully resolved (not loading)
     if (!loading && user) {
+      const next = getSafeRedirect(searchParams.get('next'));
       if (profile?.is_admin) {
-        router.push('/admin');
+        router.replace(next || '/admin');
       } else {
-        router.push('/dashboard');
+        router.replace(next || '/dashboard');
       }
     }
-  }, [user, profile, loading, router]);
+  }, [user, profile, loading, router, searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,9 +84,11 @@ function LoginContent() {
       }
 
       // onAuthStateChange in AuthProvider will update `user`, triggering
-      // the redirect useEffect above. Push to /dashboard as an explicit
-      // fallback; the useEffect will redirect to /admin if the user is an admin.
-      router.push('/dashboard');
+      // the redirect useEffect above. Replace history entry with the intended
+      // destination as an explicit fallback; the useEffect will redirect to
+      // /admin if the user is an admin.
+      const next = getSafeRedirect(searchParams.get('next'));
+      router.replace(next || '/dashboard');
     } catch (err) {
       setError(err.message || ERRORS.GENERIC);
     } finally {

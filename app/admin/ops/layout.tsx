@@ -23,7 +23,7 @@ export default async function OpsLayout({
 
   try {
     // Server-side session check
-    const supabase = getSupabaseServerClient();
+    const supabase = await getSupabaseServerClient();
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !session) {
