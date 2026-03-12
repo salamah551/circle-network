@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Crown, ArrowRight, CheckCircle, Zap, Users, Brain, TrendingUp, Sparkles, Network, Search, DollarSign, Plane, Receipt, ChevronRight, Shield, Star, Award, Building2, Briefcase, Lock, Key } from 'lucide-react';
+import { TIERS, FOUNDING_OFFER } from '@/lib/pricing';
 
 export default function NewHomepage() {
   const router = useRouter();
@@ -33,6 +34,18 @@ export default function NewHomepage() {
     setIsSubmitting(true);
 
     try {
+      // Check if user already has an active membership
+      const memberCheckRes = await fetch('/api/auth/check-membership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: requestForm.email }),
+      });
+      const memberCheck = await memberCheckRes.json();
+      if (memberCheck.exists) {
+        router.push('/login?message=existing-member');
+        return;
+      }
+
       // Save submission for tracking — do not send contact confirmation email
       await fetch('/api/contact', {
         method: 'POST',
@@ -603,6 +616,74 @@ export default function NewHomepage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Three-Tier Membership Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <div className="inline-block px-4 py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30 rounded-full text-sm font-semibold text-amber-400 mb-4">
+            Membership Tiers
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Level of Access</h2>
+          <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            Every tier includes ARC™ intelligence and BriefPoint meeting briefs. Founding members get Pro features at a locked rate.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-10">
+          {TIERS.map((tier) => {
+            const isPopular = tier.id === 'pro';
+            return (
+              <div
+                key={tier.id}
+                className={`relative rounded-2xl p-8 flex flex-col ${
+                  isPopular
+                    ? 'bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-2 border-amber-500/50 md:scale-105'
+                    : 'bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700'
+                }`}
+              >
+                {isPopular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-xs font-bold px-4 py-1 rounded-full">
+                    MOST POPULAR
+                  </div>
+                )}
+                <h3 className={`text-2xl font-bold mb-1 ${isPopular ? 'text-amber-400' : 'text-white'}`}>
+                  {tier.name}
+                </h3>
+                <p className="text-sm text-white/50 mb-4">{tier.target}</p>
+                <div className="mb-6">
+                  <div className="text-4xl font-bold text-white mb-1">
+                    ${(tier.priceMonthlyCents / 100).toFixed(0)}
+                  </div>
+                  <div className="text-zinc-400 text-sm">/month</div>
+                  {isPopular && (
+                    <div className="mt-2 text-xs text-emerald-400 font-semibold">
+                      Founding rate: ${(FOUNDING_OFFER.priceMonthlyCents / 100).toFixed(0)}/mo — locked for 24 months. Standard membership will be $599/mo.
+                    </div>
+                  )}
+                </div>
+                <ul className="space-y-2 mb-8 flex-grow">
+                  {tier.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isPopular ? 'text-amber-400' : 'text-zinc-400'}`} />
+                      <span className="text-sm text-white/70">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/subscribe"
+                  className={`block w-full text-center py-3 rounded-lg font-bold transition-all ${
+                    isPopular
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black hover:from-amber-400 hover:to-amber-500 shadow-xl'
+                      : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
+                  }`}
+                >
+                  Subscribe Now
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </section>
 

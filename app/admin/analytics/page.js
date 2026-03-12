@@ -95,8 +95,8 @@ export default function AdminAnalyticsPage() {
         .eq('status', 'active');
 
       // Calculate MRR
-      const foundingRevenue = (foundingMembers || 0) * 199;
-      const regularRevenue = ((activeMembers || 0) - (foundingMembers || 0)) * 249;
+      const foundingRevenue = (foundingMembers || 0) * 399;
+      const regularRevenue = ((activeMembers || 0) - (foundingMembers || 0)) * 299;
       const mrr = foundingRevenue + regularRevenue;
       const totalRevenue = mrr * 12;
 

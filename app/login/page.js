@@ -34,10 +34,16 @@ function LoginContent() {
   useEffect(() => {
     // Show success message if redirected from sign-up
     const message = searchParams.get('message');
+    const errorParam = searchParams.get('error');
     if (message === 'account-created') {
       setSuccessMessage(SUCCESS.ACCOUNT_CREATED);
     } else if (message === 'password-updated') {
       setSuccessMessage(SUCCESS.PASSWORD_UPDATED);
+    } else if (message === 'existing-member') {
+      setSuccessMessage(SUCCESS.EXISTING_MEMBER);
+    }
+    if (errorParam === 'auth-callback-failed') {
+      setError('The password reset link has expired or is invalid. Please request a new one.');
     }
   }, [searchParams]);
 

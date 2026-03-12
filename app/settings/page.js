@@ -488,7 +488,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <p className="text-white/40 text-xs">
-                      You're a founding member with lifetime pricing of $199/month.
+                      You're a founding member with pricing of $399/month locked for 24 months.
                     </p>
                   </div>
 
@@ -515,15 +515,15 @@ export default function SettingsPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-lg font-bold text-white mb-2">Current Plan</h3>
-                        <p className="text-2xl font-bold text-emerald-400">$199/month</p>
-                        <p className="text-white/60 text-sm mt-1">Founding Member - Lifetime Rate</p>
+                        <p className="text-2xl font-bold text-emerald-400">$399/month</p>
+                        <p className="text-white/60 text-sm mt-1">Founding Member - 24-Month Rate Lock</p>
                       </div>
                       <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs rounded-full">
                         Active
                       </span>
                     </div>
                     <p className="text-white/40 text-xs">
-                      Your rate is locked in forever as a founding member. Regular pricing is $249/month.
+                      Your rate is locked in for 24 months as a founding member. Regular pricing is $599/month.
                     </p>
                   </div>
 
@@ -551,21 +551,21 @@ export default function SettingsPage() {
                           <p className="text-white">Monthly Subscription</p>
                           <p className="text-white/60 text-sm">Dec 1, 2024</p>
                         </div>
-                        <span className="text-white font-medium">$199.00</span>
+                        <span className="text-white font-medium">$399.00</span>
                       </div>
                       <div className="flex items-center justify-between py-3 border-b border-white/10">
                         <div>
                           <p className="text-white">Monthly Subscription</p>
                           <p className="text-white/60 text-sm">Nov 1, 2024</p>
                         </div>
-                        <span className="text-white font-medium">$199.00</span>
+                        <span className="text-white font-medium">$399.00</span>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
                           <p className="text-white">Monthly Subscription</p>
                           <p className="text-white/60 text-sm">Oct 1, 2024</p>
                         </div>
-                        <span className="text-white font-medium">$199.00</span>
+                        <span className="text-white font-medium">$399.00</span>
                       </div>
                     </div>
                     <button className="mt-4 text-emerald-400 hover:text-emerald-300 text-sm">

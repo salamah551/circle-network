@@ -12,7 +12,7 @@ export type TierId = 'professional' | 'pro' | 'elite';
 /**
  * Tier identifier including special founding offer
  */
-export type TierIdWithFounding = TierId | 'founding';
+export type TierIdWithFounding = TierId | 'founding' | 'founding-annual';
 
 /**
  * Usage limits for each tier
@@ -43,6 +43,17 @@ export interface MembershipTier {
 export interface FoundingOffer {
   appliesTo: TierId;
   priceMonthlyCents: number;
+  durationMonths: number;
+}
+
+/**
+ * Founding member annual offer
+ */
+export interface FoundingOfferAnnual {
+  appliesTo: TierId;
+  priceAnnualCents: number;
+  effectiveMonthlyCents: number;
+  savingsVsMonthlyAnnual: number;
   durationMonths: number;
 }
 
@@ -121,7 +132,19 @@ export const TIERS: MembershipTier[] = [
  */
 export const FOUNDING_OFFER: FoundingOffer = {
   appliesTo: 'pro',
-  priceMonthlyCents: 21900, // $219/mo
+  priceMonthlyCents: 39900, // $399/mo
+  durationMonths: 24
+};
+
+/**
+ * Founding Members annual offer - Pro tier at annual rate for 24 months
+ * $3,999/yr ($333/mo effective, saves $789/yr vs monthly founding rate)
+ */
+export const FOUNDING_OFFER_ANNUAL: FoundingOfferAnnual = {
+  appliesTo: 'pro',
+  priceAnnualCents: 399900, // $3,999/yr
+  effectiveMonthlyCents: 33325, // ~$333/mo
+  savingsVsMonthlyAnnual: 78900, // $789/yr saved vs monthly founding rate
   durationMonths: 24
 };
 
@@ -140,6 +163,8 @@ export function getStripePriceIdByTier(tierId: TierIdWithFounding): string | und
       return process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE;
     case 'founding':
       return process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING;
+    case 'founding-annual':
+      return process.env.NEXT_PUBLIC_STRIPE_PRICE_FOUNDING_ANNUAL;
     default:
       return undefined;
   }
@@ -277,14 +302,14 @@ export const LAUNCH_MODE = true;
 export function getMRRValues(): { founding: number; regular: number } {
   const foundingMRR = process.env.NEXT_PUBLIC_FOUNDING_MRR
     ? Number(process.env.NEXT_PUBLIC_FOUNDING_MRR)
-    : 199;
+    : 399;
   
   const regularMRR = process.env.NEXT_PUBLIC_REGULAR_MRR
     ? Number(process.env.NEXT_PUBLIC_REGULAR_MRR)
-    : 249;
+    : 299;
   
   return {
-    founding: isNaN(foundingMRR) ? 199 : foundingMRR,
-    regular: isNaN(regularMRR) ? 249 : regularMRR
+    founding: isNaN(foundingMRR) ? 399 : foundingMRR,
+    regular: isNaN(regularMRR) ? 299 : regularMRR
   };
 }

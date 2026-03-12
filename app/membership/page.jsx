@@ -47,13 +47,13 @@ export default function MembershipPage() {
       {/* Pricing Tiers */}
       <section className="max-w-6xl mx-auto px-6 py-12">
         <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {/* Core Tier */}
+          {/* Professional Tier */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-bold mb-4">Core</h3>
+            <h3 className="text-2xl font-bold mb-4">Professional</h3>
             <div className="mb-6">
-              <div className="text-4xl font-bold text-white mb-2">$179</div>
+              <div className="text-4xl font-bold text-white mb-2">$199</div>
               <div className="text-zinc-400 text-sm">per month</div>
-              <div className="text-emerald-400 text-sm mt-2">$143/mo billed annually (−20%)</div>
+              <div className="text-emerald-400 text-sm mt-2">$159/mo billed annually (−20%)</div>
             </div>
             
             <ul className="space-y-3 mb-8">
@@ -138,11 +138,11 @@ export default function MembershipPage() {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <span className="text-sm font-semibold">50 ARC™ requests per month</span>
+                <span className="text-sm font-semibold">100 ARC™ requests per month</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                <span className="text-sm font-semibold">20 BriefPoint briefs per day (email + Slack)</span>
+                <span className="text-sm font-semibold">25 BriefPoint briefs per day (email + Slack)</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
@@ -175,7 +175,7 @@ export default function MembershipPage() {
           </div>
           <h3 className="text-2xl font-bold mb-3">Lock in Pro Features Forever</h3>
           <p className="text-zinc-300 mb-4">
-            First 100 members get Pro tier features (30 ARC requests/month, 10 BriefPoint briefs/day) for just <span className="text-emerald-400 font-bold">$249/month</span>
+            First 100 members get Pro tier features (30 ARC requests/month, 10 BriefPoint briefs/day) for just <span className="text-emerald-400 font-bold">$399/month</span>
           </p>
           <p className="text-sm text-zinc-400 mb-6">
             24-month price lock • Limited to first 100 sign-ups • Never available again
@@ -274,7 +274,7 @@ export default function MembershipPage() {
               <thead className="bg-zinc-800">
                 <tr>
                   <th className="text-left p-4 text-sm font-semibold">Feature</th>
-                  <th className="text-center p-4 text-sm font-semibold">Core</th>
+                  <th className="text-center p-4 text-sm font-semibold">Professional</th>
                   <th className="text-center p-4 text-sm font-semibold text-amber-400">Pro</th>
                   <th className="text-center p-4 text-sm font-semibold text-purple-400">Elite</th>
                 </tr>
@@ -284,13 +284,13 @@ export default function MembershipPage() {
                   <td className="p-4 text-sm">ARC™ Requests/Month</td>
                   <td className="text-center p-4 text-sm">10</td>
                   <td className="text-center p-4 text-sm font-semibold text-amber-400">30</td>
-                  <td className="text-center p-4 text-sm font-semibold text-purple-400">50</td>
+                  <td className="text-center p-4 text-sm font-semibold text-purple-400">100</td>
                 </tr>
                 <tr className="bg-zinc-900/50">
                   <td className="p-4 text-sm">BriefPoint Briefs/Day</td>
                   <td className="text-center p-4 text-sm">5 (email)</td>
                   <td className="text-center p-4 text-sm font-semibold text-amber-400">10 (email + Slack)</td>
-                  <td className="text-center p-4 text-sm font-semibold text-purple-400">20 (email + Slack)</td>
+                  <td className="text-center p-4 text-sm font-semibold text-purple-400">25 (email + Slack)</td>
                 </tr>
                 <tr>
                   <td className="p-4 text-sm">Response Time</td>
